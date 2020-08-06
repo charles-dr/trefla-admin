@@ -6,8 +6,6 @@ const cors = require('cors');
 
 admin.initializeApp();
 
-// Using existing Express apps
-
 const app = express();
 
 app.use(cors({ origin: true }));

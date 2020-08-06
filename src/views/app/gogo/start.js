@@ -1,32 +1,37 @@
 import React, { useEffect } from 'react';
 import { Row } from 'reactstrap';
-import * as firebase from 'firebase';
+// import * as firebase from 'firebase';
 import IntlMessages from '../../../helpers/IntlMessages';
 import { Colxx, Separator } from '../../../components/common/CustomBootstrap';
 import Breadcrumb from '../../../containers/navs/Breadcrumb';
 
-import { testFunction } from '../../../api/test.api';
+import { testFunction, _firebase } from '../../../api/test.api';
 
 const Start = ({ match }) => {
 
   useEffect(() => {
     console.log('[Hey loaded]');
     // testFunction();
-    const firebaseConfig = {
-      apiKey: "AIzaSyBdnoTzHFUFDuI-wEyMiZSqPpsy4k4TYDM",
-      authDomain: "trefla.firebaseapp.com",
-      databaseURL: "https://trefla.firebaseio.com",
-      projectId: "trefla",
-      storageBucket: "trefla.appspot.com",
-      messagingSenderId: "139969386003",
-      appId: "1:139969386003:web:509097a8e125b7d967d1e6",
-      measurementId: "G-Z650WSCL04"
-    };
+    // const firebaseConfig = {
+    //   apiKey: "AIzaSyBdnoTzHFUFDuI-wEyMiZSqPpsy4k4TYDM",
+    //   authDomain: "trefla.firebaseapp.com",
+    //   databaseURL: "https://trefla.firebaseio.com",
+    //   projectId: "trefla",
+    //   storageBucket: "trefla.appspot.com",
+    //   messagingSenderId: "139969386003",
+    //   appId: "1:139969386003:web:509097a8e125b7d967d1e6",
+    //   measurementId: "G-Z650WSCL04"
+    // };
     
-    firebase.initializeApp(firebaseConfig);
-    firebase.functions().httpsCallable('helloWorld')
-    .then(res => {
-      console.log(res);
+    // firebase.initializeApp(firebaseConfig);
+    // _firebase.functions().httpsCallable('api/user')
+    // .then(res => {
+    //   console.log(res);
+    // })
+    _firebase.firestore().collection('users').get().then((querySnapshot) => {
+      querySnapshot.forEach((doc) => {
+        console.log(`${doc.id}`, doc.data());
+      });
     })
   });
 
