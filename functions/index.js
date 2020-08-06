@@ -18,4 +18,24 @@ app.get('/user', (req, res) => {
   res.status(200).json(response);
 });
 
+app.get('/posts', async (req, res) => {
+  const users = await admin
+    .firestore()
+    .collection('users')
+    .orderBy('name', req.query.dir == 1 ? 'asc' : 'desc')
+    .startAt(Number(req.query.start))
+
+    .limit(Number(req.query.length))
+    .get()
+    .then((querySnapshot) => {
+      const rows = [];
+      querySnapshot.forEach((doc) => {
+        // console.log(`${doc.id}`, doc.data());
+        rows.push(doc.data());
+      });
+      return rows;
+    });
+  res.json(users);
+});
+
 exports.api = functions.https.onRequest(app);

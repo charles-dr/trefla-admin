@@ -14,6 +14,8 @@ const BlankPage = React.lazy(() =>
   import(/* webpackChunkName: "viwes-blank-page" */ './blank-page')
 );
 
+const PostModule = React.lazy(() => import('./post'));
+
 const App = ({ match }) => {
   return (
     <AppLayout>
@@ -32,6 +34,10 @@ const App = ({ match }) => {
             <Route
               path={`${match.url}/blank-page`}
               render={(props) => <BlankPage {...props} />}
+            />
+            <Route
+              path={`${match.url}/post`}
+              render={(props) => <PostModule {...props} />}
             />
             <Redirect to="/error" />
           </Switch>

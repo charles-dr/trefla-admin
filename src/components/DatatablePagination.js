@@ -30,6 +30,7 @@ const DataTablePagination = ({
   useEffect(() => {
     setPageState(page);
   }, [page]);
+
   const getSafePage = (_page) => {
     let p = _page;
     if (Number.isNaN(_page)) {

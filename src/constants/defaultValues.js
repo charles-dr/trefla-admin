@@ -10,7 +10,7 @@ export const defaultLocale = 'en';
 export const localeOptions = [
   { id: 'en', name: 'English - LTR', direction: 'ltr' },
   { id: 'es', name: 'Español', direction: 'ltr' },
-  { id: 'enrtl', name: 'English - RTL', direction: 'rtl' },
+  // { id: 'enrtl', name: 'English - RTL', direction: 'rtl' },
 ];
 
 export const searchPath = '#';

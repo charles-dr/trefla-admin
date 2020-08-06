@@ -13,6 +13,12 @@ const data = [
     ],
   },
   {
+    id: 'postmenu',
+    icon: 'iconsminds-three-arrow-fork',
+    label: 'menu.posts',
+    to: '/app/post',
+  },
+  {
     id: 'secondmenu',
     icon: 'iconsminds-three-arrow-fork',
     label: 'menu.second-menu',

@@ -1,0 +1,33 @@
+import axios from './index';
+
+import { serialize } from '../utils';
+
+export const userTest = async () => {
+  console.log('[Base Url]', process.env.REACT_APP_FUNCTIONS_ENDPOINT);
+  try {
+    const { data: res, status } = await axios.get('/user');
+    console.log(res, status);
+    return res;
+  } catch (e) {
+    return {
+      status: false,
+      message: e.message,
+    };
+  }
+};
+
+export const getPostTableContent = async ({ start, length, order, dir }) => {
+  console.log('[Table Posts]', start, length, order, dir);
+  const qs = serialize({ start, length, order, dir });
+  try {
+    const { data: res, status } = await axios.get(`/posts?${qs}`);
+    console.log(res, status);
+    return res;
+  } catch (e) {
+    console.error(e.message);
+    return {
+      status: false,
+      message: e.message,
+    };
+  }
+};

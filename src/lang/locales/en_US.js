@@ -11,6 +11,7 @@ Table of Contents
 module.exports = {
   /* 01.General */
   'general.copyright': 'Gogo React © 2018 All Rights Reserved.',
+  'actions.add': 'Add',
 
   /* 02.User Login, Logout, Register */
   'user.login-title': 'Login',
@@ -42,8 +43,16 @@ module.exports = {
   'menu.docs': 'Docs',
   'menu.blank-page': 'Blank Page',
 
+  'menu.list': 'List',
+  'menu.post': 'Post',
+  'menu.posts': 'Posts',
+  'menu.schools': 'Schools',
+
   /* 04.Error Page */
   'pages.error-title': 'Ooops... looks like an error occurred!',
   'pages.error-code': 'Error code',
   'pages.go-back-home': 'GO BACK HOME',
+  'pages.schools': 'Schools',
+
+  'table.react-pagination': 'React Pagination',
 };

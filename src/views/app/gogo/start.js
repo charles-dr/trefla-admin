@@ -6,12 +6,12 @@ import { Colxx, Separator } from '../../../components/common/CustomBootstrap';
 import Breadcrumb from '../../../containers/navs/Breadcrumb';
 
 import { testFunction, _firebase } from '../../../api/test.api';
+import { userTest } from '../../../api/functions.api';
 
 const Start = ({ match }) => {
-
   useEffect(() => {
     console.log('[Hey loaded]');
-    // testFunction();
+    userTest().then((res) => console.log(res));
     // const firebaseConfig = {
     //   apiKey: "AIzaSyBdnoTzHFUFDuI-wEyMiZSqPpsy4k4TYDM",
     //   authDomain: "trefla.firebaseapp.com",
@@ -22,17 +22,21 @@ const Start = ({ match }) => {
     //   appId: "1:139969386003:web:509097a8e125b7d967d1e6",
     //   measurementId: "G-Z650WSCL04"
     // };
-    
+
     // firebase.initializeApp(firebaseConfig);
     // _firebase.functions().httpsCallable('api/user')
     // .then(res => {
     //   console.log(res);
     // })
-    _firebase.firestore().collection('users').get().then((querySnapshot) => {
-      querySnapshot.forEach((doc) => {
-        console.log(`${doc.id}`, doc.data());
+    _firebase
+      .firestore()
+      .collection('users')
+      .get()
+      .then((querySnapshot) => {
+        querySnapshot.forEach((doc) => {
+          // console.log(`${doc.id}`, doc.data());
+        });
       });
-    })
   });
 
   return (
@@ -52,5 +56,5 @@ const Start = ({ match }) => {
       </Row>
     </>
   );
-}
+};
 export default Start;

@@ -1,4 +1,3 @@
-import axios from 'axios';
 import firebase from 'firebase/app';
 import 'firebase/firestore';
 
@@ -16,16 +15,3 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 
 export const _firebase = firebase;
-
-export const testFunction = async () => {
-  try {
-    const res = await axios.get('/api/user');
-    console.log(res);
-    return res;
-  } catch (e) {
-    return {
-      status: false,
-      message: e.message,
-    };
-  }
-};

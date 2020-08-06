@@ -13,8 +13,6 @@ import {
   isDarkSwitchActive,
 } from './constants/defaultValues';
 
-
-
 const color =
   (isMultiColorActive || isDarkSwitchActive) &&
   localStorage.getItem(themeColorStorageKey)
