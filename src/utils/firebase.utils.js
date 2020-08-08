@@ -18,8 +18,8 @@ if (!firebase.apps.length) {
 
 export const _firebase = firebase;
 
-export const getAllUsers = () => {
-  return _firebase.firestore().collection('users').orderBy('user_id', 'asc').get()
+export const getAllFriends = () => {
+  return _firebase.firestore().collection('friends').orderBy('friend_id', 'asc').get()
   .then((querySnapshot) => {
       const rows = [];
       querySnapshot.forEach((doc) => {
@@ -32,6 +32,18 @@ export const getAllUsers = () => {
 
 export const getAllPosts = () => {
   return _firebase.firestore().collection('posts').orderBy('post_id', 'asc').get()
+  .then((querySnapshot) => {
+      const rows = [];
+      querySnapshot.forEach((doc) => {
+          // console.log(`${doc.id}`, doc.data());
+          rows.push(doc.data());
+      });
+      return rows;
+  });
+}
+
+export const getAllUsers = () => {
+  return _firebase.firestore().collection('users').orderBy('user_id', 'asc').get()
   .then((querySnapshot) => {
       const rows = [];
       querySnapshot.forEach((doc) => {

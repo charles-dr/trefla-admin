@@ -1,16 +1,15 @@
 const data = [
   {
-    id: 'gogo',
-    icon: 'iconsminds-air-balloon-1',
-    label: 'menu.gogo',
-    to: '/app/gogo',
-    subs: [
-      {
-        icon: 'simple-icon-paper-plane',
-        label: 'menu.start',
-        to: '/app/gogo/start',
-      },
-    ],
+    id: 'dashboard',
+    icon: 'iconsminds-bucket',
+    label: 'menu.dashboard',
+    to: '/app/blank-page',
+  },
+  {
+    id: 'usermenu',
+    icon: 'simple-icon-people',
+    label: 'menu.users',
+    to: '/app/user',
   },
   {
     id: 'postmenu',
@@ -31,18 +30,18 @@ const data = [
       },
     ],
   },
-  {
-    id: 'blankpage',
-    icon: 'iconsminds-bucket',
-    label: 'menu.blank-page',
-    to: '/app/blank-page',
-  },
-  {
-    id: 'docs',
-    icon: 'iconsminds-library',
-    label: 'menu.docs',
-    to: 'https://gogo-react-docs.coloredstrategies.com/',
-    newWindow: true,
-  },
+  // {
+  //   id: 'blankpage',
+  //   icon: 'iconsminds-bucket',
+  //   label: 'menu.blank-page',
+  //   to: '/app/blank-page',
+  // },
+  // {
+  //   id: 'docs',
+  //   icon: 'iconsminds-library',
+  //   label: 'menu.docs',
+  //   to: 'https://gogo-react-docs.coloredstrategies.com/',
+  //   newWindow: true,
+  // },
 ];
 export default data;

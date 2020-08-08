@@ -25,13 +25,17 @@ export const MENU_CHANGE_DEFAULT_CLASSES = 'MENU_CHANGE_DEFAULT_CLASSES';
 export const MENU_CHANGE_HAS_SUB_ITEM_STATUS =
   'MENU_CHANGE_HAS_SUB_ITEM_STATUS';
 
-export const USERS_GET = 'USERS_GET';
-export const USERS_ARRIVED = 'USERS_ARRIVED';
+export const FRIEND_GET = 'FRIEND_GET';
+export const FRIEND_ARRIVED = 'FRIEND_ARRIVED';
 
 export const POSTS_GET = 'POSTS_GET';
 export const POSTS_ARRIVED = 'POSTS_ARRIVED';
 
+export const USERS_GET = 'USERS_GET';
+export const USERS_ARRIVED = 'USERS_ARRIVED';
+
 export * from './menu/actions';
 export * from './settings/actions';
-export * from './users/actions';
+export * from './friend/actions';
 export * from './posts/actions';
+export * from './users/actions';

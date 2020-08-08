@@ -43,17 +43,24 @@ module.exports = {
   'menu.docs': 'Docs',
   'menu.blank-page': 'Blank Page',
 
+  'menu.dashboard': 'Dashboard',
   'menu.list': 'List',
   'menu.post': 'Post',
   'menu.posts': 'Posts',
   'menu.schools': 'Schools',
+  'menu.users': 'Users',
+  'menu.user': 'User',
 
   /* 04.Error Page */
   'pages.error-title': 'Ooops... looks like an error occurred!',
   'pages.error-code': 'Error code',
   'pages.go-back-home': 'GO BACK HOME',
+
+  'pages.dashboard': 'Dashboard',
   'pages.posts': 'Posts',
   'pages.schools': 'Schools',
+  'pages.users': 'Users',
+  'pages.user': 'User',
 
   'table.react-pagination': 'React Pagination',
 };

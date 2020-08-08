@@ -29,7 +29,7 @@ const typeIcons = ['simple-icon-credit-card', 'iconsminds-car', 'iconsminds-home
 const reactionImages = ['like.png', 'love.png', 'wow.png', 'haha.png', 'sad.png', 'angry.png'];
 
 
-const PostList = ({ match, posts, users }) => {
+const UserList = ({ match, friends, posts, users }) => {
     const [pageLoaded, setPageLoaded] = useState(true);
     const [data, setData] = useState([]);
     const [modalDetails, setModalDetails] = useState(false);
@@ -37,57 +37,52 @@ const PostList = ({ match, posts, users }) => {
 
     const cols = [
         {
-            Header: 'User',
+            Header: 'Name',
             accessor: 'user_name',
             cellClass: 'list-item-heading w-15',
             Cell: (props) => <>{props.value}</>,
         },
         {
-            Header: 'Type',
-            accessor: 'type',
+            Header: 'Email',
+            accessor: 'email',
             cellClass: 'text-muted  w-5',
-            Cell: (props) => <><div className={`glyph-icon ${typeIcons[props.value]}`} style={{ fontSize: 20 }}></div></>,
+            Cell: (props) => <>{props.value}</>,
         },
         {
-            Header: 'Content',
-            accessor: 'feed',
-            cellClass: 'text-muted  w-25',
+            Header: 'Gender',
+            accessor: 'sex',
+            cellClass: 'text-muted  w-5',
+            Cell: (props) => <><Badge color="outline-primary" className="mb-1">{props.value === '1' ? 'Female' : 'Male'}</Badge></>,
+        },
+        {
+            Header: 'Birthday',
+            accessor: 'birthday',
+            cellClass: 'text-muted  w-5',
+            Cell: (props) => <>{props.value}</>,
+        },
+        {
+            Header: 'Card Number',
+            accessor: 'card_number',
+            cellClass: 'text-muted  w-5',
+            Cell: (props) => <>{props.value}</>,
+        },
+        {
+            Header: 'Location',
+            accessor: 'location_address',
+            cellClass: 'text-muted  w-5',
             Cell: (props) => <>{props.value}</>,
         },
         {
             Header: 'Coordinate',
             accessor: 'location_coordinate',
-            cellClass: 'text-muted  w-10',
+            cellClass: 'text-muted  w-5',
             Cell: (props) => <>{formatCoordinate(props.value)}</>,
         },
-        {
-            Header: 'Location',
-            accessor: 'location_address',
-            cellClass: 'text-muted  w-25',
-            Cell: (props) => <>{props.value}</>,
-        },
-        {
-            Header: 'Likes',
-            accessor: 'likes',
-            cellClass: 'text-muted  w-25',
-            Cell: (props) => <>{formatLikes(props.value)}</>,
-        },
-        {
-            Header: 'Comments',
-            accessor: 'comment_num',
-            cellClass: 'text-muted  w-5',
-            Cell: (props) => <>{props.value}</>,
-        },
-        {
-            Header: 'Time',
-            accessor: 'post_time',
-            cellClass: 'text-muted  w-20',
-            Cell: (props) => <>{transformTime(props.value)}</>,
-        },
+
         {
             Header: 'Actions',
-            accessor: 'post_id',
-            cellClass: 'text-muted  w-20',
+            accessor: 'user_id',
+            cellClass: 'text-muted  w-10',
             Cell: (props) => (
                 <>
                     <div className="tbl-actions">
@@ -108,14 +103,15 @@ const PostList = ({ match, posts, users }) => {
         },
     ];
 
-
     useEffect(() => {
-        console.log(users, posts);
+        console.log(friends, users, posts);
 
-        const tableRows = recomposePosts();
+        const tableRows = recomposeUsers();
 
         return () => { };
-    }, [match, users, posts]);
+    }, [match, users, posts, friends]);
+
+
 
     const formatLikes = (str_likes) => {
         const arr_likes = str_likes.split(',');
@@ -145,24 +141,21 @@ const PostList = ({ match, posts, users }) => {
             <p>Y: {arr[1]}</p>
         </>
     }
-    const recomposePosts = () => {
-        let new_posts = [];
-        for (let post of posts) {
-            let post_item = {};
+    const recomposeUsers = () => {
+        let new_users = [];
+        for (let user of users) {
+            let user_item = {};
             // copy all key-values
-            for (let key in post) {
-                if (post[key] !== undefined) {
-                    post_item[key] = post[key];
+            for (let key in user) {
+                if (user[key] !== undefined) {
+                    user_item[key] = user[key];
                 }
             }
-            // add new field 'user_name'
-            post_item['user_name'] = getUserNameById(post.post_user_id);
-            // add new field 'likes'
-            post_item['likes'] = `${post.like_1_num},${post.like_2_num},${post.like_3_num},${post.like_4_num},${post.like_5_num},${post.like_6_num}`;
+            
             // put item to array
-            new_posts.push(post_item);
+            new_users.push(user_item);
         }
-        setData(new_posts);
+        setData(new_users);
     }
     const getUserNameById = id => {
         if (users.length > 0) {
@@ -175,6 +168,8 @@ const PostList = ({ match, posts, users }) => {
             return '';
         }
     }
+
+
 
     const openAddModal = () => {
         // console.log('[openAddModal]');
@@ -299,13 +294,14 @@ const PostList = ({ match, posts, users }) => {
     );
 };
 
-const mapStateToProps = ({ posts: postApp, users: userApp }) => {
+const mapStateToProps = ({ friends: friendApp, posts: postApp, users: userApp }) => {
     const { list: posts } = postApp;
     const { list: users } = userApp;
+    const { list: friends } = friendApp;
 
     return {
-        users, posts
+        friends, users, posts
     };
 };
 
-export default connect(mapStateToProps)(PostList);
+export default connect(mapStateToProps)(UserList);
