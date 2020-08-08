@@ -18,7 +18,6 @@ function Table({
   data,
   divided = false,
   defaultPageSize = 10,
-  onCheck,
 }) {
   const {
     getTableProps,
@@ -110,14 +109,14 @@ function Table({
   );
 }
 
-export const ReactTableWithPaginationCard = ({ cols, data, onCheck }) => {
+export const ReactTableWithPaginationCard = ({ cols, data }) => {
   return (
     <Card className="mb-4">
       <CardBody>
         <CardTitle>
           {/* <IntlMessages id="table.react-pagination" /> */}
         </CardTitle>
-        <Table columns={cols} data={data} onCheck={onCheck} />
+        <Table columns={cols} data={data} />
 
         {/* <DatatablePagination
           page={0}

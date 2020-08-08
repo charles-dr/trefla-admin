@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
-import { Button, Label, Modal, ModalHeader, ModalBody, Row } from 'reactstrap';
+import { Badge, Button, Label, Modal, ModalHeader, ModalBody, Row } from 'reactstrap';
 import {
     AvForm,
     AvField,
@@ -16,7 +16,7 @@ import Breadcrumb from '../../../containers/navs/Breadcrumb';
 import { ReactTableWithPaginationCard } from '../../../containers/ui/ReactTableCards';
 
 import { getPostTableContent } from '../../../api/functions.api';
-import { _firebase } from '../../../utils';
+import { _firebase, transformTime } from '../../../utils';
 
 const INIT_UNIT = {
     _id: '',
@@ -25,18 +25,28 @@ const INIT_UNIT = {
     district: { districtName: '', city: { cityName: '' } },
 };
 
+const typeIcons = ['simple-icon-credit-card', 'iconsminds-car', 'iconsminds-home', 'iconsminds-dog', 'iconsminds-heart'];
+const reactionImages = ['like.png', 'love.png', 'wow.png', 'haha.png', 'sad.png', 'angry.png'];
+
+
 const PostList = ({ match, posts, users }) => {
     const [pageLoaded, setPageLoaded] = useState(true);
-    // const [posts, setPosts] = useState([]);
+    const [data, setData] = useState([]);
     const [modalDetails, setModalDetails] = useState(false);
     const [unit, setUnit] = useState(INIT_UNIT);
 
     const cols = [
         {
             Header: 'User',
-            accessor: 'post_user_id',
-            cellClass: 'list-item-heading w-30',
+            accessor: 'user_name',
+            cellClass: 'list-item-heading w-15',
             Cell: (props) => <>{props.value}</>,
+        },
+        {
+            Header: 'Type',
+            accessor: 'type',
+            cellClass: 'text-muted  w-10',
+            Cell: (props) => <><div className={`glyph-icon ${typeIcons[props.value]}`} style={{ fontSize: 20 }}></div></>,
         },
         {
             Header: 'Content',
@@ -45,10 +55,34 @@ const PostList = ({ match, posts, users }) => {
             Cell: (props) => <>{props.value}</>,
         },
         {
-            Header: 'Time',
-            accessor: 'post_time',
+            Header: 'Coordinate',
+            accessor: 'location_coordinate',
+            cellClass: 'text-muted  w-10',
+            Cell: (props) => <>{formatCoordinate(props.value)}</>,
+        },
+        {
+            Header: 'Location',
+            accessor: 'location_address',
             cellClass: 'text-muted  w-25',
             Cell: (props) => <>{props.value}</>,
+        },
+        {
+            Header: 'Likes',
+            accessor: 'likes',
+            cellClass: 'text-muted  w-25',
+            Cell: (props) => <>{formatLikes(props.value)}</>,
+        },
+        {
+            Header: 'Comments',
+            accessor: 'comment_num',
+            cellClass: 'text-muted  w-5',
+            Cell: (props) => <>{props.value}</>,
+        },
+        {
+            Header: 'Time',
+            accessor: 'post_time',
+            cellClass: 'text-muted  w-20',
+            Cell: (props) => <>{transformTime(props.value)}</>,
         },
         {
             Header: 'Actions',
@@ -57,14 +91,15 @@ const PostList = ({ match, posts, users }) => {
             Cell: (props) => (
                 <>
                     <div className="tbl-actions">
-                        <i
+                        {/* <i
                             className="iconsminds-file-edit"
                             title="Edit"
                             onClick={() => handleOnEdit(props.value)}
-                        />
+                        /> */}
                         <i
                             className="simple-icon-trash"
                             title="Remove"
+                            style={{ fontSize: 18 }}
                             onClick={() => handleOnDelete(props.value)}
                         />
                     </div>
@@ -73,21 +108,73 @@ const PostList = ({ match, posts, users }) => {
         },
     ];
 
+
     useEffect(() => {
         console.log(users, posts);
-        // _firebase.firestore().collection('posts').orderBy('post_id', 'asc').get()
-        //     .then((querySnapshot) => {
-        //         const rows = [];
-        //         querySnapshot.forEach((doc) => {
-        //             // console.log(`${doc.id}`, doc.data());
-        //             rows.push(doc.data());
-        //         });
-        //         // console.log(rows);
-        //         setPosts(rows);
-        //     });
+
+        const tableRows = recomposePosts();
 
         return () => { };
-    }, [match]);
+    }, [match, users, posts]);
+
+    const formatLikes = (str_likes) => {
+        const arr_likes = str_likes.split(',');
+        const total = arr_likes.reduce((a, b) => Number(a) + Number(b), 0);
+
+        if (total > 0) {
+            return <>
+                {arr_likes.map((like, i) => (
+                    like > 0 && <img src={`/assets/img/reactions/${reactionImages[i]}`}
+                        style={{ width: 20, display: 'inline' }}
+                        alt="Reaction Icon"
+                        key={i} />
+                ))
+                }
+                <span style={{ paddingLeft: 10, verticalAlign: 'middle', fontSize: 16 }}>{total}</span>
+            </>;
+        } else {
+            return <Badge color="warning" pill className="mb-1">
+                No reactions
+            </Badge>;
+        }
+    }
+    const formatCoordinate = (coord) => {
+        const arr = coord.split(',');
+        return <>
+            <p>X: {arr[0]}</p>
+            <p>Y: {arr[1]}</p>
+        </>
+    }
+    const recomposePosts = () => {
+        let new_posts = [];
+        for (let post of posts) {
+            let post_item = {};
+            // copy all key-values
+            for (let key in post) {
+                if (post[key] !== undefined) {
+                    post_item[key] = post[key];
+                }
+            }
+            // add new field 'user_name'
+            post_item['user_name'] = getUserNameById(post.post_user_id);
+            // add new field 'likes'
+            post_item['likes'] = `${post.like_1_num},${post.like_2_num},${post.like_3_num},${post.like_4_num},${post.like_5_num},${post.like_6_num}`;
+            // put item to array
+            new_posts.push(post_item);
+        }
+        setData(new_posts);
+    }
+    const getUserNameById = id => {
+        if (users.length > 0) {
+            for (let user of users) {
+                if (Number(user.user_id) === Number(id)) {
+                    return user.user_name;
+                }
+            }
+        } else {
+            return '';
+        }
+    }
 
     const openAddModal = () => {
         // console.log('[openAddModal]');
@@ -101,7 +188,7 @@ const PostList = ({ match, posts, users }) => {
         //     deleteSchoolById({ variables: { _id: _id } });
         // }
     };
-    const setData = (data) => { };
+
     const onSubmit = (event, errors, values) => {
         // console.log(errors);
         // console.log(values, unit);
@@ -204,8 +291,7 @@ const PostList = ({ match, posts, users }) => {
                 <Colxx xxs="12">
                     <ReactTableWithPaginationCard
                         cols={cols}
-                        data={posts}
-                        onCheck={handleOnCheck}
+                        data={data}
                     />
                 </Colxx>
             </Row>
@@ -214,12 +300,12 @@ const PostList = ({ match, posts, users }) => {
 };
 
 const mapStateToProps = ({ posts: postApp, users: userApp }) => {
-    const {list: posts} = postApp;
-    const {list: users} = userApp;
-    
+    const { list: posts } = postApp;
+    const { list: users } = userApp;
+
     return {
         users, posts
     };
-  };
+};
 
 export default connect(mapStateToProps)(PostList);
