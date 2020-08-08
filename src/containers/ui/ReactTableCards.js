@@ -55,7 +55,7 @@ function Table({
                 <th
                   key={`th_${columnIndex}`}
                   {...column.getHeaderProps(column.getSortByToggleProps())}
-                  onClick={() => onCheck(column, columnIndex)}
+
                   className={
                     column.isSorted
                       ? column.isSortedDesc
@@ -98,7 +98,7 @@ function Table({
         pages={pageCount}
         canPrevious={canPreviousPage}
         canNext={canNextPage}
-        pageSizeOptions={[4, 10, 20, 30, 40, 50]}
+        pageSizeOptions={[10, 20, 30, 40, 50]}
         showPageSizeOptions={true}
         showPageJump={true}
         defaultPageSize={pageSize}
@@ -115,7 +115,7 @@ export const ReactTableWithPaginationCard = ({ cols, data, onCheck }) => {
     <Card className="mb-4">
       <CardBody>
         <CardTitle>
-          <IntlMessages id="table.react-pagination" />
+          {/* <IntlMessages id="table.react-pagination" /> */}
         </CardTitle>
         <Table columns={cols} data={data} onCheck={onCheck} />
 

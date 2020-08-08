@@ -1,8 +1,10 @@
-import React, { Suspense } from 'react';
+import React, { Suspense, useEffect } from 'react';
 import { Route, withRouter, Switch, Redirect } from 'react-router-dom';
 import { connect } from 'react-redux';
 
 import AppLayout from '../../layout/AppLayout';
+
+import { loadAllUsers, loadAllPosts } from '../../redux/actions';
 
 const Gogo = React.lazy(() =>
   import(/* webpackChunkName: "viwes-gogo" */ './gogo')
@@ -16,7 +18,11 @@ const BlankPage = React.lazy(() =>
 
 const PostModule = React.lazy(() => import('./post'));
 
-const App = ({ match }) => {
+const App = ({ match, getAllPostsAction, getAllUsersAction }) => {
+  useEffect(() => {
+    getAllPostsAction();
+    getAllUsersAction();
+  }, [getAllUsersAction, getAllPostsAction])
   return (
     <AppLayout>
       <div className="dashboard-wrapper">
@@ -52,4 +58,7 @@ const mapStateToProps = ({ menu }) => {
   return { containerClassnames };
 };
 
-export default withRouter(connect(mapStateToProps, {})(App));
+export default withRouter(connect(mapStateToProps, {
+  getAllPostsAction: loadAllPosts,
+  getAllUsersAction: loadAllUsers
+})(App));

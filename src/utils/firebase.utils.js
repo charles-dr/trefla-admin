@@ -12,6 +12,32 @@ const firebaseConfig = {
   measurementId: 'G-Z650WSCL04',
 };
 
-firebase.initializeApp(firebaseConfig);
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+}
 
 export const _firebase = firebase;
+
+export const getAllUsers = () => {
+  return _firebase.firestore().collection('users').orderBy('user_id', 'asc').get()
+  .then((querySnapshot) => {
+      const rows = [];
+      querySnapshot.forEach((doc) => {
+          // console.log(`${doc.id}`, doc.data());
+          rows.push(doc.data());
+      });
+      return rows;
+  });
+}
+
+export const getAllPosts = () => {
+  return _firebase.firestore().collection('posts').orderBy('post_id', 'asc').get()
+  .then((querySnapshot) => {
+      const rows = [];
+      querySnapshot.forEach((doc) => {
+          // console.log(`${doc.id}`, doc.data());
+          rows.push(doc.data());
+      });
+      return rows;
+  });
+}

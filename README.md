@@ -1,4 +1,4 @@
-# Trefla Admin Panel
+# Trefla Admin Panel(npm)
 
 
 ## Firebase
@@ -32,6 +32,14 @@ refered from
 - firestore emulator: 8080
 - hosting emulator: 5000
 
+
+## Project Structure
+
+- menu: constants/menu.js
+
+- language: lang/locales/en_US.js
+
+- Styles: assets/css/scss
 
 ## Available Scripts
 

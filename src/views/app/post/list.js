@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { connect } from 'react-redux';
 import { Button, Label, Modal, ModalHeader, ModalBody, Row } from 'reactstrap';
 import {
     AvForm,
@@ -24,9 +25,9 @@ const INIT_UNIT = {
     district: { districtName: '', city: { cityName: '' } },
 };
 
-const PostList = ({ match }) => {
+const PostList = ({ match, posts, users }) => {
     const [pageLoaded, setPageLoaded] = useState(true);
-    const [posts, setPosts] = useState([]);
+    // const [posts, setPosts] = useState([]);
     const [modalDetails, setModalDetails] = useState(false);
     const [unit, setUnit] = useState(INIT_UNIT);
 
@@ -71,63 +72,19 @@ const PostList = ({ match }) => {
             ),
         },
     ];
-    const schools = [
-        { id: 1, name: 'User I', district: 'District I', city: 'City I' },
-        { id: 1, name: 'User I', district: 'District I', city: 'City I' },
-        { id: 1, name: 'User I', district: 'District I', city: 'City I' },
-        { id: 1, name: 'User I', district: 'District I', city: 'City I' },
-        { id: 1, name: 'User I', district: 'District I', city: 'City I' },
-        { id: 1, name: 'User I', district: 'District I', city: 'City I' },
-        { id: 1, name: 'User I', district: 'District I', city: 'City I' },
-        { id: 1, name: 'User I', district: 'District I', city: 'City I' },
-        { id: 1, name: 'User I', district: 'District I', city: 'City I' },
-        { id: 1, name: 'User I', district: 'District I', city: 'City I' },
-        { id: 1, name: 'User I', district: 'District I', city: 'City I' },
-        { id: 1, name: 'User I', district: 'District I', city: 'City I' },
-        { id: 1, name: 'User I', district: 'District I', city: 'City I' },
-        { id: 1, name: 'User I', district: 'District I', city: 'City I' },
-        { id: 1, name: 'User I', district: 'District I', city: 'City I' },
-        { id: 1, name: 'User I', district: 'District I', city: 'City I' },
-        { id: 1, name: 'User I', district: 'District I', city: 'City I' },
-        { id: 1, name: 'User I', district: 'District I', city: 'City I' },
-        { id: 1, name: 'User I', district: 'District I', city: 'City I' },
-        { id: 1, name: 'User I', district: 'District I', city: 'City I' },
-        { id: 1, name: 'User I', district: 'District I', city: 'City I' },
-        { id: 1, name: 'User I', district: 'District I', city: 'City I' },
-        { id: 1, name: 'User I', district: 'District I', city: 'City I' },
-        { id: 1, name: 'User I', district: 'District I', city: 'City I' },
-        { id: 1, name: 'User I', district: 'District I', city: 'City I' },
-        { id: 1, name: 'User I', district: 'District I', city: 'City I' },
-        { id: 1, name: 'User I', district: 'District I', city: 'City I' },
-        { id: 1, name: 'User I', district: 'District I', city: 'City I' },
-        { id: 1, name: 'User I', district: 'District I', city: 'City I' },
-        { id: 1, name: 'User I', district: 'District I', city: 'City I' },
-        { id: 1, name: 'User I', district: 'District I', city: 'City I' },
-        { id: 1, name: 'User I', district: 'District I', city: 'City I' },
-        { id: 1, name: 'User I', district: 'District I', city: 'City I' },
-        { id: 1, name: 'User I', district: 'District I', city: 'City I' },
-        { id: 1, name: 'User I', district: 'District I', city: 'City I' },
-        { id: 1, name: 'User I', district: 'District I', city: 'City I' },
-        { id: 1, name: 'User I', district: 'District I', city: 'City I' },
-        { id: 1, name: 'User I', district: 'District I', city: 'City I' },
-        { id: 1, name: 'User I', district: 'District I', city: 'City I' },
-        { id: 1, name: 'User I', district: 'District I', city: 'City I' },
-        { id: 1, name: 'User I', district: 'District I', city: 'City I' },
-        { id: 1, name: 'User I', district: 'District I', city: 'City I' },
-        { id: 1, name: 'User I', district: 'District I', city: 'City I' },
-    ];
 
     useEffect(() => {
-        _firebase.firestore().collection('posts').orderBy('post_id', 'asc').get()
-            .then((querySnapshot) => {
-                const rows = [];
-                querySnapshot.forEach((doc) => {
-                    // console.log(`${doc.id}`, doc.data());
-                    rows.push(doc.data());
-                });
-                console.log(rows);
-                setPosts(rows);
-            });
+        console.log(users, posts);
+        // _firebase.firestore().collection('posts').orderBy('post_id', 'asc').get()
+        //     .then((querySnapshot) => {
+        //         const rows = [];
+        //         querySnapshot.forEach((doc) => {
+        //             // console.log(`${doc.id}`, doc.data());
+        //             rows.push(doc.data());
+        //         });
+        //         // console.log(rows);
+        //         setPosts(rows);
+        //     });
 
         return () => { };
     }, [match]);
@@ -164,7 +121,7 @@ const PostList = ({ match }) => {
         <>
             <Row>
                 <Colxx xxs="12">
-                    <Breadcrumb heading="menu.schools" match={match} />
+                    <Breadcrumb heading="menu.posts" match={match} />
                     <Separator className="mb-5" />
                 </Colxx>
             </Row>
@@ -172,7 +129,7 @@ const PostList = ({ match }) => {
             <Row>
                 <Colxx xxs="12">
                     <h3 className="mb-4">
-                        <IntlMessages id="pages.schools" />
+                        <IntlMessages id="pages.posts" />
                     </h3>
                 </Colxx>
 
@@ -256,4 +213,13 @@ const PostList = ({ match }) => {
     );
 };
 
-export default PostList;
+const mapStateToProps = ({ posts: postApp, users: userApp }) => {
+    const {list: posts} = postApp;
+    const {list: users} = userApp;
+    
+    return {
+        users, posts
+    };
+  };
+
+export default connect(mapStateToProps)(PostList);

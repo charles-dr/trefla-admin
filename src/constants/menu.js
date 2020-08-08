@@ -14,7 +14,7 @@ const data = [
   },
   {
     id: 'postmenu',
-    icon: 'iconsminds-three-arrow-fork',
+    icon: 'simple-icon-paper-plane',
     label: 'menu.posts',
     to: '/app/post',
   },
