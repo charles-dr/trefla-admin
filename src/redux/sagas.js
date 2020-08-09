@@ -1,12 +1,13 @@
 import { all } from 'redux-saga/effects';
 // import authSagas from './auth/saga';
+import authSaga from './auth/saga';
 import friendSasga from './friend/saga';
 import postSaga from './posts/saga';
 import userSaga from './users/saga';
 
 export default function* rootSaga(getState) {
   yield all([
-    // authSagas(),
+    authSaga(),
     friendSasga(),
     postSaga(),
     userSaga()

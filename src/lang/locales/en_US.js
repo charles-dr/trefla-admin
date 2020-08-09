@@ -44,6 +44,8 @@ module.exports = {
   'menu.blank-page': 'Blank Page',
 
   'menu.dashboard': 'Dashboard',
+  'menu.languages': 'Languages',
+  'menu.language': 'Language',
   'menu.list': 'List',
   'menu.post': 'Post',
   'menu.posts': 'Posts',
@@ -57,6 +59,8 @@ module.exports = {
   'pages.go-back-home': 'GO BACK HOME',
 
   'pages.dashboard': 'Dashboard',
+  'pages.Languages': 'Languages',
+  'pages.Language': 'Language',
   'pages.posts': 'Posts',
   'pages.schools': 'Schools',
   'pages.users': 'Users',

@@ -12,6 +12,7 @@ import ColorSwitcher from './components/common/ColorSwitcher';
 import { NotificationContainer } from './components/common/react-notifications';
 import { isMultiColorActive } from './constants/defaultValues';
 import { getDirection } from './helpers/Utils';
+import { checkLoginSession } from './redux/actions';
 
 const ViewMain = React.lazy(() =>
   import(/* webpackChunkName: "views" */ './views')
@@ -22,6 +23,10 @@ const ViewApp = React.lazy(() =>
 
 const ViewError = React.lazy(() =>
   import(/* webpackChunkName: "views-error" */ './views/error')
+);
+
+const ViewAuth = React.lazy(() =>
+  import('./views/auth')
 );
 
 class App extends React.Component {
@@ -35,6 +40,11 @@ class App extends React.Component {
       document.body.classList.add('ltr');
       document.body.classList.remove('rtl');
     }
+  }
+
+  componentDidMount() {
+    const { checkLoginSessionAction } = this.props;
+    checkLoginSessionAction();
   }
 
   render() {
@@ -53,6 +63,10 @@ class App extends React.Component {
             <Suspense fallback={<div className="loading" />}>
               <Router>
                 <Switch>
+                  <Route
+                    path="/auth"
+                    render={(props) => <ViewAuth {...props} />}
+                  />
                   <Route
                     path="/app"
                     render={(props) => <ViewApp {...props} />}
@@ -82,6 +96,8 @@ const mapStateToProps = ({ settings }) => {
   const { locale } = settings;
   return { locale };
 };
-const mapActionsToProps = {};
+const mapActionsToProps = {
+  checkLoginSessionAction: checkLoginSession
+};
 
 export default connect(mapStateToProps, mapActionsToProps)(App);

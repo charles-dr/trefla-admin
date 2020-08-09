@@ -322,6 +322,7 @@ hr {
     height: 35px;
     background: url($logoPath) no-repeat;
     background-position: center center;
+    background-size: contain;
     display: inline-block;
     margin-bottom: 60px;
 }

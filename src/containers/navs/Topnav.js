@@ -36,6 +36,8 @@ import TopnavDarkSwitch from './Topnav.DarkSwitch';
 
 import { getDirection, setDirection } from '../../helpers/Utils';
 
+import { logout } from '../../redux/actions';
+
 const TopNav = ({
   intl,
   history,
@@ -46,6 +48,7 @@ const TopNav = ({
   setContainerClassnamesAction,
   clickOnMobileMenuAction,
   changeLocaleAction,
+  logoutAction,
 }) => {
   const [isInFullScreen, setIsInFullScreen] = useState(false);
   const [searchKeyword, setSearchKeyword] = useState('');
@@ -175,6 +178,7 @@ const TopNav = ({
 
   const handleLogout = () => {
     console.log('logout');
+    logoutAction({history});
   };
 
   const menuButtonClick = (e, _clickCount, _conClassnames) => {
@@ -326,5 +330,6 @@ export default injectIntl(
     setContainerClassnamesAction: setContainerClassnames,
     clickOnMobileMenuAction: clickOnMobileMenu,
     changeLocaleAction: changeLocale,
+    logoutAction: logout,
   })(TopNav)
 );

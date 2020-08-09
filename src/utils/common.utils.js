@@ -1,3 +1,9 @@
+import CryptoJS from "crypto-js";
+
+const getAuthTokenName = () => {
+  return 'TREFLAADMIN_TOKEN';
+}
+
 export const serialize = function (obj) {
   const str = [];
   for (const p in obj)
@@ -21,4 +27,30 @@ export const transformTime = (str_time) => {
 
     const dt_final = new Date(final_time);
     return str_time.substring(0, 10) + " " + dt_final.toLocaleTimeString();    
+}
+
+export const getAuthToken = () => {
+  const encToken = window.localStorage.getItem(getAuthTokenName());
+  return !!encToken ? decryptString(encToken) : '';
+}
+
+export const saveAuthToken = (token) => {
+  if (!token) return;
+  console.log('[Auth Util] save', token);
+  const encToken = encryptString(token);
+  window.localStorage.setItem(getAuthTokenName(), encToken);
+}
+
+export const deleteAuthToken = () => {
+  console.log('[Auth Util] delete');
+  localStorage.removeItem(getAuthTokenName());
+}
+
+export const encryptString = (src) => {
+  return CryptoJS.AES.encrypt(src, process.env.REACT_APP_SECRET).toString();
+}
+
+export const decryptString = (src) => {
+  let temp = CryptoJS.AES.decrypt(src, process.env.REACT_APP_SECRET);
+  return temp.toString(CryptoJS.enc.Utf8)
 }

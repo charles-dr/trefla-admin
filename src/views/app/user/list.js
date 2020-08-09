@@ -78,7 +78,12 @@ const UserList = ({ match, friends, posts, users }) => {
             cellClass: 'text-muted  w-5',
             Cell: (props) => <>{formatCoordinate(props.value)}</>,
         },
-
+        {
+            Header: 'Active',
+            accessor: 'active',
+            cellClass: 'text-muted  w-5',
+            Cell: (props) => <><Badge color={props.value==1 ? 'success' : 'danger'} pill className="mb-1">{props.value==1 ? 'Active' : 'Disabled'}</Badge></>,
+        },
         {
             Header: 'Actions',
             accessor: 'user_id',
@@ -112,7 +117,7 @@ const UserList = ({ match, friends, posts, users }) => {
     }, [match, users, posts, friends]);
 
 
-
+    
     const formatLikes = (str_likes) => {
         const arr_likes = str_likes.split(',');
         const total = arr_likes.reduce((a, b) => Number(a) + Number(b), 0);
@@ -203,7 +208,7 @@ const UserList = ({ match, friends, posts, users }) => {
         <>
             <Row>
                 <Colxx xxs="12">
-                    <Breadcrumb heading="menu.posts" match={match} />
+                    <Breadcrumb heading="menu.users" match={match} />
                     <Separator className="mb-5" />
                 </Colxx>
             </Row>
@@ -211,7 +216,7 @@ const UserList = ({ match, friends, posts, users }) => {
             <Row>
                 <Colxx xxs="12">
                     <h3 className="mb-4">
-                        <IntlMessages id="pages.posts" />
+                        <IntlMessages id="pages.users" />
                     </h3>
                 </Colxx>
 

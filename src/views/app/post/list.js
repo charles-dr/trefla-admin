@@ -85,6 +85,12 @@ const PostList = ({ match, posts, users }) => {
             Cell: (props) => <>{transformTime(props.value)}</>,
         },
         {
+            Header: 'Active',
+            accessor: 'active',
+            cellClass: 'text-muted  w-5',
+            Cell: (props) => <><Badge color={props.value==1 ? 'success' : 'danger'} pill className="mb-1">{props.value==1 ? 'Active' : 'Disabled'}</Badge></>,
+        },
+        {
             Header: 'Actions',
             accessor: 'post_id',
             cellClass: 'text-muted  w-20',

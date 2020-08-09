@@ -25,6 +25,12 @@ export const MENU_CHANGE_DEFAULT_CLASSES = 'MENU_CHANGE_DEFAULT_CLASSES';
 export const MENU_CHANGE_HAS_SUB_ITEM_STATUS =
   'MENU_CHANGE_HAS_SUB_ITEM_STATUS';
 
+export const AUTH_LOADING = 'AUTH_LOADING';
+export const AUTH_LOGIN = 'AUTH_LOGIN';
+export const AUTH_LOGIN_SUCCESS = 'AUTH_LOGIN_SUCCESS';
+export const AUTH_LOGIN_CHECK = 'AUTH_LOGIN_CHECK';
+export const AUTH_LOGOUT = 'AUTH_LOGOUT';
+
 export const FRIEND_GET = 'FRIEND_GET';
 export const FRIEND_ARRIVED = 'FRIEND_ARRIVED';
 
@@ -36,6 +42,8 @@ export const USERS_ARRIVED = 'USERS_ARRIVED';
 
 export * from './menu/actions';
 export * from './settings/actions';
+
+export * from './auth/actions';
 export * from './friend/actions';
 export * from './posts/actions';
 export * from './users/actions';

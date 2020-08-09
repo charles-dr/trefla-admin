@@ -3,7 +3,7 @@ const data = [
     id: 'dashboard',
     icon: 'iconsminds-bucket',
     label: 'menu.dashboard',
-    to: '/app/blank-page',
+    to: '/app/dashboard',
   },
   {
     id: 'usermenu',
@@ -18,9 +18,9 @@ const data = [
     to: '/app/post',
   },
   {
-    id: 'secondmenu',
-    icon: 'iconsminds-three-arrow-fork',
-    label: 'menu.second-menu',
+    id: 'languages',
+    icon: 'simple-icon-globe',
+    label: 'menu.languages',
     to: '/app/second-menu',
     subs: [
       {
