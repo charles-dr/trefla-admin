@@ -5,7 +5,7 @@ import { getAllUsers } from '../../utils/firebase.utils';
 // fetch users
 function* fetchUsers(action) {
     let users = yield call(getAllUsers);
-    console.log('[Saga] users', users);
+    // console.log('[Saga] users', users);
     yield put({type: USERS_ARRIVED, payload: users});
 }
 

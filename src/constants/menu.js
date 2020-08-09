@@ -1,7 +1,7 @@
 const data = [
   {
     id: 'dashboard',
-    icon: 'iconsminds-bucket',
+    icon: 'iconsminds-dashboard',
     label: 'menu.dashboard',
     to: '/app/dashboard',
   },
@@ -21,7 +21,7 @@ const data = [
     id: 'languages',
     icon: 'simple-icon-globe',
     label: 'menu.languages',
-    to: '/app/second-menu',
+    to: '/app/lang',
   },
   {
     id: 'settings',

@@ -116,7 +116,7 @@ const PostList = ({ match, posts, users }) => {
 
 
     useEffect(() => {
-        console.log(users, posts);
+        // console.log(users, posts);
 
         const tableRows = recomposePosts();
 

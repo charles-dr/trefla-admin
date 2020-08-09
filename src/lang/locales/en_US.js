@@ -18,6 +18,7 @@ module.exports = {
   'user.register': 'Register',
   'user.forgot-password': 'Forgot Password',
   'user.email': 'E-mail',
+  'user.new-password': 'New Password',
   'user.old-password': 'Old Password',
   'user.password': 'Password',
   'user.confirm-password': 'Confirm Password',
@@ -27,9 +28,15 @@ module.exports = {
   'user.register-button': 'REGISTER',
   'user.reset-password-button': 'RESET',
   'user.buy': 'BUY',
-  'user.save': 'Save',
+
+  'user.active': 'Active',
+  'user.code': 'Code',
+  'user.lang-file': 'Language File',
+  'user.name': 'Name',
   'user.username': 'Username',
+  'user.save': 'Save',
   'user.update': 'Update',
+  'user.upload-new-file': 'Upload New File',
 
   /* 03.Menu */
   'menu.app': 'Home',
@@ -47,9 +54,11 @@ module.exports = {
   'menu.docs': 'Docs',
   'menu.blank-page': 'Blank Page',
 
+  'menu.add': 'Add',
   'menu.dashboard': 'Dashboard',
+  'menu.edit': 'Edit',
   'menu.languages': 'Languages',
-  'menu.language': 'Language',
+  'menu.lang': 'Languages',
   'menu.list': 'List',
   'menu.password': 'Password',
   'menu.post': 'Post',
@@ -67,8 +76,8 @@ module.exports = {
   'pages.go-back-home': 'GO BACK HOME',
 
   'pages.dashboard': 'Dashboard',
-  'pages.Languages': 'Languages',
-  'pages.Language': 'Language',
+  'pages.languages': 'Languages',
+  'pages.language': 'Language',
   'pages.password': 'Password',
   'pages.posts': 'Posts',
   'pages.profile': 'Profile',

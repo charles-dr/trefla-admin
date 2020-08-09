@@ -121,7 +121,7 @@ const PasswordPage = ({ history, match, loginUserAction, updateLoginAction }) =>
                 <Formik initialValues={initialValues} onSubmit={onUpdateProfile}>
                     {({ errors, touched }) => (
                         <Form className="av-tooltip tooltip-label-bottom mx-auto" style={{ maxWidth: 640, width: '100%' }}>
-                            <FormGroup className="form-group">
+                            <FormGroup className="form-group has-float-label">
                                 <Label>
                                     <IntlMessages id="user.old-password" />
                                 </Label>
@@ -139,7 +139,7 @@ const PasswordPage = ({ history, match, loginUserAction, updateLoginAction }) =>
                                     </div>
                                 )}
                             </FormGroup>
-                            <FormGroup className="form-group">
+                            <FormGroup className="form-group has-float-label">
                                 <Label>
                                     <IntlMessages id="user.new-password" />
                                 </Label>
@@ -157,7 +157,7 @@ const PasswordPage = ({ history, match, loginUserAction, updateLoginAction }) =>
                                     </div>
                                 )}
                             </FormGroup>
-                            <FormGroup className="form-group">
+                            <FormGroup className="form-group has-float-label">
                                 <Label>
                                     <IntlMessages id="user.confirm-password" />
                                 </Label>

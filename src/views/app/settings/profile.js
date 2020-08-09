@@ -112,7 +112,7 @@ const ProfilePage = ({ history, match, loadAuthInfoAction, downloadAvatarAction 
                                     accept="image/*" />
 
                             </div>
-                            <FormGroup className="form-group has-float-label">
+                            <FormGroup className="form-group">
                                 <Label>
                                     <IntlMessages id="user.email" />
                                 </Label>
@@ -129,7 +129,7 @@ const ProfilePage = ({ history, match, loadAuthInfoAction, downloadAvatarAction 
                                     </div>
                                 )}
                             </FormGroup>
-                            <FormGroup className="form-group has-float-label">
+                            <FormGroup className="form-group">
                                 <Label>
                                     <IntlMessages id="user.username" />
                                 </Label>

@@ -45,6 +45,18 @@ export const getAllFriends = () => {
     });
 }
 
+export const getAllLangRequest = () => {
+  return _firebase.firestore().collection('langs').orderBy('lang_id', 'asc').get()
+    .then((querySnapshot) => {
+      const rows = [];
+      querySnapshot.forEach((doc) => {
+        // console.log(`${doc.id}`, doc.data());
+        rows.push(doc.data());
+      });
+      return rows;
+    });
+}
+
 export const getAllPosts = () => {
   return _firebase.firestore().collection('posts').orderBy('post_id', 'asc').get()
     .then((querySnapshot) => {
@@ -110,5 +122,21 @@ export const updateAdminProfile = async (data, file) => {
 
   await adminRef.set(data)
   return true;
+}
+
+export const updateAdminPassword = async ({old_pass, password}) => {
+  const admin = await getAdminInfo();
+  if (admin) {
+    if (admin.password === old_pass) {
+      admin.password = password;
+      const adminRef = await _firebase.firestore().collection('admin').doc("0").set(admin);
+
+      return {status: true, message: 'Password has been updated!'};
+    } else {
+      return {status: false, message: 'Old password does not match!'};
+    }
+  } else {
+    return {status: false, message: 'Something went wrong!'};
+  }
 }
 

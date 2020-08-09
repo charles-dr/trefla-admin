@@ -7,28 +7,29 @@ import AppLayout from '../../layout/AppLayout';
 import {
   downloadAvatar,
   loadAllFriends,
+  loadAllLangs,
   loadAllPosts,
   loadAllUsers,
   loadAuthInfo
 } from '../../redux/actions';
 
+const LangModule = React.lazy(() => import('./lang'));
 const PostModule = React.lazy(() => import('./post'));
-
 const SettingModule = React.lazy(() => import('./settings'));
-
 const UserModule = React.lazy(() => import('./user'));
-
 const DashboardPage = React.lazy(() => import('./dashboard'));
 
-const App = ({ match, downloadAvatarAction, getAllFriendsAction, getAllPostsAction, getAllUsersAction, loadAuthInfoAction, login }) => {
+const App = ({ match, downloadAvatarAction, getAllFriendsAction, getAllLangsAction, getAllPostsAction, getAllUsersAction, loadAuthInfoAction, login }) => {
   const history = useHistory();
   useEffect(() => {
     if (!login) {
       console.log('[->] Login');
       history.push('/auth/login');
     }
+    // load all data
     getAllUsersAction();
     getAllFriendsAction();
+    getAllLangsAction();
     getAllPostsAction();
     loadAuthInfoAction();
     downloadAvatarAction();
@@ -44,6 +45,10 @@ const App = ({ match, downloadAvatarAction, getAllFriendsAction, getAllPostsActi
               path={`${match.url}/dashboard`}
               render={(props) => <DashboardPage {...props} />}
             />
+            <Route
+              path={`${match.url}/lang`}
+              render={(props) => <LangModule {...props} />}
+            />            
             <Route
               path={`${match.url}/post`}
               render={(props) => <PostModule {...props} />}
@@ -73,6 +78,7 @@ const mapStateToProps = ({ menu, auth }) => {
 export default withRouter(connect(mapStateToProps, {
   downloadAvatarAction: downloadAvatar,
   getAllFriendsAction: loadAllFriends,
+  getAllLangsAction: loadAllLangs,
   getAllPostsAction: loadAllPosts,
   getAllUsersAction: loadAllUsers,
   loadAuthInfoAction: loadAuthInfo,

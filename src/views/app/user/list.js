@@ -109,7 +109,7 @@ const UserList = ({ match, friends, posts, users }) => {
     ];
 
     useEffect(() => {
-        console.log(friends, users, posts);
+        // console.log(friends, users, posts);
 
         const tableRows = recomposeUsers();
 
