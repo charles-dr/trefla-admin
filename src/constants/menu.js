@@ -22,11 +22,22 @@ const data = [
     icon: 'simple-icon-globe',
     label: 'menu.languages',
     to: '/app/second-menu',
+  },
+  {
+    id: 'settings',
+    icon: 'simple-icon-settings',
+    label: 'menu.settings',
+    to: '/app/settings',
     subs: [
       {
-        icon: 'simple-icon-paper-plane',
-        label: 'menu.second',
-        to: '/app/second-menu/second',
+        icon: 'iconsminds-profile',
+        label: 'menu.profile',
+        to: '/app/settings/profile',
+      },
+      {
+        icon: 'iconsminds-key-lock',
+        label: 'menu.password',
+        to: '/app/settings/password',
       },
     ],
   },

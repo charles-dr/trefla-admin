@@ -1,18 +1,26 @@
 import React, { Suspense, useEffect } from 'react';
-import { Route, withRouter, Switch, Redirect, useHistory} from 'react-router-dom';
+import { Route, withRouter, Switch, Redirect, useHistory } from 'react-router-dom';
 import { connect } from 'react-redux';
 
 import AppLayout from '../../layout/AppLayout';
 
-import { loadAllFriends, loadAllPosts, loadAllUsers } from '../../redux/actions';
+import {
+  downloadAvatar,
+  loadAllFriends,
+  loadAllPosts,
+  loadAllUsers,
+  loadAuthInfo
+} from '../../redux/actions';
 
 const PostModule = React.lazy(() => import('./post'));
+
+const SettingModule = React.lazy(() => import('./settings'));
 
 const UserModule = React.lazy(() => import('./user'));
 
 const DashboardPage = React.lazy(() => import('./dashboard'));
 
-const App = ({ match, getAllFriendsAction, getAllPostsAction, getAllUsersAction, login }) => {
+const App = ({ match, downloadAvatarAction, getAllFriendsAction, getAllPostsAction, getAllUsersAction, loadAuthInfoAction, login }) => {
   const history = useHistory();
   useEffect(() => {
     if (!login) {
@@ -22,6 +30,8 @@ const App = ({ match, getAllFriendsAction, getAllPostsAction, getAllUsersAction,
     getAllUsersAction();
     getAllFriendsAction();
     getAllPostsAction();
+    loadAuthInfoAction();
+    downloadAvatarAction();
   }, [getAllUsersAction, getAllPostsAction])
   return (
     <AppLayout>
@@ -37,6 +47,10 @@ const App = ({ match, getAllFriendsAction, getAllPostsAction, getAllUsersAction,
             <Route
               path={`${match.url}/post`}
               render={(props) => <PostModule {...props} />}
+            />
+            <Route
+              path={`${match.url}/settings`}
+              render={(props) => <SettingModule {...props} />}
             />
             <Route
               path={`${match.url}/user`}
@@ -57,7 +71,9 @@ const mapStateToProps = ({ menu, auth }) => {
 };
 
 export default withRouter(connect(mapStateToProps, {
+  downloadAvatarAction: downloadAvatar,
   getAllFriendsAction: loadAllFriends,
   getAllPostsAction: loadAllPosts,
-  getAllUsersAction: loadAllUsers
+  getAllUsersAction: loadAllUsers,
+  loadAuthInfoAction: loadAuthInfo,
 })(App));

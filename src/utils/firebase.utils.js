@@ -1,5 +1,6 @@
 import firebase from 'firebase/app';
 import 'firebase/firestore';
+import 'firebase/storage';
 
 const firebaseConfig = {
   apiKey: 'AIzaSyBdnoTzHFUFDuI-wEyMiZSqPpsy4k4TYDM',
@@ -24,11 +25,11 @@ export const loginAdmin = (data) => {
     .then((querySnapshot) => {
       let status = false;
       querySnapshot.forEach((doc) => {
-          console.log(`${doc.id}`, doc.data());
-          status = true;
-          // return {status: true, message: 'You logged in successfully!'};
+        console.log(`${doc.id}`, doc.data());
+        status = true;
+        // return {status: true, message: 'You logged in successfully!'};
       });
-      return {status: status, message: status ? 'You logged in successfully!' : 'Invalid credentials!'};
+      return { status: status, message: status ? 'You logged in successfully!' : 'Invalid credentials!' };
     });
 }
 
@@ -67,3 +68,47 @@ export const getAllUsers = () => {
       return rows;
     });
 }
+
+export const getAdminInfo = async () => {
+  return _firebase.firestore().collection('admin').doc('0').get()
+    .then(function (doc) {
+      if (doc.exists) {
+        // console.log(doc.data());
+        return doc.data();
+      } else {
+        console.log("No document exists!");
+        return false;
+      }
+    })
+    .catch(function (err) {
+      console.log('Error getting admin info: ', err);
+      return false;
+    });
+}
+
+export const getAdminAvatarURL = async () => {
+  const fileRef = _firebase.storage().ref().child('admin/profile.png');
+  return fileRef.getDownloadURL()
+  .then(url => url)
+  .catch(err => '');
+}
+
+export const updateAdminProfile = async (data, file) => {
+  const fileRef = _firebase.app().storage('gs://trefla.appspot.com').ref().child('admin/profile.png');
+
+  if (file) {
+    await fileRef.put(file);
+    // fileRef.put(file)
+    //   .then(function (snapshot) {
+    //     fileRef.getDownloadURL().then(function(url) {
+    //       console.log('[Storage] uploaded a file!', url);
+    //     });        
+    //   })
+  }
+
+  const adminRef = _firebase.firestore().collection('admin').doc("0");
+
+  await adminRef.set(data)
+  return true;
+}
+

@@ -30,6 +30,11 @@ export const AUTH_LOGIN = 'AUTH_LOGIN';
 export const AUTH_LOGIN_SUCCESS = 'AUTH_LOGIN_SUCCESS';
 export const AUTH_LOGIN_CHECK = 'AUTH_LOGIN_CHECK';
 export const AUTH_LOGOUT = 'AUTH_LOGOUT';
+export const AUTH_LOAD_INFO = 'AUTH_LOAD_INFO';
+export const AUTH_INFO_LOADED = 'AUTH_INFO_LOADED';
+export const AUTH_AVATAR = 'AUTH_AVATAR';
+export const AUTH_AVATAR_UPDATE = 'AUTH_AVATAR_UPDATE';
+
 
 export const FRIEND_GET = 'FRIEND_GET';
 export const FRIEND_ARRIVED = 'FRIEND_ARRIVED';

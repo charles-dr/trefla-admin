@@ -49,6 +49,7 @@ const TopNav = ({
   clickOnMobileMenuAction,
   changeLocaleAction,
   logoutAction,
+  avatar, admin_name
 }) => {
   const [isInFullScreen, setIsInFullScreen] = useState(false);
   const [searchKeyword, setSearchKeyword] = useState('');
@@ -293,9 +294,9 @@ const TopNav = ({
         <div className="user d-inline-block">
           <UncontrolledDropdown className="dropdown-menu-right">
             <DropdownToggle className="p-0" color="empty">
-              <span className="name mr-1">Sarah Kortney</span>
+              <span className="name mr-1">{admin_name}</span>
               <span>
-                <img alt="Profile" src="/assets/img/profile-pic-l.jpg" />
+                <img alt="Profile" src={avatar} />
               </span>
             </DropdownToggle>
             <DropdownMenu className="mt-3" right>
@@ -315,14 +316,17 @@ const TopNav = ({
   );
 };
 
-const mapStateToProps = ({ menu, settings }) => {
+const mapStateToProps = ({ auth, menu, settings }) => {
   const { containerClassnames, menuClickCount, selectedMenuHasSubItems } = menu;
   const { locale } = settings;
+  const { info: {name}, avatar } = auth;
   return {
     containerClassnames,
     menuClickCount,
     selectedMenuHasSubItems,
     locale,
+    admin_name: name,
+    avatar
   };
 };
 export default injectIntl(

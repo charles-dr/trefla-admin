@@ -1,6 +1,25 @@
 import { call, put, takeEvery } from 'redux-saga/effects';
-import { AUTH_LOADING, AUTH_LOGIN, AUTH_LOGIN_CHECK, AUTH_LOGIN_SUCCESS, AUTH_LOGOUT, USERS_GET, USERS_ARRIVED } from '../actions';
-import { loginAdmin, updateLogin, getAuthToken, saveAuthToken, deleteAuthToken } from '../../utils';
+import { 
+    AUTH_AVATAR,
+    AUTH_AVATAR_UPDATE,
+    AUTH_INFO_LOADED,
+    AUTH_LOAD_INFO,
+    AUTH_LOADING, 
+    AUTH_LOGIN, 
+    AUTH_LOGIN_CHECK, 
+    AUTH_LOGIN_SUCCESS, 
+    AUTH_LOGOUT, 
+    USERS_GET, 
+    USERS_ARRIVED } from '../actions';
+import { 
+    getAdminAvatarURL,
+    getAdminInfo, 
+    loginAdmin, 
+    updateLogin, 
+    
+    getAuthToken, 
+    saveAuthToken, 
+    deleteAuthToken } from '../../utils';
 
 // fetch users
 function* loginRequest(action) {
@@ -39,8 +58,24 @@ function* processLogout(action) {
     history.push('/auth/login');
 }
 
+function* loadAdminProfile(action) {
+    const profile = yield call(getAdminInfo);
+    // delete profile.password;
+    profile.password = '';
+    // console.log(profile);
+    yield put({type: AUTH_INFO_LOADED, payload: profile});
+}
+
+function* downloadAdminAvatar(action) {
+    const url = yield call(getAdminAvatarURL);
+    yield put({type: AUTH_AVATAR_UPDATE, payload: url});
+}
+
+
 export default function* authSaga() {
     yield takeEvery(AUTH_LOGIN, loginRequest);
     yield takeEvery(AUTH_LOGIN_CHECK, checkLogin);
     yield takeEvery(AUTH_LOGOUT, processLogout);
+    yield takeEvery(AUTH_LOAD_INFO, loadAdminProfile);
+    yield takeEvery(AUTH_AVATAR, downloadAdminAvatar);
 }
