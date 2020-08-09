@@ -40,11 +40,7 @@ const validateName = (value) => {
 const PasswordPage = ({ history, match, loading, login, message, loginUserAction, updateLoginAction }) => {
     let avatarInput = null;
     // const history = useHistory();
-    const [email] = useState('');
-    const [password, setPassword] = useState('');
-    const [username] = useState('');
-    const [cpassword] = useState('');
-    const [avatar, setAvatar] = useState('/assets/img/no_profile.png')
+    const [profile, setProfile] = useState({old_pass: '', password: '', cpassword: ''});
     // const [loading, setLoading] = useState(false);
 
     useEffect(() => {
@@ -52,7 +48,7 @@ const PasswordPage = ({ history, match, loading, login, message, loginUserAction
             console.log(info);
         })
         return () => {
-    
+
         }
     }, [match]);
 
@@ -75,35 +71,16 @@ const PasswordPage = ({ history, match, loading, login, message, loginUserAction
         //     }
         // }
     };
-    const openFileSelector = () => {
-        avatarInput.click();
-    }
-    const handleAvatarSelect = (e) => {
-        console.log(e)
-        e.preventDefault();
-        let reader = new FileReader();
-        let file = e.target.files[0];
-        console.log(avatarInput.files[0]);
-        setAvatar(URL.createObjectURL(e.target.files[0]));
-        // reader.onloadend = (theFile) => {
-        //     // var data = {
-        //     //     blob: theFile.target.result, name: file.name,
-        //     //     visitorId:  this.props.socketio.visitorId
-        //     // };
-        //     // console.log(this.props.socketio);
-        //     // this.props.socketio.emit('file-upload', data);
-        // };
-        // reader.readAsDataURL(file);
-    }
-    const validateCPassword = (value) => {
+
+    const validateCPassword = () => {
         let error;
-        if (password !== value) {
+        if (profile.password !== profile.cpassword) {
             error = 'Password does not match!';
         }
         return error;
     }
     const validatePassword = (value) => {
-        value = password;
+        value = profile.password;
         let error;
         if (!value) {
             error = 'Please enter your password';
@@ -112,11 +89,11 @@ const PasswordPage = ({ history, match, loading, login, message, loginUserAction
         }
         return error;
     };
-    const onPasswordChange = (e) => {
-        setPassword(e.target.value);
+    const handleOnChange = (e) => {
+        setProfile({...profile, [e.target.name]: e.target.value});
     }
 
-    const initialValues = { password, cpassword };
+    const initialValues = profile;
 
     return (
         <>
@@ -138,7 +115,25 @@ const PasswordPage = ({ history, match, loading, login, message, loginUserAction
 
                 <Formik initialValues={initialValues} onSubmit={onUpdateProfile}>
                     {({ errors, touched }) => (
-                        <Form className="av-tooltip tooltip-label-bottom mx-auto" style={{maxWidth: 640, width: '100%'}}>
+                        <Form className="av-tooltip tooltip-label-bottom mx-auto" style={{ maxWidth: 640, width: '100%' }}>
+                            <FormGroup className="form-group has-float-label">
+                                <Label>
+                                    <IntlMessages id="user.old-password" />
+                                </Label>
+                                <Field
+                                    className="form-control"
+                                    type="password"
+                                    name="old_pass"
+                                    value={profile.old_pass}
+                                    validate={validatePassword}
+                                    onChange={handleOnChange}
+                                />
+                                {errors.old_pass && touched.old_pass && (
+                                    <div className="invalid-feedback d-block">
+                                        {errors.old_pass}
+                                    </div>
+                                )}
+                            </FormGroup>
                             <FormGroup className="form-group has-float-label">
                                 <Label>
                                     <IntlMessages id="user.password" />
@@ -147,9 +142,9 @@ const PasswordPage = ({ history, match, loading, login, message, loginUserAction
                                     className="form-control"
                                     type="password"
                                     name="password"
-                                    value={password}
+                                    value={profile.password}
                                     validate={validatePassword}
-                                    onChange={onPasswordChange}
+                                    onChange={handleOnChange}
                                 />
                                 {errors.password && touched.password && (
                                     <div className="invalid-feedback d-block">
@@ -165,7 +160,9 @@ const PasswordPage = ({ history, match, loading, login, message, loginUserAction
                                     className="form-control"
                                     type="password"
                                     name="cpassword"
+                                    value={profile.cpassword}
                                     validate={validateCPassword}
+                                    onChange={handleOnChange}
                                 />
                                 {errors.cpassword && touched.cpassword && (
                                     <div className="invalid-feedback d-block">

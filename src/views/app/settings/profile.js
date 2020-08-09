@@ -6,7 +6,6 @@ import { connect } from 'react-redux';
 import { Formik, Form, Field } from 'formik';
 import { NotificationManager } from '../../../components/common/react-notifications';
 
-import { login, updateLogin } from '../../../redux/actions';
 import { Colxx, Separator } from '../../../components/common/CustomBootstrap';
 import IntlMessages from '../../../helpers/IntlMessages';
 import Breadcrumb from '../../../containers/navs/Breadcrumb';
@@ -14,7 +13,7 @@ import Breadcrumb from '../../../containers/navs/Breadcrumb';
 import { getAdminAvatarURL, getAdminInfo, updateAdminProfile } from '../../../utils';
 import { downloadAvatar, loadAuthInfo } from '../../../redux/actions';
 
-const ProfilePage = ({ history, match, login, message, loadAuthInfoAction, downloadAvatarAction, loginUserAction, updateLoginAction }) => {
+const ProfilePage = ({ history, match, loadAuthInfoAction, downloadAvatarAction }) => {
     let avatarInput = null;
     const [profile, setProfile] = useState({ email: '', name: '' });
     const [avatar, setAvatar] = useState('/assets/img/no_profile.png');
@@ -31,50 +30,30 @@ const ProfilePage = ({ history, match, login, message, loadAuthInfoAction, downl
         }
 
         loadAdminProfile();
+        // get profile avatar
         getAdminAvatarURL().then(url => setAvatar(url));
         return () => { };
     }, [match]);
 
-    // useEffect(() => {
-
-    //     // if (login) {
-    //     //   history.push('/app');
-    //     // }
-
-    //     return () => { };
-    // }, [login, message]);
-
     const onUpdateProfile = async (values) => {
-        // console.log('[form value]', profile, avatarInput.files[0]);
         const file = avatarInput.files[0];
         setLoading(true);
         const updated = await updateAdminProfile(profile, file);
         console.log('done');
+
         NotificationManager.success('Profile has been updated.', 'Profile Update', 3000, null, null, '');
         setLoading(false);
+
+        // reload admin information
         loadAuthInfoAction();
         downloadAvatarAction();
-        // update profile
     };
     const openFileSelector = () => {
         avatarInput.click();
     }
     const handleAvatarSelect = (e) => {
-        // console.log(e)
         e.preventDefault();
-        let reader = new FileReader();
-        let file = e.target.files[0];
-        // console.log(avatarInput.files[0]);
         setAvatar(URL.createObjectURL(e.target.files[0]));
-        // reader.onloadend = (theFile) => {
-        //     // var data = {
-        //     //     blob: theFile.target.result, name: file.name,
-        //     //     visitorId:  this.props.socketio.visitorId
-        //     // };
-        //     // console.log(this.props.socketio);
-        //     // this.props.socketio.emit('file-upload', data);
-        // };
-        // reader.readAsDataURL(file);
     }
     const validateEmail = () => {
         const value = profile.email;
@@ -198,16 +177,11 @@ const ProfilePage = ({ history, match, login, message, loadAuthInfoAction, downl
     );
 };
 
-const mapStateToProps = ({ auth }) => {
-    // const { loading, error } = authUser;
-    const { loading, login, message } = auth;
-    // return { loading, error };
-    return { error: false, login, message };
+const mapStateToProps = (state) => {
+    return {  };
 };
 
 export default connect(mapStateToProps, {
-    loginUserAction: login,
-    updateLoginAction: updateLogin,
     loadAuthInfoAction: loadAuthInfo,
     downloadAvatarAction: downloadAvatar,
 })(ProfilePage);
