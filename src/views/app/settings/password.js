@@ -45,7 +45,7 @@ const PasswordPage = ({ history, match, loginUserAction, updateLoginAction }) =>
 
     useEffect(() => {
         getAdminInfo().then((info) => {
-            console.log(info);
+            // console.log(info);
         })
         return () => {
 

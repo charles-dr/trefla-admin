@@ -29,6 +29,21 @@ export const transformTime = (str_time) => {
     return str_time.substring(0, 10) + " " + dt_final.toLocaleTimeString();    
 }
 
+export const convertTimeToString = (dt) => {
+  if (!dt) {
+    dt = new Date();
+  }
+
+  const y = dt.getFullYear();
+  const m = formatTwoDigits(dt.getMonth() + 1);
+  const d = formatTwoDigits(dt.getDate());
+  const H = formatTwoDigits(dt.getHours());
+  const i = formatTwoDigits(dt.getMinutes());
+  const s = formatTwoDigits(dt.getSeconds());
+  const tz = dt.getTimezoneOffset();
+  return `${y}-${m}-${d}-${H}-${i}-${s}:${tz}`;
+}
+
 export const getAuthToken = () => {
   const encToken = window.localStorage.getItem(getAuthTokenName());
   return !!encToken ? decryptString(encToken) : '';
@@ -53,4 +68,8 @@ export const encryptString = (src) => {
 export const decryptString = (src) => {
   let temp = CryptoJS.AES.decrypt(src, process.env.REACT_APP_SECRET);
   return temp.toString(CryptoJS.enc.Utf8)
+}
+
+export const formatTwoDigits = num => {
+  return num > 9 ? num : '0' + num;
 }

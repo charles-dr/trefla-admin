@@ -15,7 +15,7 @@ import { Colxx, Separator } from '../../../components/common/CustomBootstrap';
 import IntlMessages from '../../../helpers/IntlMessages';
 import Breadcrumb from '../../../containers/navs/Breadcrumb';
 
-import { getAdminInfo, updateAdminPassword } from '../../../utils';
+import { addNewLangRequest, convertTimeToString, getAdminInfo, updateAdminPassword } from '../../../utils';
 
 
 const validateEmail = (value) => {
@@ -38,12 +38,14 @@ const validateName = (value) => {
     return error;
 };
 
-const AddLangPage = ({ history, match, loginUserAction, updateLoginAction }) => {
+const AddLangPage = ({ history, match, lang_list, loginUserAction, updateLoginAction }) => {
     let avatarInput = null;
 
     const [active, setActive] = useState(true);
     const [lang, setLang] = useState({ name: '', code: '', active: true, file: '' });
     const [items, setItems] = useState({});
+    const [keys, setKeys] = useState([]);
+    const [values, setValues] = useState([]);
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
@@ -51,8 +53,36 @@ const AddLangPage = ({ history, match, loginUserAction, updateLoginAction }) => 
         return () => { }
     }, [match]);
 
-    const handleOnSubmit = async (values) => {
-        console.log(values);
+    const handleOnSubmit = async (value) => {
+        // console.log(value, keys, values);
+        let lang_data = {};
+        for (let i = 0; i < keys.length; i++) {
+            lang_data[keys[i]] = values[i];
+        }
+        const blob = new Blob([JSON.stringify(lang_data)], { type: 'application/json' })
+
+        const params = {
+            lang_id: getNextLangId(),
+            name: value.name,
+            code: value.code,
+            active: value.active === true ? 1 : 0,
+            blob: blob,
+        };
+
+        addNewLangRequest(params)
+            .then(res => {
+                console.log(res);
+                if (res.status === true) {
+                    NotificationManager.success(res.message, 'Add Language')
+                } else {
+                    NotificationManager.warning(res.message, 'Add Language')
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                NotificationManager.warning('Something went wrong!', 'Add Language');
+            })
+
         // set loading
         // setLoading(true);
         // const res = await updateAdminPassword(profile);
@@ -67,14 +97,23 @@ const AddLangPage = ({ history, match, loginUserAction, updateLoginAction }) => 
         //     NotificationManager.warning(res.message, 'Password Update', 3000, null, null, '');
         // }
     };
-
+    const getNextLangId = () => {
+        if (lang_list.length === 0) {
+            return 0;
+        }
+        let lang_id = -1;
+        for (let lang_item of lang_list) {
+            lang_id = Math.max(lang_id, lang_item.lang_id);
+        }
+        return lang_id + 1;
+    }
     const validateName = (value) => {
         let error;
         if (!value) {
             error = 'Please enter name';
         }
         return error;
-    }
+    };
     const validateCode = (value) => {
         let error;
         if (!value) {
@@ -89,6 +128,20 @@ const AddLangPage = ({ history, match, loginUserAction, updateLoginAction }) => 
     const handleOnChange = (e) => {
         setLang({ ...lang, [e.target.name]: e.target.value });
     }
+    const handleOnKeyChange = (e) => {
+        const fld_name = e.target.name;
+        const arr = fld_name.split('__');
+        const index = Number(arr[1]);
+        const new_keys = keys.map((key, i) => i === index ? e.target.value : key);
+        setKeys(new_keys);
+    }
+    const handleOnValueChange = (e) => {
+        const fld_name = e.target.name;
+        const arr = fld_name.split('__');
+        const index = Number(arr[1]);
+        const new_values = values.map((value, i) => i === index ? e.target.value : value);
+        setValues(new_values);
+    }
     const handleOnFileChange = (e) => {
         const file = e.target.files[0];
 
@@ -98,9 +151,17 @@ const AddLangPage = ({ history, match, loginUserAction, updateLoginAction }) => 
         const reader = new FileReader();
         reader.onload = function () {
             const text = reader.result;
-            console.log(JSON.parse(text));
+            // console.log(JSON.parse(text));
             try {
-                setItems(JSON.parse(text));
+                const json = JSON.parse(text);
+                let t_keys = [], t_values = [];
+                Object.keys(json).map((key, i) => {
+                    t_keys.push(key);
+                    t_values.push(json[key]);
+                });
+                setKeys(t_keys);
+                setValues(t_values);
+                // setItems(JSON.parse(text));
             } catch (e) {
                 setItems({});
             }
@@ -203,23 +264,25 @@ const AddLangPage = ({ history, match, loginUserAction, updateLoginAction }) => 
                             </Row>
 
                             {
-                                Object.keys(items).map((key, i) => (
+                                Object.keys(keys).map((key, i) => (
                                     <Row key={i} className="mt-3">
                                         <Colxx xxs="12" md="5">
                                             <Field
                                                 className="form-control"
                                                 type="text"
-                                                value={key}
-                                                name="keys[]"
+                                                value={keys[i]}
+                                                name={`key__${i}`}
+                                                onChange={handleOnKeyChange}
+
                                             />
                                         </Colxx>
                                         <Colxx xxs="12" md="7">
                                             <Field
                                                 className="form-control"
                                                 type="text"
-                                                value={items[key]}
-                                                name="values[]"
-                                                validate={validateCode}
+                                                value={values[i]}
+                                                name={`value__${i}`}
+                                                onChange={handleOnValueChange}
                                             />
                                         </Colxx>
                                     </Row>
@@ -254,8 +317,9 @@ const AddLangPage = ({ history, match, loginUserAction, updateLoginAction }) => 
     );
 };
 
-const mapStateToProps = (state) => {
-    return {};
+const mapStateToProps = ({ langs: langApp }) => {
+    const { list: lang_list } = langApp;
+    return { lang_list };
 };
 
 export default connect(mapStateToProps, {

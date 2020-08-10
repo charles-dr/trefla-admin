@@ -2,6 +2,8 @@ import firebase from 'firebase/app';
 import 'firebase/firestore';
 import 'firebase/storage';
 
+import { convertTimeToString } from './common.utils';
+
 const firebaseConfig = {
   apiKey: 'AIzaSyBdnoTzHFUFDuI-wEyMiZSqPpsy4k4TYDM',
   authDomain: 'trefla.firebaseapp.com',
@@ -20,12 +22,12 @@ if (!firebase.apps.length) {
 export const _firebase = firebase;
 
 export const loginAdmin = (data) => {
-  console.log(data);
+  // console.log(data);
   return _firebase.firestore().collection('admin').where('email', '==', data.email).where('password', '==', data.password).get()
     .then((querySnapshot) => {
       let status = false;
       querySnapshot.forEach((doc) => {
-        console.log(`${doc.id}`, doc.data());
+        // console.log(`${doc.id}`, doc.data());
         status = true;
         // return {status: true, message: 'You logged in successfully!'};
       });
@@ -101,8 +103,8 @@ export const getAdminInfo = async () => {
 export const getAdminAvatarURL = async () => {
   const fileRef = _firebase.storage().ref().child('admin/profile.png');
   return fileRef.getDownloadURL()
-  .then(url => url)
-  .catch(err => '');
+    .then(url => url)
+    .catch(err => '');
 }
 
 export const updateAdminProfile = async (data, file) => {
@@ -124,19 +126,43 @@ export const updateAdminProfile = async (data, file) => {
   return true;
 }
 
-export const updateAdminPassword = async ({old_pass, password}) => {
+export const updateAdminPassword = async ({ old_pass, password }) => {
   const admin = await getAdminInfo();
   if (admin) {
     if (admin.password === old_pass) {
       admin.password = password;
       const adminRef = await _firebase.firestore().collection('admin').doc("0").set(admin);
 
-      return {status: true, message: 'Password has been updated!'};
+      return { status: true, message: 'Password has been updated!' };
     } else {
-      return {status: false, message: 'Old password does not match!'};
+      return { status: false, message: 'Old password does not match!' };
     }
   } else {
-    return {status: false, message: 'Something went wrong!'};
+    return { status: false, message: 'Something went wrong!' };
+  }
+}
+
+export const addNewLangRequest = async ({ lang_id, name, code, active, blob }) => {
+  try {
+    const fileRef = _firebase.storage().ref().child(`lang/${code}.json`);
+
+    if (blob) {
+      await fileRef.put(blob);
+    }
+
+    const adminRef = _firebase.firestore().collection('langs').doc(lang_id.toString());
+
+    const update_time = convertTimeToString();
+    await adminRef.set({
+      active,
+      code,
+      lang_id,
+      name,
+      update_time
+    });
+    return {status: true, message: 'Language has been saved.'};
+  } catch (e) {
+    return {status: false, message: e.message};
   }
 }
 
