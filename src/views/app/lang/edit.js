@@ -32,8 +32,13 @@ const EditLangPage = ({ history, match, lang_list, loadAllLangsAction, loginUser
                 setActive(res.active === 1);
                 // load file
                 getLangFileContentRequest(res.code)
-                    .then(json => {
-                        initKeyValues(json);
+                    .then(fileRes => {
+                        if (fileRes.status === true) {
+                            initKeyValues(fileRes.data);
+                        } else {
+                            NotificationManager.warning('Lanague file not found!', 'Loading assets...');
+                        }
+                        
                     })
                     .catch(err => {
                         console.error(err);

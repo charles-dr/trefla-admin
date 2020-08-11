@@ -142,6 +142,13 @@ export const updateAdminPassword = async ({ old_pass, password }) => {
   }
 }
 
+
+////////////////////////////////////////////////////////////////
+//                                                            //
+//                       L A N G U A G E                      //
+//                                                            // 
+////////////////////////////////////////////////////////////////
+
 export const addNewLangRequest = async ({ lang_id, name, code, active, blob }) => {
   try {
     const fileRef = _firebase.storage().ref().child(`lang/${code}.json`);
@@ -177,7 +184,7 @@ export const getLangInfoByIdRequest = async lang_id => {
       }
     })
     .catch(function (err) {
-      console.log('Error getting admin info: ', err);
+      console.log('Error getting lang info: ', err);
       return false;
     });
 }
@@ -189,20 +196,20 @@ export const getLangFileContentRequest = async lang_code => {
       return new Promise((resolve, reject) => {
         var xhr = new XMLHttpRequest();
         xhr.responseType = 'json';
-        xhr.onload = function(event) {
+        xhr.onload = function (event) {
           var json = xhr.response;
-          console.log(json);
-          resolve(json);
+          // console.log(json);
+          resolve({status: true, data: json});
         };
         xhr.open('GET', url);
-        xhr.send();        
+        xhr.send();
       });
     })
     .catch(err => {
       console.error(err);
       switch (err.code) {
         case 'storage/object-not-found':
-          return { status: false, message: 'File not found!'};
+          return { status: false, message: 'File not found!' };
         case 'storage/unauthorized':
           return { status: false, message: 'Authorization failed!' };
         case 'storage/canceled':
@@ -213,4 +220,28 @@ export const getLangFileContentRequest = async lang_code => {
           return { status: false, message: 'Something went wrong!' };
       }
     });
+}
+
+export const deleteLangByIdRequest = async (lang_id) => {
+  console.log(lang_id);
+  // return {status: false, message: 'hi'};
+  const lang = await getLangInfoByIdRequest(lang_id);
+  if (!lang) {
+    return { status: false, message: 'Language does not exist!' };
+  } else {
+    // delete file
+    try {
+      const fileRef = _firebase.storage().ref().child(`lang/${lang.code}.json`);
+      await fileRef.delete();
+    } catch (file_error) {
+      return { status: false, message: 'Failed to delete file', details: file_error.message };
+    }
+    // delete document
+    try {
+      await _firebase.firestore().collection('langs').doc(lang_id.toString()).delete();
+      return { status: true, message: `Language '${lang.name}' has been deleted!` };
+    } catch (doc_error) {
+      return { status: false, message: 'Failed to delete document', details: doc_error.message };
+    }
+  }
 }

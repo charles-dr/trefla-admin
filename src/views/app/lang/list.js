@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
-import { Badge, Button, Row } from 'reactstrap';
+import { Badge, Button, Modal, ModalHeader, ModalBody, ModalFooter, Row } from 'reactstrap';
 
 import IntlMessages from '../../../helpers/IntlMessages';
 import { NotificationManager } from '../../../components/common/react-notifications';
@@ -8,15 +8,17 @@ import { Colxx, Separator } from '../../../components/common/CustomBootstrap';
 import Breadcrumb from '../../../containers/navs/Breadcrumb';
 import { ReactTableWithPaginationCard } from '../../../containers/ui/ReactTableCards';
 
-import { transformTime } from '../../../utils';
+import { loadAllLangs } from '../../../redux/actions';
+import { deleteLangByIdRequest, getLangInfoByIdRequest, getLangFileContentRequest, transformTime } from '../../../utils';
 
 
+const UserList = ({ history, match, langs, loadAllLangsAction }) => {
 
-
-const UserList = ({ history, match, langs }) => {
     const [pageLoaded, setPageLoaded] = useState(true);
     const [data, setData] = useState([]);
     const [modalDetails, setModalDetails] = useState(false);
+    const [confirm, setConfirm] = useState(false);
+    const [delId, setDelId] = useState(-1);
 
 
     const cols = [
@@ -42,7 +44,7 @@ const UserList = ({ history, match, langs }) => {
             Header: 'Active',
             accessor: 'active',
             cellClass: 'text-muted  w-5',
-            Cell: (props) => <><Badge color={props.value==1 ? 'success' : 'danger'} pill className="mb-1">{props.value==1 ? 'Active' : 'Disabled'}</Badge></>,
+            Cell: (props) => <><Badge color={props.value == 1 ? 'success' : 'danger'} pill className="mb-1">{props.value == 1 ? 'Active' : 'Disabled'}</Badge></>,
         },
         {
             Header: 'Actions',
@@ -52,13 +54,19 @@ const UserList = ({ history, match, langs }) => {
                 <>
                     <div className="tbl-actions">
                         <i
-                            className="iconsminds-file-edit"
+                            className="iconsminds-file-edit info"
                             title="Edit"
                             style={{ fontSize: 18 }}
                             onClick={() => handleOnEdit(props.value)}
                         />
                         <i
-                            className="simple-icon-trash"
+                            className="simple-icon-cloud-download success"
+                            title="Download"
+                            style={{ fontSize: 18 }}
+                            onClick={() => handleOnDownload(props.value)}
+                        />
+                        <i
+                            className="simple-icon-trash danger"
                             title="Remove"
                             style={{ fontSize: 18 }}
                             onClick={() => handleOnDelete(props.value)}
@@ -86,7 +94,7 @@ const UserList = ({ history, match, langs }) => {
                     lang_item[key] = lang[key];
                 }
             }
-            
+
             // put item to array
             new_langs.push(lang_item);
         }
@@ -99,11 +107,58 @@ const UserList = ({ history, match, langs }) => {
     const handleOnEdit = (lang_id) => {
         history.push(`/app/lang/edit/${lang_id}`);
     };
-    const handleOnDelete = (_id) => {
-        // if (window.confirm('Are you sure to delete data?')) {
-        //     deleteSchoolById({ variables: { _id: _id } });
-        // }
+    const handleOnDelete = (lang_id) => {
+        setDelId(lang_id);
+        setConfirm(true);
     };
+    const deleteLanguage = () => {
+        if (delId > -1) {
+
+            setConfirm(false);
+            setDelId(-1);
+
+            deleteLangByIdRequest(delId)
+                .then(res => {
+                    console.log(res);
+                    if (res.status === true) {
+                        NotificationManager.success(res.message, 'Delete Language');
+                        loadAllLangsAction();
+                    } else {
+                        NotificationManager.warning(res.message, 'Delete Language');
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    NotificationManager.warning(err.message, 'Delete Language');
+                })
+        } else {
+            NotificationManager.warning('No found language to delete!', 'Delete Language');
+        }
+    }
+    const handleOnDownload = async (lang_id) => {
+        const lang = await getLangInfoByIdRequest(lang_id);
+        if (!lang) {
+            NotificationManager.warning('Not found language info!', 'Download Language');
+            return;
+        } else {
+            const json_res = await getLangFileContentRequest(lang.code);
+
+            if (json_res.status === true) {
+                downloadAsFile(json_res.data, `${lang.code}.json`);
+            } else {
+                NotificationManager.warning(json_res.message, 'Download Language');
+            }
+        }
+    }
+    const downloadAsFile = (json, download_name) => {
+        const res = JSON.stringify(json);
+        var data = new Blob([res], { type: 'text/csv' });
+        var csvURL = window.URL.createObjectURL(data);
+        let tempLink = document.createElement('a');
+        tempLink.href = csvURL;
+        tempLink.setAttribute('download', download_name);
+        tempLink.click();
+    }
 
 
     return (
@@ -136,6 +191,28 @@ const UserList = ({ history, match, langs }) => {
                     />
                 </Colxx>
             </Row>
+
+            <Modal
+                isOpen={confirm}
+                toggle={() => setConfirm(!confirm)}
+                backdrop={'static'}
+            >
+                <ModalHeader>Confirm</ModalHeader>
+                <ModalBody>
+                    Are you sure to remove this language?
+                  </ModalBody>
+                <ModalFooter>
+                    <Button color="primary" onClick={deleteLanguage}>
+                        Ok
+                    </Button>{' '}
+                    <Button
+                        color="secondary"
+                        onClick={() => setConfirm(false)}
+                    >
+                        Cancel
+                    </Button>
+                </ModalFooter>
+            </Modal>
         </>
     );
 };
@@ -148,4 +225,6 @@ const mapStateToProps = ({ langs: langApp }) => {
     };
 };
 
-export default connect(mapStateToProps)(UserList);
+export default connect(mapStateToProps, {
+    loadAllLangsAction: loadAllLangs,
+})(UserList);
