@@ -85,7 +85,7 @@ export const getJSON = (url) => {
 
       var status = xhr.status;
 
-      if (status == 200) {
+      if (status === 200) {
         resolve(xhr.response);
         // callback(null, xhr.response);
       } else {

@@ -163,6 +163,18 @@ const AddLangPage = ({ history, match, lang_list, loadAllLangsAction, loginUserA
         }
         reader.readAsText(file);
     }
+    const deleteLangItem = (key_index) => {
+        const new_keys = keys.filter((key, i) => i !== key_index);
+        const new_values = values.filter((value, i) => i !== key_index);
+        setKeys(new_keys);
+        setValues(new_values);
+    }
+    const addNewField = () => {
+        const new_keys = keys.map(key => key); new_keys.push('New Field');
+        const new_values = values.map(value => value); new_values.push('');
+        setKeys(new_keys);
+        setValues(new_values);
+    }
 
     const initialValues = lang;
 
@@ -262,14 +274,24 @@ const AddLangPage = ({ history, match, lang_list, loadAllLangsAction, loginUserA
                                 Object.keys(keys).map((key, i) => (
                                     <Row key={i} className="mt-3">
                                         <Colxx xxs="12" md="5">
-                                            <Field
-                                                className="form-control"
-                                                type="text"
-                                                value={keys[i]}
-                                                name={`key__${i}`}
-                                                onChange={handleOnKeyChange}
-
-                                            />
+                                            <div className="d-flex">
+                                                <Button
+                                                    type="button"
+                                                    color="info"
+                                                    className={`default btn btn-info mb-1 mr-1`}
+                                                    size="md"
+                                                    onClick={() => deleteLangItem(i)}
+                                                >
+                                                    <div className="glyph-icon simple-icon-minus"></div>
+                                                </Button>
+                                                <Field
+                                                    className="form-control mb-1"
+                                                    type="text"
+                                                    value={keys[i]}
+                                                    name={`key__${i}`}
+                                                    onChange={handleOnKeyChange}
+                                                />
+                                            </div>
                                         </Colxx>
                                         <Colxx xxs="12" md="7">
                                             <Field
@@ -285,6 +307,18 @@ const AddLangPage = ({ history, match, lang_list, loadAllLangsAction, loginUserA
                             }
 
                             <div className="d-flex justify-content-end align-items-center mt-3">
+                                <Button
+                                    type="button"
+                                    color="secondary"
+                                    className={`btn-shadow btn-multiple-state mr-2`}
+                                    size="lg"
+                                    onClick={addNewField}
+                                >
+                                    <span className="glyph-icon simple-icon-plus mr-1"></span>
+                                    <span className="label">
+                                        <IntlMessages id="user.add-new-fld" />
+                                    </span>
+                                </Button>
                                 <Button
                                     type="submit"
                                     color="primary"

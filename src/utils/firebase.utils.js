@@ -2,7 +2,7 @@ import firebase from 'firebase/app';
 import 'firebase/firestore';
 import 'firebase/storage';
 
-import { convertTimeToString, getJSON } from './common.utils';
+import { convertTimeToString } from './common.utils';
 
 const firebaseConfig = {
   apiKey: 'AIzaSyBdnoTzHFUFDuI-wEyMiZSqPpsy4k4TYDM',
@@ -131,7 +131,7 @@ export const updateAdminPassword = async ({ old_pass, password }) => {
   if (admin) {
     if (admin.password === old_pass) {
       admin.password = password;
-      const adminRef = await _firebase.firestore().collection('admin').doc("0").set(admin);
+      await _firebase.firestore().collection('admin').doc("0").set(admin);
 
       return { status: true, message: 'Password has been updated!' };
     } else {

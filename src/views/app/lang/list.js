@@ -1,13 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
-import { Badge, Button, Label, Modal, ModalHeader, ModalBody, Row } from 'reactstrap';
-import {
-    AvForm,
-    AvField,
-    AvGroup,
-    AvInput,
-    AvFeedback,
-} from 'availity-reactstrap-validation';
+import { Badge, Button, Row } from 'reactstrap';
 
 import IntlMessages from '../../../helpers/IntlMessages';
 import { NotificationManager } from '../../../components/common/react-notifications';
@@ -15,8 +8,7 @@ import { Colxx, Separator } from '../../../components/common/CustomBootstrap';
 import Breadcrumb from '../../../containers/navs/Breadcrumb';
 import { ReactTableWithPaginationCard } from '../../../containers/ui/ReactTableCards';
 
-import { getPostTableContent } from '../../../api/functions.api';
-import { _firebase, transformTime } from '../../../utils';
+import { transformTime } from '../../../utils';
 
 
 
