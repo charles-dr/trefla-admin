@@ -1,9 +1,7 @@
-import React, { createRef, useState, useEffect } from 'react';
-import { Row, Card, CardTitle, Label, FormGroup, Button } from 'reactstrap';
-import { NavLink, Redirect, useHistory } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Row, Label, FormGroup, Button } from 'reactstrap';
 import { connect } from 'react-redux';
-import DropzoneComponent from 'react-dropzone-component';
-import 'dropzone/dist/min/dropzone.min.css';
+
 import Switch from 'rc-switch';
 import 'rc-switch/assets/index.css';
 
@@ -16,35 +14,12 @@ import IntlMessages from '../../../helpers/IntlMessages';
 import Breadcrumb from '../../../containers/navs/Breadcrumb';
 
 import { loadAllLangs } from '../../../redux/actions';
-import { addNewLangRequest, convertTimeToString, getLangInfoByIdRequest, getLangFileContentRequest } from '../../../utils';
+import { addNewLangRequest, getLangInfoByIdRequest, getLangFileContentRequest } from '../../../utils';
 
-
-const validateEmail = (value) => {
-    let error;
-    if (!value) {
-        error = 'Please enter your email address';
-    } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(value)) {
-        error = 'Invalid email address';
-    }
-    return error;
-};
-
-const validateName = (value) => {
-    let error;
-    if (!value) {
-        error = 'Please enter name';
-    } else if (value.length < 4) {
-        error = 'Value must be longer than 3 characters';
-    }
-    return error;
-};
 
 const EditLangPage = ({ history, match, lang_list, loadAllLangsAction, loginUserAction, updateLoginAction }) => {
-    let avatarInput = null;
-
     const [active, setActive] = useState(true);
     const [lang, setLang] = useState({ name: '', code: '', active: true, file: '' });
-    const [items, setItems] = useState({});
     const [keys, setKeys] = useState([]);
     const [values, setValues] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -52,7 +27,7 @@ const EditLangPage = ({ history, match, lang_list, loadAllLangsAction, loginUser
     useEffect(() => {
         getLangInfoByIdRequest(match.params.id)
             .then(res => {
-                console.log(res);
+                // console.log(res);
                 setLang({ ...lang, name: res.name, code: res.code });
                 setActive(res.active === 1);
                 // load file
@@ -69,7 +44,9 @@ const EditLangPage = ({ history, match, lang_list, loadAllLangsAction, loginUser
                 NotificationManager.warning('Error while loading language info!', 'Update Language');
             });
 
-        return () => { }
+        return () => {
+            setLang([]);
+        }
     }, [match]);
 
     const handleOnSubmit = async (value) => {
@@ -79,7 +56,7 @@ const EditLangPage = ({ history, match, lang_list, loadAllLangsAction, loginUser
             lang_data[keys[i]] = values[i];
         }
         const blob = new Blob([JSON.stringify(lang_data)], { type: 'application/json' })
-        
+
         const params = {
             lang_id: match.params.id,
             name: lang.name,
@@ -107,7 +84,6 @@ const EditLangPage = ({ history, match, lang_list, loadAllLangsAction, loginUser
                 NotificationManager.warning('Something went wrong!', 'Update Language');
             })
     };
-
 
     const validateName = () => {
         let error;
@@ -156,21 +132,15 @@ const EditLangPage = ({ history, match, lang_list, loadAllLangsAction, loginUser
             // console.log(JSON.parse(text));
             try {
                 const json = JSON.parse(text);
-                // let t_keys = [], t_values = [];
-                // Object.keys(json).map((key, i) => {
-                //     t_keys.push(key);
-                //     t_values.push(json[key]);
-                // });
-                // setKeys(t_keys);
-                // setValues(t_values);
                 initKeyValues(json);
-                // setItems(JSON.parse(text));
             } catch (e) {
-                setItems({});
+                setKeys([]);
+                setValues([]);
             }
         }
         reader.readAsText(file);
     }
+
     const initKeyValues = (json) => {
         let t_keys = [], t_values = [];
         Object.keys(json).map((key, i) => {

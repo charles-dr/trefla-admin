@@ -1,9 +1,7 @@
-import React, { createRef, useState, useEffect } from 'react';
-import { Row, Card, CardTitle, Label, FormGroup, Button } from 'reactstrap';
-import { NavLink, Redirect, useHistory } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Row, Label, FormGroup, Button } from 'reactstrap';
 import { connect } from 'react-redux';
-import DropzoneComponent from 'react-dropzone-component';
-import 'dropzone/dist/min/dropzone.min.css';
+
 import Switch from 'rc-switch';
 import 'rc-switch/assets/index.css';
 
@@ -16,35 +14,12 @@ import IntlMessages from '../../../helpers/IntlMessages';
 import Breadcrumb from '../../../containers/navs/Breadcrumb';
 
 import { loadAllLangs } from '../../../redux/actions';
-import { addNewLangRequest, convertTimeToString, getAdminInfo, updateAdminPassword } from '../../../utils';
+import { addNewLangRequest } from '../../../utils';
 
-
-const validateEmail = (value) => {
-    let error;
-    if (!value) {
-        error = 'Please enter your email address';
-    } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(value)) {
-        error = 'Invalid email address';
-    }
-    return error;
-};
-
-const validateName = (value) => {
-    let error;
-    if (!value) {
-        error = 'Please enter name';
-    } else if (value.length < 4) {
-        error = 'Value must be longer than 3 characters';
-    }
-    return error;
-};
 
 const AddLangPage = ({ history, match, lang_list, loadAllLangsAction, loginUserAction, updateLoginAction }) => {
-    let avatarInput = null;
-
     const [active, setActive] = useState(true);
-    const [lang, setLang] = useState({ name: '', code: '', active: true, file: '' });
-    const [items, setItems] = useState({});
+    const [lang] = useState({ name: '', code: '', active: true, file: '' });
     const [keys, setKeys] = useState([]);
     const [values, setValues] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -153,12 +128,13 @@ const AddLangPage = ({ history, match, lang_list, loadAllLangsAction, loginUserA
                 Object.keys(json).map((key, i) => {
                     t_keys.push(key);
                     t_values.push(json[key]);
+                    return true;
                 });
                 setKeys(t_keys);
                 setValues(t_values);
-                // setItems(JSON.parse(text));
             } catch (e) {
-                setItems({});
+                setKeys([]);
+                setValues([]);
             }
         }
         reader.readAsText(file);
