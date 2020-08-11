@@ -15,6 +15,7 @@ import { Colxx, Separator } from '../../../components/common/CustomBootstrap';
 import IntlMessages from '../../../helpers/IntlMessages';
 import Breadcrumb from '../../../containers/navs/Breadcrumb';
 
+import { loadAllLangs } from '../../../redux/actions';
 import { addNewLangRequest, convertTimeToString, getAdminInfo, updateAdminPassword } from '../../../utils';
 
 
@@ -38,7 +39,7 @@ const validateName = (value) => {
     return error;
 };
 
-const AddLangPage = ({ history, match, lang_list, loginUserAction, updateLoginAction }) => {
+const AddLangPage = ({ history, match, lang_list, loadAllLangsAction, loginUserAction, updateLoginAction }) => {
     let avatarInput = null;
 
     const [active, setActive] = useState(true);
@@ -55,47 +56,43 @@ const AddLangPage = ({ history, match, lang_list, loginUserAction, updateLoginAc
 
     const handleOnSubmit = async (value) => {
         // console.log(value, keys, values);
+
+        // generate new blob
         let lang_data = {};
         for (let i = 0; i < keys.length; i++) {
             lang_data[keys[i]] = values[i];
         }
-        const blob = new Blob([JSON.stringify(lang_data)], { type: 'application/json' })
+        const blob = new Blob([JSON.stringify(lang_data)], { type: 'application/json' });
 
+        // compose parameters
         const params = {
             lang_id: getNextLangId(),
             name: value.name,
             code: value.code,
-            active: value.active === true ? 1 : 0,
+            active: active === true ? 1 : 0,
             blob: blob,
         };
 
+        setLoading(true);
+
+        // send request
         addNewLangRequest(params)
             .then(res => {
-                console.log(res);
+                setLoading(false);
+                // console.log(res);
                 if (res.status === true) {
-                    NotificationManager.success(res.message, 'Add Language')
+                    NotificationManager.success(res.message, 'Add Language');
+                    loadAllLangsAction();
+                    history.push('/app/lang');
                 } else {
-                    NotificationManager.warning(res.message, 'Add Language')
+                    NotificationManager.warning(res.message, 'Add Language');
                 }
             })
             .catch(err => {
+                setLoading(false);
                 console.error(err);
                 NotificationManager.warning('Something went wrong!', 'Add Language');
-            })
-
-        // set loading
-        // setLoading(true);
-        // const res = await updateAdminPassword(profile);
-
-        // // cancel the loading
-        // setLoading(false);
-        // if (res.status === true) {
-        //     NotificationManager.success(res.message, 'Password Update', 3000, null, null, '');
-        //     // init form
-        //     setLang({ name: '', code: '', active: true });
-        // } else {
-        //     NotificationManager.warning(res.message, 'Password Update', 3000, null, null, '');
-        // }
+            });
     };
     const getNextLangId = () => {
         if (lang_list.length === 0) {
@@ -107,6 +104,7 @@ const AddLangPage = ({ history, match, lang_list, loginUserAction, updateLoginAc
         }
         return lang_id + 1;
     }
+
     const validateName = (value) => {
         let error;
         if (!value) {
@@ -123,11 +121,8 @@ const AddLangPage = ({ history, match, lang_list, loginUserAction, updateLoginAc
         }
         return error;
     };
-
     const validateFile = () => { }
-    const handleOnChange = (e) => {
-        setLang({ ...lang, [e.target.name]: e.target.value });
-    }
+
     const handleOnKeyChange = (e) => {
         const fld_name = e.target.name;
         const arr = fld_name.split('__');
@@ -304,7 +299,7 @@ const AddLangPage = ({ history, match, lang_list, loginUserAction, updateLoginAc
                                         <span className="bounce3" />
                                     </span>
                                     <span className="label">
-                                        <IntlMessages id="user.update" />
+                                        <IntlMessages id="user.submit" />
                                     </span>
                                 </Button>
                             </div>
@@ -323,6 +318,7 @@ const mapStateToProps = ({ langs: langApp }) => {
 };
 
 export default connect(mapStateToProps, {
+    loadAllLangsAction: loadAllLangs,
     loginUserAction: login,
     updateLoginAction: updateLogin
 })(AddLangPage);

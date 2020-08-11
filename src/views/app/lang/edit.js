@@ -2,6 +2,10 @@ import React, { createRef, useState, useEffect } from 'react';
 import { Row, Card, CardTitle, Label, FormGroup, Button } from 'reactstrap';
 import { NavLink, Redirect, useHistory } from 'react-router-dom';
 import { connect } from 'react-redux';
+import DropzoneComponent from 'react-dropzone-component';
+import 'dropzone/dist/min/dropzone.min.css';
+import Switch from 'rc-switch';
+import 'rc-switch/assets/index.css';
 
 import { Formik, Form, Field } from 'formik';
 import { NotificationManager } from '../../../components/common/react-notifications';
@@ -11,10 +15,8 @@ import { Colxx, Separator } from '../../../components/common/CustomBootstrap';
 import IntlMessages from '../../../helpers/IntlMessages';
 import Breadcrumb from '../../../containers/navs/Breadcrumb';
 
-import { getAdminInfo, updateAdminPassword } from '../../../utils';
-
-
-
+import { loadAllLangs } from '../../../redux/actions';
+import { addNewLangRequest, convertTimeToString, getLangInfoByIdRequest, getLangFileContentRequest } from '../../../utils';
 
 
 const validateEmail = (value) => {
@@ -37,74 +39,167 @@ const validateName = (value) => {
     return error;
 };
 
-const PasswordPage = ({ history, match, loginUserAction, updateLoginAction }) => {
+const EditLangPage = ({ history, match, lang_list, loadAllLangsAction, loginUserAction, updateLoginAction }) => {
     let avatarInput = null;
-    // const history = useHistory();
-    const [profile, setProfile] = useState({old_pass: '', password: '', cpassword: ''});
+
+    const [active, setActive] = useState(true);
+    const [lang, setLang] = useState({ name: '', code: '', active: true, file: '' });
+    const [items, setItems] = useState({});
+    const [keys, setKeys] = useState([]);
+    const [values, setValues] = useState([]);
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        getAdminInfo().then((info) => {
-            console.log(info);
-        })
-        return () => {
+        getLangInfoByIdRequest(match.params.id)
+            .then(res => {
+                console.log(res);
+                setLang({ ...lang, name: res.name, code: res.code });
+                setActive(res.active === 1);
+                // load file
+                getLangFileContentRequest(res.code)
+                    .then(json => {
+                        initKeyValues(json);
+                    })
+                    .catch(err => {
+                        console.error(err);
+                    });
+            })
+            .catch(err => {
+                console.error(err);
+                NotificationManager.warning('Error while loading language info!', 'Update Language');
+            });
 
-        }
+        return () => { }
     }, [match]);
 
-    const onUpdateProfile = async (values) => {
+    const handleOnSubmit = async (value) => {
+        // console.log(value, keys, values);
+        let lang_data = {};
+        for (let i = 0; i < keys.length; i++) {
+            lang_data[keys[i]] = values[i];
+        }
+        const blob = new Blob([JSON.stringify(lang_data)], { type: 'application/json' })
+        
+        const params = {
+            lang_id: match.params.id,
+            name: lang.name,
+            code: lang.code,
+            active: active === true ? 1 : 0,
+            blob: blob,
+        };
 
-        // set loading
         setLoading(true);
-        const res = await updateAdminPassword(profile);
-
-        // cancel the loading
-        setLoading(false);
-        if (res.status === true) {
-            NotificationManager.success(res.message, 'Password Update', 3000, null, null, '');
-            // init form
-            setProfile({old_pass: '', password: '', cpassword: ''});
-        } else {
-            NotificationManager.warning(res.message, 'Password Update', 3000, null, null, '');
-        }
+        addNewLangRequest(params)
+            .then(res => {
+                setLoading(false);
+                console.log(res);
+                if (res.status === true) {
+                    NotificationManager.success(res.message, 'Update Language');
+                    loadAllLangsAction();
+                    history.push('/app/lang');
+                } else {
+                    NotificationManager.warning(res.message, 'Update Language')
+                }
+            })
+            .catch(err => {
+                setLoading(false);
+                console.error(err);
+                NotificationManager.warning('Something went wrong!', 'Update Language');
+            })
     };
 
-    const validateOldPassword = () => {
-        const value = profile.old_pass;
+
+    const validateName = () => {
         let error;
-        if (!value) {
-            error = 'Please enter the old password';
-        }
-        return error;
-    }
-    const validatePassword = (value) => {
-        value = profile.password;
-        let error;
-        if (!value) {
-            error = 'Please enter new password';
-        } else if (value.length < 4) {
-            error = 'Value must be longer than 3 characters';
+        if (!lang.name) {
+            error = 'Please enter name';
         }
         return error;
     };
-    const validateCPassword = () => {
+    const validateCode = () => {
         let error;
-        if (profile.password !== profile.cpassword) {
-            error = 'Password does not match!';
+        if (!lang.code) {
+            error = 'Please enter code';
+        } else if (lang.code.length !== 2) {
+            error = 'Value must be 2 characters long!';
         }
         return error;
-    }
+    };
+    const validateFile = () => { }
+
     const handleOnChange = (e) => {
-        setProfile({...profile, [e.target.name]: e.target.value});
+        setLang({ ...lang, [e.target.name]: e.target.value });
+    }
+    const handleOnKeyChange = (e) => {
+        const fld_name = e.target.name;
+        const arr = fld_name.split('__');
+        const index = Number(arr[1]);
+        const new_keys = keys.map((key, i) => i === index ? e.target.value : key);
+        setKeys(new_keys);
+    }
+    const handleOnValueChange = (e) => {
+        const fld_name = e.target.name;
+        const arr = fld_name.split('__');
+        const index = Number(arr[1]);
+        const new_values = values.map((value, i) => i === index ? e.target.value : value);
+        setValues(new_values);
+    }
+    const handleOnFileChange = (e) => {
+        const file = e.target.files[0];
+
+        //ignore the cancel, same file
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function () {
+            const text = reader.result;
+            // console.log(JSON.parse(text));
+            try {
+                const json = JSON.parse(text);
+                // let t_keys = [], t_values = [];
+                // Object.keys(json).map((key, i) => {
+                //     t_keys.push(key);
+                //     t_values.push(json[key]);
+                // });
+                // setKeys(t_keys);
+                // setValues(t_values);
+                initKeyValues(json);
+                // setItems(JSON.parse(text));
+            } catch (e) {
+                setItems({});
+            }
+        }
+        reader.readAsText(file);
+    }
+    const initKeyValues = (json) => {
+        let t_keys = [], t_values = [];
+        Object.keys(json).map((key, i) => {
+            t_keys.push(key);
+            t_values.push(json[key]);
+        });
+        setKeys(t_keys);
+        setValues(t_values);
+    }
+    const deleteLangItem = (key_index) => {
+        const new_keys = keys.filter((key, i) => i !== key_index);
+        const new_values = values.filter((value, i) => i !== key_index);
+        setKeys(new_keys);
+        setValues(new_values);
+    }
+    const addNewField = () => {
+        const new_keys = keys.map(key => key); new_keys.push('New Field');
+        const new_values = values.map(value => value); new_values.push('');
+        setKeys(new_keys);
+        setValues(new_values);
     }
 
-    const initialValues = profile;
+    const initialValues = lang;
 
     return (
         <>
             <Row>
                 <Colxx xxs="12">
-                    <Breadcrumb heading="menu.password" match={match} />
+                    <Breadcrumb heading="menu.languages" match={match} />
                     <Separator className="mb-5" />
                 </Colxx>
             </Row>
@@ -113,70 +208,139 @@ const PasswordPage = ({ history, match, loginUserAction, updateLoginAction }) =>
 
                 <Colxx xxs="12">
                     <h3 className="mb-4">
-                        <IntlMessages id="pages.password" />
+                        <IntlMessages id="pages.language" />
                     </h3>
                 </Colxx>
 
 
-                <Formik initialValues={initialValues} onSubmit={onUpdateProfile}>
+                <Formik initialValues={initialValues} onSubmit={handleOnSubmit}>
                     {({ errors, touched }) => (
-                        <Form className="av-tooltip tooltip-label-bottom mx-auto" style={{ maxWidth: 640, width: '100%' }}>
-                            <FormGroup className="form-group has-float-label">
-                                <Label>
-                                    <IntlMessages id="user.old-password" />
-                                </Label>
-                                <Field
-                                    className="form-control"
-                                    type="password"
-                                    name="old_pass"
-                                    value={profile.old_pass}
-                                    validate={validateOldPassword}
-                                    onChange={handleOnChange}
-                                />
-                                {errors.old_pass && touched.old_pass && (
-                                    <div className="invalid-feedback d-block">
-                                        {errors.old_pass}
-                                    </div>
-                                )}
-                            </FormGroup>
-                            <FormGroup className="form-group has-float-label">
-                                <Label>
-                                    <IntlMessages id="user.new-password" />
-                                </Label>
-                                <Field
-                                    className="form-control"
-                                    type="password"
-                                    name="password"
-                                    value={profile.password}
-                                    validate={validatePassword}
-                                    onChange={handleOnChange}
-                                />
-                                {errors.password && touched.password && (
-                                    <div className="invalid-feedback d-block">
-                                        {errors.password}
-                                    </div>
-                                )}
-                            </FormGroup>
-                            <FormGroup className="form-group has-float-label">
-                                <Label>
-                                    <IntlMessages id="user.confirm-password" />
-                                </Label>
-                                <Field
-                                    className="form-control"
-                                    type="password"
-                                    name="cpassword"
-                                    value={profile.cpassword}
-                                    validate={validateCPassword}
-                                    onChange={handleOnChange}
-                                />
-                                {errors.cpassword && touched.cpassword && (
-                                    <div className="invalid-feedback d-block">
-                                        {errors.cpassword}
-                                    </div>
-                                )}
-                            </FormGroup>
+                        <Form className="av-tooltip tooltip-label-bottom mx-auto" style={{ maxWidth: 1024, width: '100%', padding: 15 }}>
+                            <Row>
+                                <Colxx xxs="12" md="6">
+                                    <FormGroup className="form-group">
+                                        <Label>
+                                            <IntlMessages id="user.name" />
+                                        </Label>
+                                        <Field
+                                            className="form-control"
+                                            type="text"
+                                            name="name"
+                                            validate={validateName}
+                                            value={lang.name}
+                                            onChange={handleOnChange}
+                                        />
+                                        {errors.name && touched.name && (
+                                            <div className="invalid-feedback d-block">
+                                                {errors.name}
+                                            </div>
+                                        )}
+                                    </FormGroup>
+                                </Colxx>
+                                <Colxx xxs="12" md="6">
+                                    <FormGroup className="form-group">
+                                        <Label>
+                                            <IntlMessages id="user.code" />
+                                        </Label>
+                                        <Field
+                                            className="form-control"
+                                            type="text"
+                                            name="code"
+                                            validate={validateCode}
+                                            value={lang.code}
+                                            onChange={handleOnChange}
+                                        />
+                                        {errors.code && touched.code && (
+                                            <div className="invalid-feedback d-block">
+                                                {errors.code}
+                                            </div>
+                                        )}
+                                    </FormGroup>
+                                </Colxx>
+                            </Row>
+                            <Row>
+                                <Colxx xxs="12" md="6">
+                                    <FormGroup className="form-group">
+                                        <Label>
+                                            <IntlMessages id="user.lang-file" />
+                                        </Label>
+                                        <Field
+                                            className="form-control"
+                                            type="file"
+                                            name="file"
+                                            validate={validateFile}
+                                            accept="application/JSON"
+                                            onChange={handleOnFileChange}
+                                        />
+                                        {errors.file && touched.file && (
+                                            <div className="invalid-feedback d-block">
+                                                {errors.file}
+                                            </div>
+                                        )}
+                                    </FormGroup>
+                                </Colxx>
+                                <Colxx xxs="12" md="6">
+                                    <label>
+                                        <IntlMessages id="user.active" />
+                                    </label>
+                                    <Switch
+                                        className="custom-switch custom-switch-secondary"
+                                        checked={active}
+                                        onChange={(secondary) => setActive(secondary)}
+                                    />
+                                </Colxx>
+                            </Row>
 
-                            <div className="d-flex justify-content-end align-items-center">
+                            {
+                                Object.keys(keys).map((key, i) => (
+                                    <Row key={i} className="mt-3">
+                                        <Colxx xxs="12" md="5">
+                                            <div className="d-flex">
+                                                <Button
+                                                    type="button"
+                                                    color="info"
+                                                    className={`default btn btn-info mb-1 mr-1`}
+                                                    size="md"
+                                                    onClick={() => deleteLangItem(i)}
+                                                >
+                                                    <div className="glyph-icon simple-icon-minus"></div>
+                                                </Button>
+                                                <Field
+                                                    className="form-control mb-1"
+                                                    type="text"
+                                                    value={keys[i]}
+                                                    name={`key__${i}`}
+                                                    onChange={handleOnKeyChange}
+
+                                                />
+                                            </div>
+                                        </Colxx>
+                                        <Colxx xxs="12" md="7">
+                                            <Field
+                                                className="form-control"
+                                                type="text"
+                                                value={values[i]}
+                                                name={`value__${i}`}
+                                                onChange={handleOnValueChange}
+                                            />
+                                        </Colxx>
+                                    </Row>
+                                ))
+                            }
+
+                            <div className="d-flex justify-content-end align-items-center mt-3">
+                                <Button
+                                    type="button"
+                                    color="secondary"
+                                    className={`btn-shadow btn-multiple-state mr-2`}
+                                    size="lg"
+                                    onClick={addNewField}
+                                >
+                                    <span className="glyph-icon simple-icon-plus mr-1"></span>
+                                    <span className="label">
+                                        <IntlMessages id="user.add-new-fld" />
+                                    </span>
+                                </Button>
                                 <Button
                                     type="submit"
                                     color="primary"
@@ -204,11 +368,13 @@ const PasswordPage = ({ history, match, loginUserAction, updateLoginAction }) =>
     );
 };
 
-const mapStateToProps = (state) => {
-    return {  };
+const mapStateToProps = ({ langs: langApp }) => {
+    const { list: lang_list } = langApp;
+    return { lang_list };
 };
 
 export default connect(mapStateToProps, {
+    loadAllLangsAction: loadAllLangs,
     loginUserAction: login,
     updateLoginAction: updateLogin
-})(PasswordPage);
+})(EditLangPage);

@@ -2,7 +2,7 @@ import firebase from 'firebase/app';
 import 'firebase/firestore';
 import 'firebase/storage';
 
-import { convertTimeToString } from './common.utils';
+import { convertTimeToString, getJSON } from './common.utils';
 
 const firebaseConfig = {
   apiKey: 'AIzaSyBdnoTzHFUFDuI-wEyMiZSqPpsy4k4TYDM',
@@ -160,9 +160,57 @@ export const addNewLangRequest = async ({ lang_id, name, code, active, blob }) =
       name,
       update_time
     });
-    return {status: true, message: 'Language has been saved.'};
+    return { status: true, message: 'Language has been saved.' };
   } catch (e) {
-    return {status: false, message: e.message};
+    return { status: false, message: e.message };
   }
 }
 
+export const getLangInfoByIdRequest = async lang_id => {
+  return _firebase.firestore().collection('langs').doc(lang_id.toString()).get()
+    .then(function (doc) {
+      if (doc.exists) {
+        return doc.data();
+      } else {
+        console.log("No document exists!");
+        return false;
+      }
+    })
+    .catch(function (err) {
+      console.log('Error getting admin info: ', err);
+      return false;
+    });
+}
+
+export const getLangFileContentRequest = async lang_code => {
+  const fileRef = _firebase.storage().ref().child(`lang/${lang_code}.json`);
+  return fileRef.getDownloadURL()
+    .then(async url => {
+      return new Promise((resolve, reject) => {
+        var xhr = new XMLHttpRequest();
+        xhr.responseType = 'json';
+        xhr.onload = function(event) {
+          var json = xhr.response;
+          console.log(json);
+          resolve(json);
+        };
+        xhr.open('GET', url);
+        xhr.send();        
+      });
+    })
+    .catch(err => {
+      console.error(err);
+      switch (err.code) {
+        case 'storage/object-not-found':
+          return { status: false, message: 'File not found!'};
+        case 'storage/unauthorized':
+          return { status: false, message: 'Authorization failed!' };
+        case 'storage/canceled':
+          return { status: false, message: 'Operation has been canceled' };
+        case 'storage/unknown':
+          return { status: false, message: 'Unknown error!' };
+        default:
+          return { status: false, message: 'Something went wrong!' };
+      }
+    });
+}

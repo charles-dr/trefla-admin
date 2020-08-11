@@ -14,19 +14,19 @@ export const serialize = function (obj) {
 };
 
 export const transformTime = (str_time) => {
-    const arr1 = str_time.split(':');
-    const date_arr = arr1[0].split('-');
-    const dt = new Date(Number(date_arr[0]), Number(date_arr[1]) - 1, Number(date_arr[2]), Number(date_arr[3]), Number(date_arr[4]), Number(date_arr[5]));
+  const arr1 = str_time.split(':');
+  const date_arr = arr1[0].split('-');
+  const dt = new Date(Number(date_arr[0]), Number(date_arr[1]) - 1, Number(date_arr[2]), Number(date_arr[3]), Number(date_arr[4]), Number(date_arr[5]));
 
-    const my_timezone = -dt.getTimezoneOffset();
-    const time = dt.getTime();
+  const my_timezone = -dt.getTimezoneOffset();
+  const time = dt.getTime();
 
-    const timezoneOffset = Number(arr1[1]);
+  const timezoneOffset = Number(arr1[1]);
 
-    const final_time = time - (my_timezone - timezoneOffset) * 60 * 1000;
+  const final_time = time - (my_timezone - timezoneOffset) * 60 * 1000;
 
-    const dt_final = new Date(final_time);
-    return str_time.substring(0, 10) + " " + dt_final.toLocaleTimeString();    
+  const dt_final = new Date(final_time);
+  return str_time.substring(0, 10) + " " + dt_final.toLocaleTimeString();
 }
 
 export const convertTimeToString = (dt) => {
@@ -40,7 +40,7 @@ export const convertTimeToString = (dt) => {
   const H = formatTwoDigits(dt.getHours());
   const i = formatTwoDigits(dt.getMinutes());
   const s = formatTwoDigits(dt.getSeconds());
-  const tz = dt.getTimezoneOffset();
+  const tz = -dt.getTimezoneOffset();
   return `${y}-${m}-${d}-${H}-${i}-${s}:${tz}`;
 }
 
@@ -73,3 +73,32 @@ export const decryptString = (src) => {
 export const formatTwoDigits = num => {
   return num > 9 ? num : '0' + num;
 }
+
+export const getJSON = (url) => {
+  return new Promise((resolve, reject) => {
+
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', url, true);
+    xhr.responseType = 'json';
+
+    xhr.onload = function () {
+
+      var status = xhr.status;
+
+      if (status == 200) {
+        resolve(xhr.response);
+        // callback(null, xhr.response);
+      } else {
+        // callback(status);
+        reject(false);
+      }
+    };
+
+    xhr.onerror = function(err) {
+      console.error(err);
+      reject(false);
+    }
+
+    xhr.send();
+  });
+};

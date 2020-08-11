@@ -54,7 +54,7 @@ const UserList = ({ history, match, langs }) => {
         },
         {
             Header: 'Actions',
-            accessor: 'user_id',
+            accessor: 'lang_id',
             cellClass: 'text-muted  w-10',
             Cell: (props) => (
                 <>
@@ -104,13 +104,8 @@ const UserList = ({ history, match, langs }) => {
         history.push('/app/lang/add');
     }
 
-
-    const openAddModal = () => {
-        // console.log('[openAddModal]');
-        // setModalDetails(true);
-    };
-    const handleOnEdit = (_id) => {
-        // getSchoolById({ variables: { _id: _id, force: new Date().getTime().toString() } });
+    const handleOnEdit = (lang_id) => {
+        history.push(`/app/lang/edit/${lang_id}`);
     };
     const handleOnDelete = (_id) => {
         // if (window.confirm('Are you sure to delete data?')) {
@@ -118,21 +113,6 @@ const UserList = ({ history, match, langs }) => {
         // }
     };
 
-    const onSubmit = (event, errors, values) => {
-        // console.log(errors);
-        // console.log(values, unit);
-        // if (errors.length === 0) {
-        //     // submit
-        //     if (unit._id === "") { addNewSchool({ variables: values}); }
-        //     else { updateSchoolById({ variables: {...values, _id: unit._id }}); }
-        // }
-    };
-    const handleOnChange = (e) => {
-        // setUnit({ ...unit, [e.target.name]: e.target.value });
-    };
-    const handleOnCheck = (column, colIndex) => {
-        console.log(column, colIndex);
-    };
 
     return (
         <>

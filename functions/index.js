@@ -3,8 +3,15 @@ const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 const express = require('express');
 const cors = require('cors');
+const serviceAccount = require('./trefla-firebase-adminsdk-ic030-de756cf0e9.json');
 
-admin.initializeApp();
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+  databaseURL: 'https://trefla.firebaseio.com',
+  storageBucket: 'trefla.appspot.com',
+});
+
+const bucket = admin.storage().bucket();
 
 const app = express();
 
@@ -22,7 +29,7 @@ app.get('/posts', async (req, res) => {
   const users = await admin
     .firestore()
     .collection('users')
-    .orderBy('name', req.query.dir == 1 ? 'asc' : 'desc')
+    .orderBy('name', req.query.dir === 1 ? 'asc' : 'desc')
     .startAt(Number(req.query.start))
 
     .limit(Number(req.query.length))
@@ -36,6 +43,25 @@ app.get('/posts', async (req, res) => {
       return rows;
     });
   res.json(users);
+});
+
+app.get('/lang/download', async (req, res) => {
+  try {
+    const langRef = bucket.child('lang/en.jsons');
+    langRef
+      .getDownloadURL()
+      .then((url) => {
+        return { status: true, url: url };
+      })
+      .catch((err) => {
+        return { stauts: false, error: err.message };
+      });
+  } catch (e) {
+    res.json({
+      status: false,
+      message: e.message,
+    });
+  }
 });
 
 exports.api = functions.https.onRequest(app);

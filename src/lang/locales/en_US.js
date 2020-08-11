@@ -30,11 +30,13 @@ module.exports = {
   'user.buy': 'BUY',
 
   'user.active': 'Active',
+  'user.add-new-fld': 'Add New Field',
   'user.code': 'Code',
   'user.lang-file': 'Language File',
   'user.name': 'Name',
   'user.username': 'Username',
   'user.save': 'Save',
+  'user.submit': 'Submit',
   'user.update': 'Update',
   'user.upload-new-file': 'Upload New File',
 
