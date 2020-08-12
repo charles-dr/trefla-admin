@@ -49,7 +49,7 @@ const UserList = ({ history, match, langs, loadAllLangsAction }) => {
         {
             Header: 'Actions',
             accessor: 'lang_id',
-            cellClass: 'text-muted  w-10',
+            cellClass: 'text-muted  w-15',
             Cell: (props) => (
                 <>
                     <div className="tbl-actions">

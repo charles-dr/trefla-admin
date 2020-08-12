@@ -52,7 +52,7 @@ const EditLangPage = ({ history, match, lang_list, loadAllLangsAction, loginUser
         return () => {
             setLang([]);
         }
-    }, [match]);
+    }, [match, lang]);
 
     const handleOnSubmit = async (value) => {
         // console.log(value, keys, values);

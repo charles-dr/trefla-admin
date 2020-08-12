@@ -1,7 +1,7 @@
 const data = [
   {
     id: 'dashboard',
-    icon: 'iconsminds-dashboard',
+    icon: 'simple-icon-speedometer',
     label: 'menu.dashboard',
     to: '/app/dashboard',
   },
@@ -30,6 +30,11 @@ const data = [
     to: '/app/settings',
     subs: [
       {
+        icon: 'iconsminds-gears',
+        label: 'menu.config',
+        to: '/app/settings/config',
+      },
+      {
         icon: 'iconsminds-profile',
         label: 'menu.profile',
         to: '/app/settings/profile',
@@ -41,18 +46,5 @@ const data = [
       },
     ],
   },
-  // {
-  //   id: 'blankpage',
-  //   icon: 'iconsminds-bucket',
-  //   label: 'menu.blank-page',
-  //   to: '/app/blank-page',
-  // },
-  // {
-  //   id: 'docs',
-  //   icon: 'iconsminds-library',
-  //   label: 'menu.docs',
-  //   to: 'https://gogo-react-docs.coloredstrategies.com/',
-  //   newWindow: true,
-  // },
 ];
 export default data;

@@ -13,6 +13,8 @@ module.exports = {
   'general.copyright': 'Gogo React © 2018 All Rights Reserved.',
   'actions.add': 'Add',
 
+  'config.lang-version': 'Language Version',
+
   /* 02.User Login, Logout, Register */
   'user.login-title': 'Login',
   'user.register': 'Register',
@@ -57,6 +59,7 @@ module.exports = {
   'menu.blank-page': 'Blank Page',
 
   'menu.add': 'Add',
+  'menu.config': 'Config',
   'menu.dashboard': 'Dashboard',
   'menu.edit': 'Edit',
   'menu.languages': 'Languages',
@@ -77,6 +80,7 @@ module.exports = {
   'pages.error-code': 'Error code',
   'pages.go-back-home': 'GO BACK HOME',
 
+  'pages.config': 'Config',
   'pages.dashboard': 'Dashboard',
   'pages.languages': 'Languages',
   'pages.language': 'Language',

@@ -1,14 +1,18 @@
 import React, { Suspense } from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
 
-
+const ConfigPage = React.lazy(() => import('./config'));
 const ProfilePage = React.lazy(() => import('./profile'));
 const PasswordPage = React.lazy(() => import('./password'));
 
 const UserModule = ({ match }) => (
   <Suspense fallback={<div className="loading" />}>
     <Switch>
-      <Redirect exact from={`${match.url}/`} to={`${match.url}/profile`} />
+      <Redirect exact from={`${match.url}/`} to={`${match.url}/config`} />
+      <Route
+        path={`${match.url}/config`}
+        render={(props) => <ConfigPage {...props} />}
+      />
       <Route
         path={`${match.url}/password`}
         render={(props) => <PasswordPage {...props} />}

@@ -25,7 +25,6 @@ const INIT_UNIT = {
     district: { districtName: '', city: { cityName: '' } },
 };
 
-const typeIcons = ['simple-icon-credit-card', 'iconsminds-car', 'iconsminds-home', 'iconsminds-dog', 'iconsminds-heart'];
 const reactionImages = ['like.png', 'love.png', 'wow.png', 'haha.png', 'sad.png', 'angry.png'];
 
 
@@ -52,7 +51,16 @@ const UserList = ({ match, friends, posts, users }) => {
             Header: 'Gender',
             accessor: 'sex',
             cellClass: 'text-muted  w-5',
-            Cell: (props) => <><Badge color="outline-primary" className="mb-1">{props.value === '1' ? 'Female' : 'Male'}</Badge></>,
+            Cell: (props) => <>
+                {props.value==="1" && <div className="text-center">
+                    <span className="glyph-icon iconsminds-female" 
+                        style={{fontSize: 18, color: '#16c5bd'}}></span>
+                    </div>}
+                {props.value!=="1" && <div className="text-center">
+                    <span className="glyph-icon iconsminds-male"
+                        style={{fontSize: 18, color: '#1675c5'}}></span>
+                    </div>}
+            </>,
         },
         {
             Header: 'Birthday',
@@ -82,7 +90,7 @@ const UserList = ({ match, friends, posts, users }) => {
             Header: 'Active',
             accessor: 'active',
             cellClass: 'text-muted  w-5',
-            Cell: (props) => <><Badge color={props.value==1 ? 'success' : 'danger'} pill className="mb-1">{props.value==1 ? 'Active' : 'Disabled'}</Badge></>,
+            Cell: (props) => <><Badge color={props.value == 1 ? 'success' : 'danger'} pill className="mb-1">{props.value == 1 ? 'Active' : 'Disabled'}</Badge></>,
         },
         {
             Header: 'Actions',
@@ -117,28 +125,7 @@ const UserList = ({ match, friends, posts, users }) => {
     }, [match, users, posts, friends]);
 
 
-    
-    const formatLikes = (str_likes) => {
-        const arr_likes = str_likes.split(',');
-        const total = arr_likes.reduce((a, b) => Number(a) + Number(b), 0);
 
-        if (total > 0) {
-            return <>
-                {arr_likes.map((like, i) => (
-                    like > 0 && <img src={`/assets/img/reactions/${reactionImages[i]}`}
-                        style={{ width: 20, display: 'inline' }}
-                        alt="Reaction Icon"
-                        key={i} />
-                ))
-                }
-                <span style={{ paddingLeft: 10, verticalAlign: 'middle', fontSize: 16 }}>{total}</span>
-            </>;
-        } else {
-            return <Badge color="warning" pill className="mb-1">
-                No reactions
-            </Badge>;
-        }
-    }
     const formatCoordinate = (coord) => {
         const arr = coord.split(',');
         return <>
@@ -156,7 +143,7 @@ const UserList = ({ match, friends, posts, users }) => {
                     user_item[key] = user[key];
                 }
             }
-            
+
             // put item to array
             new_users.push(user_item);
         }
@@ -173,7 +160,6 @@ const UserList = ({ match, friends, posts, users }) => {
             return '';
         }
     }
-
 
 
     const openAddModal = () => {

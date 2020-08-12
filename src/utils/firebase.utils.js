@@ -4,6 +4,9 @@ import 'firebase/storage';
 
 import { convertTimeToString } from './common.utils';
 
+
+const config_id = 'ZYvvzsj8CMffIcHhY689';
+
 const firebaseConfig = {
   apiKey: 'AIzaSyBdnoTzHFUFDuI-wEyMiZSqPpsy4k4TYDM',
   authDomain: 'trefla.firebaseapp.com',
@@ -199,7 +202,7 @@ export const getLangFileContentRequest = async lang_code => {
         xhr.onload = function (event) {
           var json = xhr.response;
           // console.log(json);
-          resolve({status: true, data: json});
+          resolve({ status: true, data: json });
         };
         xhr.open('GET', url);
         xhr.send();
@@ -243,5 +246,37 @@ export const deleteLangByIdRequest = async (lang_id) => {
     } catch (doc_error) {
       return { status: false, message: 'Failed to delete document', details: doc_error.message };
     }
+  }
+}
+
+export const getConfigRequest = async () => {
+
+  return _firebase.firestore().collection('config').doc(config_id).get()
+    .then(doc => {
+      if (doc.exists) {
+        return doc.data();
+      } else {
+        console.log('[Config Info] No document exists!');
+        return false;
+      }
+    })
+    .catch(err => {
+      console.log('Error while getting config info!', err);
+      return false;
+    });
+}
+
+export const updateConfigRequest = async ({ lang_version }) => {
+  const config = await getConfigRequest();
+
+  if (!config) return { status: false, message: 'Something went wrong with config data on firestore!' };
+
+  config.lang_version = lang_version;
+
+  try {
+    await _firebase.firestore().collection('config').doc(config_id).set(config);
+    return { status: true, message: 'Data has been saved!' };
+  } catch (err) {
+    return { status: false, message: err.message };
   }
 }
