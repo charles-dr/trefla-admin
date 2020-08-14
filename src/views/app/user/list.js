@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { Badge, Button, Label, Modal, ModalHeader, ModalBody, Row } from 'reactstrap';
+
 import {
     AvForm,
     AvField,
@@ -15,24 +16,10 @@ import { Colxx, Separator } from '../../../components/common/CustomBootstrap';
 import Breadcrumb from '../../../containers/navs/Breadcrumb';
 import { ReactTableWithPaginationCard } from '../../../containers/ui/ReactTableCards';
 
-import { getPostTableContent } from '../../../api/functions.api';
-import { _firebase, transformTime } from '../../../utils';
 
-const INIT_UNIT = {
-    _id: '',
-    districtId: '',
-    name: '',
-    district: { districtName: '', city: { cityName: '' } },
-};
-
-const reactionImages = ['like.png', 'love.png', 'wow.png', 'haha.png', 'sad.png', 'angry.png'];
-
-
-const UserList = ({ match, friends, posts, users }) => {
-    const [pageLoaded, setPageLoaded] = useState(true);
+const UserList = ({ match, history, friends, posts, users }) => {
     const [data, setData] = useState([]);
     const [modalDetails, setModalDetails] = useState(false);
-    const [unit, setUnit] = useState(INIT_UNIT);
 
     const cols = [
         {
@@ -52,14 +39,14 @@ const UserList = ({ match, friends, posts, users }) => {
             accessor: 'sex',
             cellClass: 'text-muted  w-5',
             Cell: (props) => <>
-                {props.value==="1" && <div className="text-center">
-                    <span className="glyph-icon iconsminds-female" 
-                        style={{fontSize: 18, color: '#16c5bd'}}></span>
-                    </div>}
-                {props.value!=="1" && <div className="text-center">
+                {props.value === "1" && <div className="text-center">
+                    <span className="glyph-icon iconsminds-female"
+                        style={{ fontSize: 18, color: '#16c5bd' }}></span>
+                </div>}
+                {props.value !== "1" && <div className="text-center">
                     <span className="glyph-icon iconsminds-male"
-                        style={{fontSize: 18, color: '#1675c5'}}></span>
-                    </div>}
+                        style={{ fontSize: 18, color: '#1675c5' }}></span>
+                </div>}
             </>,
         },
         {
@@ -90,7 +77,7 @@ const UserList = ({ match, friends, posts, users }) => {
             Header: 'Active',
             accessor: 'active',
             cellClass: 'text-muted  w-5',
-            Cell: (props) => <><Badge color={props.value == 1 ? 'success' : 'danger'} pill className="mb-1">{props.value == 1 ? 'Active' : 'Disabled'}</Badge></>,
+            Cell: (props) => <><Badge color={props.value === 1 ? 'success' : 'danger'} pill className="mb-1">{props.value === 1 ? 'Active' : 'Disabled'}</Badge></>,
         },
         {
             Header: 'Actions',
@@ -99,13 +86,14 @@ const UserList = ({ match, friends, posts, users }) => {
             Cell: (props) => (
                 <>
                     <div className="tbl-actions">
-                        {/* <i
-                            className="iconsminds-file-edit"
-                            title="Edit"
-                            onClick={() => handleOnEdit(props.value)}
-                        /> */}
                         <i
-                            className="simple-icon-trash"
+                            className="iconsminds-file-edit info"
+                            title="Edit"
+                            style={{ fontSize: 18 }}
+                            onClick={() => handleOnEdit(props.value)}
+                        />
+                        <i
+                            className="simple-icon-trash danger"
                             title="Remove"
                             style={{ fontSize: 18 }}
                             onClick={() => handleOnDelete(props.value)}
@@ -117,14 +105,9 @@ const UserList = ({ match, friends, posts, users }) => {
     ];
 
     useEffect(() => {
-        // console.log(friends, users, posts);
-
-        const tableRows = recomposeUsers();
-
-        return () => { };
+        recomposeUsers();
+        return () => { return true; };
     }, [match, users, posts, friends]);
-
-
 
     const formatCoordinate = (coord) => {
         const arr = coord.split(',');
@@ -163,33 +146,20 @@ const UserList = ({ match, friends, posts, users }) => {
 
 
     const openAddModal = () => {
-        // console.log('[openAddModal]');
-        // setModalDetails(true);
+        history.push('/app/user/add');
     };
-    const handleOnEdit = (_id) => {
-        // getSchoolById({ variables: { _id: _id, force: new Date().getTime().toString() } });
+    const handleOnEdit = (user_id) => {
+        history.push(`/app/user/edit/${user_id}`);
     };
-    const handleOnDelete = (_id) => {
-        // if (window.confirm('Are you sure to delete data?')) {
-        //     deleteSchoolById({ variables: { _id: _id } });
-        // }
+    const handleOnDelete = (user_id) => {
+        setModalDetails(true);
     };
 
-    const onSubmit = (event, errors, values) => {
-        // console.log(errors);
-        // console.log(values, unit);
-        // if (errors.length === 0) {
-        //     // submit
-        //     if (unit._id === "") { addNewSchool({ variables: values}); }
-        //     else { updateSchoolById({ variables: {...values, _id: unit._id }}); }
-        // }
-    };
-    const handleOnChange = (e) => {
-        // setUnit({ ...unit, [e.target.name]: e.target.value });
-    };
-    const handleOnCheck = (column, colIndex) => {
-        console.log(column, colIndex);
-    };
+
+    const onConfirmDelete = () => {
+
+    }
+
     return (
         <>
             <Row>
@@ -211,67 +181,6 @@ const UserList = ({ match, friends, posts, users }) => {
                         <i className="simple-icon-plus mr-1" />
                         <IntlMessages id="actions.add" />
                     </Button>{' '}
-                    <Modal
-                        isOpen={modalDetails}
-                        toggle={() => setModalDetails(!modalDetails)}
-                        backdrop="static"
-                    >
-                        <ModalHeader>
-                            <IntlMessages id="pages.districts.add-new" />
-                        </ModalHeader>
-                        <ModalBody>
-                            <AvForm
-                                className="av-tooltip tooltip-label-right"
-                                onSubmit={(event, errors, values) =>
-                                    onSubmit(event, errors, values)
-                                }
-                            >
-                                <AvField
-                                    type="select"
-                                    name="districtId"
-                                    required
-                                    label="District"
-                                    value={unit.districtId}
-                                    onChange={handleOnChange}
-                                    errorMessage="Please select a district!"
-                                >
-                                    {[
-                                        { id: 1, name: 'Option I' },
-                                        { id: 2, name: 'Option II' },
-                                    ].map((district) => (
-                                        <option value={district._id} key={district.id}>
-                                            {district.name}
-                                        </option>
-                                    ))}
-                                </AvField>
-
-                                <AvGroup>
-                                    <Label>School Name</Label>
-                                    <AvInput
-                                        name="name"
-                                        value={unit.name}
-                                        onChange={handleOnChange}
-                                        required
-                                    />
-                                    <AvFeedback>School name is required!</AvFeedback>
-                                </AvGroup>
-
-                                <Separator className="mb-5" />
-
-                                <div className="d-flex justify-content-end">
-                                    <Button color="primary mr-2">
-                                        <IntlMessages id="actions.submit" />
-                                    </Button>{' '}
-                                    <Button
-                                        color="secondary"
-                                        onClick={() => setModalDetails(false)}
-                                    >
-                                        <IntlMessages id="actions.cancel" />
-                                    </Button>
-                                </div>
-                            </AvForm>
-                        </ModalBody>
-                    </Modal>
                 </Colxx>
 
                 <Colxx xxs="12">
@@ -281,9 +190,43 @@ const UserList = ({ match, friends, posts, users }) => {
                     />
                 </Colxx>
             </Row>
+
+            <Modal
+                isOpen={modalDetails}
+                toggle={() => setModalDetails(!modalDetails)}
+                backdrop="static"
+            >
+                <ModalHeader>
+                    <IntlMessages id="pages.delete-user" />
+                </ModalHeader>
+                <ModalBody>
+                    <AvForm
+                        className="av-tooltip tooltip-label-right"
+                        onSubmit={(event, errors, values) =>
+                            onConfirmDelete(event, errors, values)
+                        }
+                    >
+
+                        <Separator className="mb-5" />
+
+                        <div className="d-flex justify-content-end">
+                            <Button color="primary mr-2">
+                                <IntlMessages id="actions.submit" />
+                            </Button>{' '}
+                            <Button
+                                color="secondary"
+                                onClick={() => setModalDetails(false)}
+                            >
+                                <IntlMessages id="actions.cancel" />
+                            </Button>
+                        </div>
+                    </AvForm>
+                </ModalBody>
+            </Modal>
         </>
     );
 };
+
 
 const mapStateToProps = ({ friends: friendApp, posts: postApp, users: userApp }) => {
     const { list: posts } = postApp;

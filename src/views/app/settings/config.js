@@ -1,6 +1,5 @@
-import React, { createRef, useState, useEffect } from 'react';
-import { Row, Card, CardTitle, Label, FormGroup, Button } from 'reactstrap';
-import { NavLink, Redirect, useHistory } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Row, Label, FormGroup, Button } from 'reactstrap';
 import { connect } from 'react-redux';
 
 import { Formik, Form, Field } from 'formik';
@@ -13,29 +12,6 @@ import Breadcrumb from '../../../containers/navs/Breadcrumb';
 
 import { getConfigRequest, updateConfigRequest } from '../../../utils';
 
-
-
-
-
-const validateEmail = (value) => {
-    let error;
-    if (!value) {
-        error = 'Please enter your email address';
-    } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(value)) {
-        error = 'Invalid email address';
-    }
-    return error;
-};
-
-const validateName = (value) => {
-    let error;
-    if (!value) {
-        error = 'Please enter name';
-    } else if (value.length < 4) {
-        error = 'Value must be longer than 3 characters';
-    }
-    return error;
-};
 
 const PasswordPage = ({ history, match, loginUserAction, updateLoginAction }) => {
 

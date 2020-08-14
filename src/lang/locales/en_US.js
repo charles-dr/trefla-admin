@@ -12,6 +12,8 @@ module.exports = {
   /* 01.General */
   'general.copyright': 'Gogo React © 2018 All Rights Reserved.',
   'actions.add': 'Add',
+  'actions.cancel': 'Cancel',
+  'actions.submit': 'Submit',
 
   'config.lang-version': 'Language Version',
 
@@ -33,8 +35,14 @@ module.exports = {
 
   'user.active': 'Active',
   'user.add-new-fld': 'Add New Field',
+  'user.bio': 'Bio',
+  'user.birthday': 'Birthday',
+  'user.card-number': 'Card Number',
+  'user.city': 'City',
   'user.code': 'Code',
+  'user.gender': 'Gender',
   'user.lang-file': 'Language File',
+  'user.location': 'Location',
   'user.name': 'Name',
   'user.username': 'Username',
   'user.save': 'Save',
@@ -82,6 +90,7 @@ module.exports = {
 
   'pages.config': 'Config',
   'pages.dashboard': 'Dashboard',
+  'pages.delete-user': 'Delete User',
   'pages.languages': 'Languages',
   'pages.language': 'Language',
   'pages.password': 'Password',

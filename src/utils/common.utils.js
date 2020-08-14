@@ -102,3 +102,19 @@ export const getJSON = (url) => {
     xhr.send();
   });
 };
+
+export const getMapPositionFromString = (str) => {
+  if (!!str) {
+    let tArray = str.split(',');
+    if (tArray.length === 2) {
+      return {
+        lat: Number(tArray[0]),
+        lng: Number(tArray[1])
+      };
+    } else {
+      return {lat: 0, lng: 0};
+    }
+  } else {
+    return {lat: 0, lng: 0};
+  }
+}

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
-import { Badge, Button, Label, Modal, ModalHeader, ModalBody, Row } from 'reactstrap';
+import { Badge, Button, Label, Row } from 'reactstrap';
 import {
     AvForm,
     AvField,
@@ -26,15 +26,16 @@ const INIT_UNIT = {
 };
 
 const typeIcons = {
-    '0': 'simple-icon-credit-card', 
-    '1': 'iconsminds-heart', 
+    '0': 'simple-icon-credit-card',
+    '1': 'iconsminds-heart',
     '21': 'iconsminds-first-aid',
     '22': 'iconsminds-scale',
     '23': 'iconsminds-shop',
-    '31': 'iconsminds-car', 
-    '32': 'iconsminds-home', 
+    '31': 'iconsminds-car',
+    '32': 'iconsminds-home',
     '33': 'iconsminds-dog'
 };
+
 const reactionImages = ['like.png', 'love.png', 'wow.png', 'haha.png', 'sad.png', 'angry.png'];
 
 
@@ -97,7 +98,7 @@ const PostList = ({ match, posts, users }) => {
             Header: 'Active',
             accessor: 'active',
             cellClass: 'text-muted  w-5',
-            Cell: (props) => <><Badge color={props.value==1 ? 'success' : 'danger'} pill className="mb-1">{props.value==1 ? 'Active' : 'Disabled'}</Badge></>,
+            Cell: (props) => <><Badge color={props.value == 1 ? 'success' : 'danger'} pill className="mb-1">{props.value == 1 ? 'Active' : 'Disabled'}</Badge></>,
         },
         {
             Header: 'Actions',
@@ -240,67 +241,6 @@ const PostList = ({ match, posts, users }) => {
                         <i className="simple-icon-plus mr-1" />
                         <IntlMessages id="actions.add" />
                     </Button>{' '}
-                    <Modal
-                        isOpen={modalDetails}
-                        toggle={() => setModalDetails(!modalDetails)}
-                        backdrop="static"
-                    >
-                        <ModalHeader>
-                            <IntlMessages id="pages.districts.add-new" />
-                        </ModalHeader>
-                        <ModalBody>
-                            <AvForm
-                                className="av-tooltip tooltip-label-right"
-                                onSubmit={(event, errors, values) =>
-                                    onSubmit(event, errors, values)
-                                }
-                            >
-                                <AvField
-                                    type="select"
-                                    name="districtId"
-                                    required
-                                    label="District"
-                                    value={unit.districtId}
-                                    onChange={handleOnChange}
-                                    errorMessage="Please select a district!"
-                                >
-                                    {[
-                                        { id: 1, name: 'Option I' },
-                                        { id: 2, name: 'Option II' },
-                                    ].map((district) => (
-                                        <option value={district._id} key={district.id}>
-                                            {district.name}
-                                        </option>
-                                    ))}
-                                </AvField>
-
-                                <AvGroup>
-                                    <Label>School Name</Label>
-                                    <AvInput
-                                        name="name"
-                                        value={unit.name}
-                                        onChange={handleOnChange}
-                                        required
-                                    />
-                                    <AvFeedback>School name is required!</AvFeedback>
-                                </AvGroup>
-
-                                <Separator className="mb-5" />
-
-                                <div className="d-flex justify-content-end">
-                                    <Button color="primary mr-2">
-                                        <IntlMessages id="actions.submit" />
-                                    </Button>{' '}
-                                    <Button
-                                        color="secondary"
-                                        onClick={() => setModalDetails(false)}
-                                    >
-                                        <IntlMessages id="actions.cancel" />
-                                    </Button>
-                                </div>
-                            </AvForm>
-                        </ModalBody>
-                    </Modal>
                 </Colxx>
 
                 <Colxx xxs="12">
@@ -310,6 +250,7 @@ const PostList = ({ match, posts, users }) => {
                     />
                 </Colxx>
             </Row>
+
         </>
     );
 };

@@ -37,8 +37,7 @@ const EditLangPage = ({ history, match, lang_list, loadAllLangsAction, loginUser
                             initKeyValues(fileRes.data);
                         } else {
                             NotificationManager.warning('Lanague file not found!', 'Loading assets...');
-                        }
-                        
+                        }                        
                     })
                     .catch(err => {
                         console.error(err);
@@ -50,9 +49,10 @@ const EditLangPage = ({ history, match, lang_list, loadAllLangsAction, loginUser
             });
 
         return () => {
-            setLang([]);
+            // setLang([]);
+            return true;
         }
-    }, [match, lang]);
+    }, [match]);
 
     const handleOnSubmit = async (value) => {
         // console.log(value, keys, values);
@@ -151,6 +151,7 @@ const EditLangPage = ({ history, match, lang_list, loadAllLangsAction, loginUser
         Object.keys(json).map((key, i) => {
             t_keys.push(key);
             t_values.push(json[key]);
+            return true;
         });
         setKeys(t_keys);
         setValues(t_values);

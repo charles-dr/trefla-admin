@@ -14,9 +14,7 @@ import { deleteLangByIdRequest, getLangInfoByIdRequest, getLangFileContentReques
 
 const UserList = ({ history, match, langs, loadAllLangsAction }) => {
 
-    const [pageLoaded, setPageLoaded] = useState(true);
     const [data, setData] = useState([]);
-    const [modalDetails, setModalDetails] = useState(false);
     const [confirm, setConfirm] = useState(false);
     const [delId, setDelId] = useState(-1);
 
@@ -44,7 +42,7 @@ const UserList = ({ history, match, langs, loadAllLangsAction }) => {
             Header: 'Active',
             accessor: 'active',
             cellClass: 'text-muted  w-5',
-            Cell: (props) => <><Badge color={props.value == 1 ? 'success' : 'danger'} pill className="mb-1">{props.value == 1 ? 'Active' : 'Disabled'}</Badge></>,
+            Cell: (props) => <><Badge color={props.value === 1 ? 'success' : 'danger'} pill className="mb-1">{props.value === 1 ? 'Active' : 'Disabled'}</Badge></>,
         },
         {
             Header: 'Actions',
@@ -79,7 +77,7 @@ const UserList = ({ history, match, langs, loadAllLangsAction }) => {
 
     useEffect(() => {
         // console.log(friends, users, posts);
-        const tableRows = recomposeLangs();
+        recomposeLangs();
         return () => { };
     }, [match, langs]);
 
@@ -159,7 +157,6 @@ const UserList = ({ history, match, langs, loadAllLangsAction }) => {
         tempLink.setAttribute('download', download_name);
         tempLink.click();
     }
-
 
     return (
         <>

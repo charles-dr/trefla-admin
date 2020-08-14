@@ -74,18 +74,6 @@ export const getAllPosts = () => {
     });
 }
 
-export const getAllUsers = () => {
-  return _firebase.firestore().collection('users').orderBy('user_id', 'asc').get()
-    .then((querySnapshot) => {
-      const rows = [];
-      querySnapshot.forEach((doc) => {
-        // console.log(`${doc.id}`, doc.data());
-        rows.push(doc.data());
-      });
-      return rows;
-    });
-}
-
 export const getAdminInfo = async () => {
   return _firebase.firestore().collection('admin').doc('0').get()
     .then(function (doc) {
@@ -156,8 +144,12 @@ export const addNewLangRequest = async ({ lang_id, name, code, active, blob }) =
   try {
     const fileRef = _firebase.storage().ref().child(`lang/${code}.json`);
 
+    let download_url = '';
     if (blob) {
-      await fileRef.put(blob);
+      const uploaded = await fileRef.put(blob);
+      // get download url
+      download_url = await fileRef.getDownloadURL();
+      
     }
 
     const adminRef = _firebase.firestore().collection('langs').doc(lang_id.toString());
@@ -168,7 +160,8 @@ export const addNewLangRequest = async ({ lang_id, name, code, active, blob }) =
       code,
       lang_id,
       name,
-      update_time
+      update_time,
+      download_url
     });
     return { status: true, message: 'Language has been saved.' };
   } catch (e) {
@@ -279,4 +272,41 @@ export const updateConfigRequest = async ({ lang_version }) => {
   } catch (err) {
     return { status: false, message: err.message };
   }
+}
+
+
+////////////////////////////////////////////////////////////////
+//                                                            //
+//                         U   S   E   R                      //
+//                                                            // 
+////////////////////////////////////////////////////////////////
+
+export const getAllUsers = () => {
+  return _firebase.firestore().collection('users').orderBy('user_id', 'asc').get()
+    .then((querySnapshot) => {
+      const rows = [];
+      querySnapshot.forEach((doc) => {
+        // console.log(`${doc.id}`, doc.data());
+        rows.push(doc.data());
+      });
+      return rows;
+    });
+}
+
+export const getUserByIdRequest = async (user_id) => {
+  user_id = Number(user_id); // convert into integer
+  const userRef = _firebase.firestore().collection('users').doc(user_id.toString());
+
+  return  _firebase.firestore().collection('users').doc(user_id.toString()).get()
+    .then(doc => {
+      if (doc.exists) {
+        return doc.data();
+      } else {
+        return false;
+      }
+    })
+    .catch(err => {
+      console.log('[User Fetch]', err);
+      return false;
+    })
 }

@@ -1,6 +1,5 @@
-import React, { createRef, Suspense, useState, useEffect } from 'react';
-import { Row, Card, CardTitle, Label, FormGroup, Button } from 'reactstrap';
-import { NavLink, Redirect, useHistory } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Row, Label, FormGroup, Button } from 'reactstrap';
 import { connect } from 'react-redux';
 
 import { Formik, Form, Field } from 'formik';
@@ -38,7 +37,7 @@ const ProfilePage = ({ history, match, loadAuthInfoAction, downloadAvatarAction 
     const onUpdateProfile = async (values) => {
         const file = avatarInput.files[0];
         setLoading(true);
-        const updated = await updateAdminProfile(profile, file);
+        await updateAdminProfile(profile, file);
         console.log('done');
 
         NotificationManager.success('Profile has been updated.', 'Profile Update', 3000, null, null, '');
@@ -101,7 +100,7 @@ const ProfilePage = ({ history, match, loadAuthInfoAction, downloadAvatarAction 
                         <Form className="av-tooltip tooltip-label-bottom mx-auto" style={{ maxWidth: 640, width: '100%' }}>
                             <div className="profile-avatar">
                                 <div className="wrapper">
-                                    <img src={avatar} />
+                                    <img src={avatar} alt="User Profile" />
                                     <div className="hover-layer" onClick={openFileSelector}>
                                         <div className="glyph-icon simple-icon-camera change-avatar"></div>
                                     </div>

@@ -8,14 +8,11 @@ import {
     AUTH_LOGIN, 
     AUTH_LOGIN_CHECK, 
     AUTH_LOGIN_SUCCESS, 
-    AUTH_LOGOUT, 
-    USERS_GET, 
-    USERS_ARRIVED } from '../actions';
+    AUTH_LOGOUT } from '../actions';
 import { 
     getAdminAvatarURL,
     getAdminInfo, 
     loginAdmin, 
-    updateLogin, 
     
     getAuthToken, 
     saveAuthToken, 
