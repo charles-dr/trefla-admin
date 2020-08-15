@@ -311,6 +311,46 @@ export const getUserByIdRequest = async (user_id) => {
     })
 }
 
+export const addNewUserRequest = async (profile, avatarFile) => {
+  console.log('[user data]', profile, user_id);
+  const user_id = profile.user_id;
+
+  if (!profile.email) { return { status: false, message: 'Email is required!' }; }
+  if (!profile.password) { return { status: false, message: 'User Name is required!' }; }
+
+  const userWithEmail = await getUserByEmail(profile.email); console.log(userWithEmail);
+  if (userWithEmail.status === true) {
+    return { status: false, message: 'User already exists with the given email' };
+  } else if (userWithEmail.code === 400) {
+    return userWithEmail;
+  } else if (userWithEmail.code === 404) {
+
+    // update profile photo
+    if (!!avatarFile) {
+      let ext = getExtensionFromFileName(avatarFile.name);
+      const avatarRef = _firebase.storage().ref().child(`profile/${user_id.toString()}.${ext}`);
+      try {
+        await avatarRef.put(avatarFile);
+        let profile_photo = await avatarRef.getDownloadURL();
+        profile.photo = profile_photo;
+      } catch (e) {
+        console.error(e);
+        return { status: false, message: 'Failed to upload profile photo!' };
+      }
+    }
+
+    //add user
+    try {
+      const userRef = _firebase.firestore().collection('users').doc(user_id.toString());
+      await userRef.set({ ...profile, user_id: user_id });
+      return { status: true, message: 'A new user has been created!' };
+    } catch (err) {
+      console.error(err);
+      return { status: false, message: 'Something went wrong', details: err.message };
+    }
+  }
+}
+
 export const updateUserProfile = async (profile, avatarFile = null, cardFile = null) => {
   console.log(avatarFile, cardFile, profile);
   const user_id = profile.user_id;
@@ -326,7 +366,7 @@ export const updateUserProfile = async (profile, avatarFile = null, cardFile = n
       profile.card_img_url = card_path;
     } catch (e) {
       console.error(e);
-      return {status: false, message: 'Failed to upload card image!'};
+      return { status: false, message: 'Failed to upload card image!' };
     }
   }
 
@@ -340,7 +380,7 @@ export const updateUserProfile = async (profile, avatarFile = null, cardFile = n
       profile.photo = profile_photo;
     } catch (e) {
       console.error(e);
-      return {status: false, message: 'Failed to upload profile photo!'};
+      return { status: false, message: 'Failed to upload profile photo!' };
     }
   }
 
@@ -349,11 +389,28 @@ export const updateUserProfile = async (profile, avatarFile = null, cardFile = n
     const userRef = _firebase.firestore().collection('users').doc(user_id.toString());
     profile.update_time = convertTimeToString();
     await userRef.set(profile);
-    return {status: true, message: 'User has been updated!'};
+    return { status: true, message: 'User has been updated!' };
   } catch (e) {
-    return {status: false, message: 'Failed to update profile', details: e.message};
+    return { status: false, message: 'Failed to update profile', details: e.message };
   }
+}
 
+export const getUserByEmail = async (email) => {
+  return _firebase.firestore().collection('users').where("email", "==", email).get()
+    .then(querySnapshot => {
+      let user;
+      querySnapshot.forEach(doc => {
+        user = doc.data();
+      });
+      if (!!user) {
+        return { status: true, message: 'success', data: user };
+      } else {
+        return { status: false, message: 'No user found with email', code: 404 };
+      }
+    })
+    .catch(err => {
+      return { status: false, message: err.message, code: 400 };
+    })
 }
 
 export const getExtensionFromFileName = (filename) => {

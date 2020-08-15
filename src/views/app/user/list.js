@@ -130,6 +130,7 @@ const UserList = ({ match, history, friends, posts, users }) => {
     }
 
     const formatCoordinate = (coord) => {
+        if (!coord) return '';
         const arr = coord.split(',');
         return <>
             <p>X: {arr[0]}</p>

@@ -435,7 +435,7 @@ const EditUserPage = ({ history, match, loginUserAction, updateLoginAction, load
                                             type="text"
                                             name="card_number"
                                             value={profile.card_number}
-                                            validate={() => validateRequired('card_number')}
+                                            // validate={() => validateRequired('card_number')}
                                             onChange={handleOnChange}
                                         />
                                         {errors.card_number && touched.card_number && (
@@ -478,7 +478,7 @@ const EditUserPage = ({ history, match, loginUserAction, updateLoginAction, load
                                             type="text"
                                             name="location_address"
                                             value={profile.location_address}
-                                            validate={() => validateRequired('location_address')}
+                                            // validate={() => validateRequired('location_address')}
                                             onChange={handleOnChange}
                                         />
                                         {errors.location_address && touched.location_address && (
@@ -500,7 +500,7 @@ const EditUserPage = ({ history, match, loginUserAction, updateLoginAction, load
                                             type="text"
                                             name="city"
                                             value={profile.city || ''}
-                                            validate={() => validateRequired('city')}
+                                            // validate={() => validateRequired('city')}
                                             onChange={handleOnChange}
                                         />
                                         {errors.city && touched.city && (
