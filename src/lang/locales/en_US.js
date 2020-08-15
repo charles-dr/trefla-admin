@@ -13,6 +13,7 @@ module.exports = {
   'general.copyright': 'Gogo React © 2018 All Rights Reserved.',
   'actions.add': 'Add',
   'actions.cancel': 'Cancel',
+  'actions.delete': 'Delete',
   'actions.submit': 'Submit',
 
   'config.lang-version': 'Language Version',

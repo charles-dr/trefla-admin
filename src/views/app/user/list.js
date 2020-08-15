@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
-import { Badge, Button, Label, Modal, ModalHeader, ModalBody, Row } from 'reactstrap';
+import { Badge, Button, FormGroup, Label, Modal, ModalHeader, ModalBody, Row } from 'reactstrap';
 
+import Switch from 'rc-switch';
+import 'rc-switch/assets/index.css';
 import {
     AvForm,
     AvField,
@@ -16,10 +18,17 @@ import { Colxx, Separator } from '../../../components/common/CustomBootstrap';
 import Breadcrumb from '../../../containers/navs/Breadcrumb';
 import { ReactTableWithPaginationCard } from '../../../containers/ui/ReactTableCards';
 
+import { deletePostsOfUser, deleteUserById } from '../../../utils';
+import { loadAllUsers } from '../../../redux/actions';
 
-const UserList = ({ match, history, friends, posts, users }) => {
+
+const UserList = ({ match, history, friends, posts, users, loadAllUsersAction }) => {
     const [data, setData] = useState([]);
+
+    const [loading, setLoading] = useState(false);
+    const [delId, setDeleteId] = useState(-1);
     const [modalDetails, setModalDetails] = useState(false);
+    const [modalOptions, setModalOptions] = useState({ comment: true, post: true, report: true, friend: true, chat: true });
 
     const cols = [
         {
@@ -34,7 +43,7 @@ const UserList = ({ match, history, friends, posts, users }) => {
             cellClass: 'list-item-heading w-10',
             Cell: (props) => <>
                 <div className="text-center">
-                    <img src={getUserAvatarUrl(props.value)} style={{width: 50, height: 50, borderRadius: '50%'}} alt="User Profile" />
+                    <img src={getUserAvatarUrl(props.value)} style={{ width: 50, height: 50, borderRadius: '50%' }} alt="User Profile" />
                 </div>
             </>,
         },
@@ -123,9 +132,9 @@ const UserList = ({ match, history, friends, posts, users }) => {
         if (!!photo) {
             return photo;
         } else if (avatarIndex !== undefined && avatarIndex !== "") {
-            return `/assets/avatar/${sex==='1'?'girl':'boy'}/${avatarIndex}.png`;
+            return `/assets/avatar/${sex === '1' ? 'girl' : 'boy'}/${avatarIndex}.png`;
         } else {
-            return `/assets/avatar/avatar_${sex==='1' ? 'girl2' : 'boy1'}.png`;
+            return `/assets/avatar/avatar_${sex === '1' ? 'girl2' : 'boy1'}.png`;
         }
     }
 
@@ -180,11 +189,33 @@ const UserList = ({ match, history, friends, posts, users }) => {
     };
     const handleOnDelete = (user_id) => {
         setModalDetails(true);
+        setDeleteId(user_id);
     };
+    const onConfirmDelete = async () => {
+        console.log(delId, modalOptions);
 
-
-    const onConfirmDelete = () => {
-
+        try {
+            setLoading(true);
+            const res = await deleteUserById(delId, modalOptions);
+            setLoading(false);
+            if (res.status === true) {
+                NotificationManager.success(res.message, 'Delete User');
+                loadAllUsersAction();
+                setModalDetails(false);
+            } else {
+                NotificationManager.error(res.message, 'Delete User');
+            }
+        } catch (err) {
+            setLoading(false);
+            console.error(err);
+            NotificationManager.error('Something went wrong', 'Delete User');
+        }
+    }
+    const getAllActive = () => {
+        return modalOptions.post && modalOptions.comment && modalOptions.report && modalOptions.chat && modalOptions.friend;
+    }
+    const setAllActive = (st) => {
+        setModalOptions({ comment: st, post: st, report: st, friend: st, chat: st });
     }
 
     return (
@@ -194,6 +225,7 @@ const UserList = ({ match, history, friends, posts, users }) => {
                     <Breadcrumb heading="menu.users" match={match} />
                     <Separator className="mb-5" />
                 </Colxx>
+
             </Row>
 
             <Row>
@@ -234,11 +266,100 @@ const UserList = ({ match, history, friends, posts, users }) => {
                         }
                     >
 
-                        <Separator className="mb-5" />
+                        <h5>Delete together user's:</h5>
+                        <Colxx className="mb-4" xxs="12">
+                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                <Label>
+                                    All
+                                </Label>
+                                <Switch
+                                    className="custom-switch custom-switch-secondary"
+                                    checked={getAllActive()}
+                                    onChange={setAllActive}
+                                />
+                            </div>
+                        </Colxx>
 
+                        <Colxx className="mb-2" xxs="12">
+                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                <Label>
+                                    Posts
+                                </Label>
+                                <Switch
+                                    className="custom-switch custom-switch-secondary"
+                                    checked={modalOptions.post}
+                                    onChange={(st) => setModalOptions({ ...modalOptions, post: st })}
+                                />
+                            </div>
+                        </Colxx>
+                        <Colxx className="mb-2" xxs="12">
+                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                <Label>
+                                    Comments
+                                </Label>
+                                <Switch
+                                    className="custom-switch custom-switch-secondary"
+                                    checked={modalOptions.comment}
+                                    onChange={(st) => setModalOptions({ ...modalOptions, comment: st })}
+                                />
+                            </div>
+                        </Colxx>
+                        <Colxx className="mb-2" xxs="12">
+                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                <Label>
+                                    Reports
+                                </Label>
+                                <Switch
+                                    className="custom-switch custom-switch-secondary"
+                                    checked={modalOptions.report}
+                                    onChange={(st) => setModalOptions({ ...modalOptions, report: st })}
+                                />
+                            </div>
+                        </Colxx>
+                        <Colxx className="mb-2" xxs="12">
+                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                <Label>
+                                    Chat
+                                </Label>
+                                <Switch
+                                    className="custom-switch custom-switch-secondary"
+                                    checked={modalOptions.chat}
+                                    onChange={(st) => setModalOptions({ ...modalOptions, chat: st })}
+                                />
+                            </div>
+                        </Colxx>
+                        <Colxx className="mb-2" xxs="12">
+                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                <Label>
+                                    Friend
+                                </Label>
+                                <Switch
+                                    className="custom-switch custom-switch-secondary"
+                                    checked={modalOptions.friend}
+                                    onChange={(st) => setModalOptions({ ...modalOptions, friend: st })}
+                                />
+                            </div>
+                        </Colxx>
+
+
+                        <Separator className="mb-5 mt-5" />
                         <div className="d-flex justify-content-end">
-                            <Button color="primary mr-2">
-                                <IntlMessages id="actions.submit" />
+                            <Button
+                                type="submit"
+                                color="primary"
+                                className={`btn-shadow btn-multiple-state mr-2 ${
+                                    loading ? 'show-spinner' : ''
+                                    }`}
+                                size="lg"
+                            >
+                                <span className="spinner d-inline-block">
+                                    <span className="bounce1" />
+                                    <span className="bounce2" />
+                                    <span className="bounce3" />
+                                </span>
+                                <span className="label">
+                                    Delete
+                                </span>
                             </Button>{' '}
                             <Button
                                 color="secondary"
@@ -265,4 +386,6 @@ const mapStateToProps = ({ friends: friendApp, posts: postApp, users: userApp })
     };
 };
 
-export default connect(mapStateToProps)(UserList);
+export default connect(mapStateToProps, {
+    loadAllUsersAction: loadAllUsers
+})(UserList);

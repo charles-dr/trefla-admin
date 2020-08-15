@@ -317,6 +317,7 @@ export const addNewUserRequest = async (profile, avatarFile) => {
 
   if (!profile.email) { return { status: false, message: 'Email is required!' }; }
   if (!profile.password) { return { status: false, message: 'User Name is required!' }; }
+  if (profile.cpassword !== undefined) { delete profile.cpassword; }
 
   const userWithEmail = await getUserByEmail(profile.email); console.log(userWithEmail);
   if (userWithEmail.status === true) {
@@ -418,3 +419,140 @@ export const getExtensionFromFileName = (filename) => {
   return tArray[tArray.length - 1];
 }
 
+export const deleteUserById = async (user_id, options) => {
+  console.log(user_id, options);
+
+  // delete post
+  if (options.post) {
+    try {
+      await deletePostsOfUser(user_id);
+    } catch (err) {
+      return { status: false, message: 'Error while deleting posts!', details: err.message };
+    }
+  }
+
+  // delete chats
+  if (options.chat) {
+    try {
+      await deleteChatOfUesr(user_id);
+    } catch (err) {
+      return { status: false, message: 'Error while deleting chat!', details: err.message };
+    }
+  }
+
+  // delete comments
+  if (options.comment) {
+    try {
+      deleteCommentsOfUser(user_id);
+    } catch (err) {
+      return { status: false, message: 'Error while deleting comments!', details: err.message };
+    }
+  }
+
+  // delete reports
+  if (options.report) {
+    try {
+      deleteReportsOfUser(user_id);
+    } catch (err) {
+      return { status: false, message: 'Error while deleting reports!', details: err.message }
+    }
+  }
+
+  // delete friends
+  if (options.friend) {
+    try {
+      deleteFriendsOfUser(user_id);
+    } catch (err) {
+      return { status: false, message: 'Error while deleting friends!', details: err.message };
+    }
+  }
+
+  // delete user
+  try {
+    await _firebase.firestore().collection('users').doc(user_id.toString()).collection('notifications').get().then(qss => {
+      qss.forEach(async notiDoc => {
+        await _firebase.firestore().collection('reports').doc(user_id.toString()).collection('notifications').doc(notiDoc.id).delete();
+      });
+    });
+    await _firebase.firestore().collection('users').doc(user_id.toString()).collection('photos').get().then(qss => {
+      qss.forEach(async photoDoc => {
+        await _firebase.firestore().collection('reports').doc(user_id.toString()).collection('photos').doc(photoDoc.id).delete();
+      });
+    });
+    await _firebase.firestore().collection('users').doc(user_id.toString()).delete();
+  } catch (err) {
+    return { status: false, message: 'Error while deleting user', details: err.message };
+  }
+  return { status: true, message: 'User has been deleted!' };
+}
+
+
+export const deletePostsOfUser = async user_id => {
+  await _firebase.firestore().collection('posts').where('post_user_id', '==', user_id).get()
+    .then(querySnapshot => {
+      querySnapshot.forEach(async doc => {
+        await _firebase.firestore().collection('posts').doc(doc.id).collection('likes').get().then(qss => {
+          qss.forEach(async likeDoc => {
+            await _firebase.firestore().collection('posts').doc(doc.id).collection('likes').doc(likeDoc.id).delete();
+          })
+        });
+        await _firebase.firestore().collection('posts').doc(doc.id).delete();
+      });
+    });
+}
+
+export const deleteChatOfUesr = async (user_id) => {
+  await _firebase.firestore().collection('chats').where('user_ids', 'array-contains', user_id).get()
+    .then(querySnapshot => {
+      querySnapshot.forEach(async doc => {
+        await _firebase.firestore().collection('chats').doc(doc.id).collection('messages').get().then(qss => {
+          qss.forEach(async msgDoc => {
+            await _firebase.firestore().collection('chats').doc(doc.id).collection('messages').doc(msgDoc.id).delete();
+          });
+        });
+        await _firebase.firestore().collection('chats').doc(doc.id).delete();
+      });
+    });
+}
+
+export const deleteCommentsOfUser = async (user_id) => {
+  await _firebase.firestore().collection('comments').where('user_id', '==', user_id).get()
+    .then(querySnapshot => {
+      querySnapshot.forEach(async doc => {
+        await _firebase.firestore().collection('comments').doc(doc.id).collection('likes').get().then(qss => {
+          qss.forEach(async msgDoc => {
+            await _firebase.firestore().collection('comments').doc(doc.id).collection('likes').doc(msgDoc.id).delete();
+          });
+        });
+        await _firebase.firestore().collection('comments').doc(doc.id).delete();
+      });
+    });
+}
+
+export const deleteReportsOfUser = async (user_id) => {
+  await _firebase.firestore().collection('reports').where('user_id', '==', user_id).get()
+    .then(querySnapshot => {
+      querySnapshot.forEach(async doc => {
+        // await _firebase.firestore().collection('reports').doc(doc.id).collection('likes').get().then(qss => {
+        //   qss.forEach(async msgDoc => {
+        //     await _firebase.firestore().collection('reports').doc(doc.id).collection('likes').doc(msgDoc.id).delete();
+        //   });
+        // });
+        await _firebase.firestore().collection('reports').doc(doc.id).delete();
+      });
+    });
+}
+
+export const deleteFriendsOfUser = async (user_id) => {
+  await _firebase.firestore().collection('friends').where('user_ids', 'array-contains', user_id).get()
+    .then(querySnapshot => {
+      querySnapshot.forEach(async doc => {
+        // await _firebase.firestore().collection('reports').doc(doc.id).collection('likes').get().then(qss => {
+        //   qss.forEach(async msgDoc => {
+        //     await _firebase.firestore().collection('reports').doc(doc.id).collection('likes').doc(msgDoc.id).delete();
+        //   });
+        // });
+        await _firebase.firestore().collection('friends').doc(doc.id).delete();
+      });
+    });
+}
