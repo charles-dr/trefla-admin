@@ -1,5 +1,5 @@
 import React, { createRef, useState, useEffect } from 'react';
-import { Row, Card, CardTitle, Label, FormGroup, Button, Nav, NavItem, TabContent, TabPane, } from 'reactstrap';
+import { Row, Card, CardTitle, Label, FormGroup, Button, Nav, NavItem, TabContent, TabPane } from 'reactstrap';
 import { NavLink, Redirect, useHistory } from 'react-router-dom';
 import { connect } from 'react-redux';
 
@@ -24,9 +24,10 @@ import { login, updateLogin } from '../../../redux/actions';
 import { Colxx, Separator } from '../../../components/common/CustomBootstrap';
 import IntlMessages from '../../../helpers/IntlMessages';
 import Breadcrumb from '../../../containers/navs/Breadcrumb';
-import LocationItem from '../../../components/custom/LocationItem';
+import { LocationItem, UserSettings } from '../../../components/custom';
 
-import { getMapPositionFromString, getUserByIdRequest, transformTime, updateAdminPassword } from '../../../utils';
+import { formatTime, getMapPositionFromString, getUserByIdRequest, transformTime, updateUserProfile } from '../../../utils';
+import { loadAllUsers } from '../../../redux/actions';
 
 
 const validateEmail = (value) => {
@@ -74,12 +75,14 @@ const MapWithAMarker = withScriptjs(
     ))
 );
 
-const EditUserPage = ({ history, match, loginUserAction, updateLoginAction }) => {
+const EditUserPage = ({ history, match, loginUserAction, updateLoginAction, loadAllUsersAction }) => {
+    let avatarInput = null;
     let cardImgFile = null;
 
     const [profile, setProfile] = useState(INIT_USER_INFO);
     const [dob, setDob] = useState(new Date());
     const [active, setActive] = useState(true);
+    const [avatar, setAvatar] = useState({ mode: 0, path: 0 }); // mode: 0 - avatar, 1 - file
     const [gender, setGender] = useState(genderData[0]);
     const [cardImage, setCardImage] = useState('/assets/img/default/default_national_card.png');
 
@@ -94,7 +97,7 @@ const EditUserPage = ({ history, match, loginUserAction, updateLoginAction }) =>
     useEffect(() => {
         getUserByIdRequest(match.params.id)
             .then(res => {
-                console.log(res);
+                // console.log(res);
                 if (!res) {
                     NotificationManager.warning('Error while getting user info!', 'Edit User');
                 } else {
@@ -102,15 +105,29 @@ const EditUserPage = ({ history, match, loginUserAction, updateLoginAction }) =>
                     if (!!res.birthday) {
                         setDob(new Date(res.birthday));
                     }
+
+                    // active
+                    setActive(res.active === 1 ? true : false);
+
+                    // gender
                     if (res.sex === '1') {
                         setGender(genderData[1]);
                     } else {
                         setGender(genderData[0]);
                     }
 
+                    // card image
                     if (!!res.card_img_url) {
                         setCardImage(res.card_img_url);
                     }
+
+                    // profile photo
+                    if (!!res.photo) {
+                        setAvatar({mode: 1, path: res.photo});
+                    } else if (!!res.avatarIndex) {
+                        setAvatar({mode: 0, path: res.avatarIndex});
+                    }
+
                     setMapData(res);
                 }
             })
@@ -122,22 +139,52 @@ const EditUserPage = ({ history, match, loginUserAction, updateLoginAction }) =>
     }, [match]);
 
     const onUpdateProfile = async (values) => {
+        // console.log(profile, avatar, gender, active, dob, cardImage);
+        const cardFile = cardImgFile.files[0];
+        const avatarFile = avatarInput.files[0];
+
+        const new_profile = composeSubmitData();
+        // console.log(new_profile, avatar.mode === 1 ? avatarInput.files[0] : null, cardImgFile.files[0]);
+        // return;
 
         // set loading
         setLoading(true);
-        const res = await updateAdminPassword(profile);
+        
+        console.log(cardImgFile, !!cardImgFile);
+        const res = await updateUserProfile(new_profile, avatar.mode === 1 ? avatarFile : null, cardFile);
 
         // cancel the loading
         setLoading(false);
         if (res.status === true) {
-            NotificationManager.success(res.message, 'Password Update', 3000, null, null, '');
+            NotificationManager.success(res.message, 'User Update', 3000, null, null, '');
             // init form
-            setProfile({ old_pass: '', password: '', cpassword: '' });
+            // setProfile({ old_pass: '', password: '', cpassword: '' });
+            loadAllUsersAction();
+            history.push('/app/user');
         } else {
-            NotificationManager.warning(res.message, 'Password Update', 3000, null, null, '');
+            NotificationManager.warning(res.message, 'User Update', 3000, null, null, '');
         }
     };
 
+    const composeSubmitData = () => {
+        let submit_profile = {};
+        for (let key in profile) {
+            submit_profile[key] = profile[key];
+        }
+
+        // active
+        submit_profile.active = active === true ? 1 : 0;
+        // dob
+        submit_profile.birthday = formatTime(dob, 'm/d/Y');
+        // avatar
+        if (avatar.mode === 0) {
+            submit_profile.avatarIndex = avatar.path;
+        }
+        // gender
+        submit_profile.sex = gender.value;
+
+        return submit_profile;
+    }
 
     const setMapData = (res) => {
         setZoom(10);
@@ -145,8 +192,8 @@ const EditUserPage = ({ history, match, loginUserAction, updateLoginAction }) =>
 
         //set markers
         let tMarkers = [];
-
-        for (let location of res.location_array) {
+        let location_array = res.location_array || [];
+        for (let location of location_array) {
             let tArray = location.split('&&');
             let strPoint = tArray[0];
             let position = getMapPositionFromString(strPoint);
@@ -218,8 +265,19 @@ const EditUserPage = ({ history, match, loginUserAction, updateLoginAction }) =>
         // check if selected valid file
         if (!!file) {
             setCardImage(URL.createObjectURL(file));
-            console.log(cardImgFile.files[0]);
+            // console.log(cardImgFile.files[0]);
         }
+    }
+    const handleAvatarSelect = (e) => {
+        const file = e.target.files[0];
+
+        // check if selected valid file
+        if (!!file) {
+            setAvatar({mode: 1, path: URL.createObjectURL(file)});
+        }
+    }
+    const handleOnClickAvatar = (num) => {
+        setAvatar({ mode: 0, path: num });
     }
     // const setGender = (e) => {
     //     console.log(e);
@@ -231,6 +289,16 @@ const EditUserPage = ({ history, match, loginUserAction, updateLoginAction }) =>
     const setFieldTouched = (e) => {
         console.log(e);
     }
+    const openAvatarSelector = () => {
+        avatarInput.click();
+    }
+    const getAvatarPath = () => {
+        if (avatar.mode === 0) {
+            return `/assets/avatar/${gender && gender.value === '1' ? 'girl' : 'boy'}/${avatar.path}.png`;
+        } else {
+            return avatar.path || '/assets/avatar/avatar_boy1.png';
+        }
+    }
     const ProfileForm = () => {
         return (
             <Formik initialValues={initialValues} onSubmit={onUpdateProfile}>
@@ -239,6 +307,39 @@ const EditUserPage = ({ history, match, loginUserAction, updateLoginAction }) =>
                     // setFieldTouched, 
                     errors, touched, values }) => (
                         <Form className="av-tooltip tooltip-label-bottom mx-auto" style={{ maxWidth: 1024, width: '100%' }}>
+
+                            <div className="profile-avatar">
+                                <div className="wrapper">
+                                    <img src={getAvatarPath()} alt="User Profile" />
+                                    <div className="hover-layer">
+                                        <div
+                                            className="glyph-icon simple-icon-picture change-avatar two"
+                                            title="Select from avatars"
+                                            onClick={openAvatarSelector}></div>
+                                        <div
+                                            className="glyph-icon simple-icon-camera change-avatar two"
+                                            title="Upload file"
+                                            onClick={openAvatarSelector}></div>
+                                    </div>
+                                </div>
+                                <input type="file" className="hidden-file"
+                                    ref={input => { avatarInput = input }}
+                                    onChange={handleAvatarSelect}
+                                    accept="image/*" />
+                            </div>
+
+                            <div className="all-avatars mt-1 mb-5">
+                                {
+                                    [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((num, i) => (
+                                        <img 
+                                            className={`example-avatar ${avatar.path === num ? 'selected' : ''}`} 
+                                            src={`/assets/avatar/${gender && gender.value === '1' ? 'girl' : 'boy'}/${num}.png`} 
+                                            onClick={() => handleOnClickAvatar(num)}
+                                            alt={`Example Avatar ${i}`} 
+                                            key={i} />
+                                    ))
+                                }
+                            </div>
 
                             {/* name & email */}
                             <Row>
@@ -322,6 +423,7 @@ const EditUserPage = ({ history, match, loginUserAction, updateLoginAction }) =>
                                 </Colxx>
                             </Row>
 
+                            {/* Card Number & Image */}
                             <Row>
                                 <Colxx xxs="12" md="6">
                                     <FormGroup className="form-group">
@@ -397,7 +499,7 @@ const EditUserPage = ({ history, match, loginUserAction, updateLoginAction }) =>
                                             className="form-control"
                                             type="text"
                                             name="city"
-                                            value={profile.city}
+                                            value={profile.city || ''}
                                             validate={() => validateRequired('city')}
                                             onChange={handleOnChange}
                                         />
@@ -561,26 +663,19 @@ const EditUserPage = ({ history, match, loginUserAction, updateLoginAction }) =>
                         </Colxx>
 
                         <Colxx xxs="12">
-                            <div className="custom-scrollbar mt-4" style={{maxHeight: '75vh', overflow: 'auto'}}>
-                            {
-                                profile && profile.location_array && profile.location_array.length > 0 && profile.location_array.map((location, i) => (
-                                    <LocationItem strInfo={location} key={i} />
-                                ))
-                            }
+                            <div className="custom-scrollbar mt-4" style={{ maxHeight: '75vh', overflow: 'auto' }}>
+                                {
+                                    profile && profile.location_array && profile.location_array.length > 0 && profile.location_array.map((location, i) => (
+                                        <LocationItem strInfo={location} key={i} />
+                                    ))
+                                }
                             </div>
                         </Colxx>
                     </Row>
                 </TabPane>
 
                 <TabPane tabId="3">
-                    <Row>
-                        <Colxx xxs="12" md="6">
-
-                        </Colxx>
-                        <Colxx xxs="12" md="6">
-                            
-                        </Colxx>
-                    </Row>
+                    <UserSettings className="" profile={profile} />
                 </TabPane>
             </TabContent>
 
@@ -594,6 +689,5 @@ const mapStateToProps = (state) => {
 };
 
 export default connect(mapStateToProps, {
-    loginUserAction: login,
-    updateLoginAction: updateLogin
+    loadAllUsersAction: loadAllUsers,
 })(EditUserPage);

@@ -44,6 +44,29 @@ export const convertTimeToString = (dt) => {
   return `${y}-${m}-${d}-${H}-${i}-${s}:${tz}`;
 }
 
+export const formatTime = (dt, format) => {
+  if (!dt) {
+    dt = new Date();
+  }
+
+  const y = dt.getFullYear();
+  const m = formatTwoDigits(dt.getMonth() + 1);
+  const d = formatTwoDigits(dt.getDate());
+  const H = formatTwoDigits(dt.getHours());
+  const i = formatTwoDigits(dt.getMinutes());
+  const s = formatTwoDigits(dt.getSeconds());
+  // const tz = -dt.getTimezoneOffset();
+
+  let formatted = format;
+  formatted = formatted.replace('Y', y);
+  formatted = formatted.replace('m', m);
+  formatted = formatted.replace('d', d);
+  formatted = formatted.replace('H', H);
+  formatted = formatted.replace('i', i);
+  formatted = formatted.replace('s', s);
+  return formatted;
+}
+
 export const getAuthToken = () => {
   const encToken = window.localStorage.getItem(getAuthTokenName());
   return !!encToken ? decryptString(encToken) : '';

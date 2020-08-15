@@ -46,9 +46,11 @@ html {
         position: relative;
         border-radius: 50%;
         overflow: hidden;
+        border: 2px solid $input-background;
 
         img {
-            width: 100%;
+            width: 200px;
+            height: 200px;
         }
 
         .hover-layer {
@@ -67,6 +69,14 @@ html {
 
             .change-avatar {
                 font-size: 24px;
+
+                &.two {
+                    font-size: 20px;
+                    margin: 0 8px;
+                    &:hover {
+                        opacity: 0.95;
+                    }
+                }
             }
         }
 
@@ -131,5 +141,24 @@ html {
 
     &:first-child {
         margin: 0;
+    }
+}
+
+
+.all-avatars {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+
+    .example-avatar {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        border: 1px solid $theme-color-1;
+        margin: 10px 10px;
+        cursor: pointer;
+        &.selected {
+            border: 2px solid $theme-color-2;
+        }
     }
 }

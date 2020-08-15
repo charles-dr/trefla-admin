@@ -29,6 +29,16 @@ const UserList = ({ match, history, friends, posts, users }) => {
             Cell: (props) => <>{props.value}</>,
         },
         {
+            Header: 'Image',
+            accessor: 'image',
+            cellClass: 'list-item-heading w-10',
+            Cell: (props) => <>
+                <div className="text-center">
+                    <img src={getUserAvatarUrl(props.value)} style={{width: 50, height: 50, borderRadius: '50%'}} alt="User Profile" />
+                </div>
+            </>,
+        },
+        {
             Header: 'Email',
             accessor: 'email',
             cellClass: 'text-muted  w-5',
@@ -109,6 +119,16 @@ const UserList = ({ match, history, friends, posts, users }) => {
         return () => { return true; };
     }, [match, users, posts, friends]);
 
+    const getUserAvatarUrl = ({ photo, sex, avatarIndex }) => {
+        if (!!photo) {
+            return photo;
+        } else if (avatarIndex !== undefined && avatarIndex !== "") {
+            return `/assets/avatar/${sex==='1'?'girl':'boy'}/${avatarIndex}.png`;
+        } else {
+            return `/assets/avatar/avatar_${sex==='1' ? 'girl2' : 'boy1'}.png`;
+        }
+    }
+
     const formatCoordinate = (coord) => {
         const arr = coord.split(',');
         return <>
@@ -125,6 +145,12 @@ const UserList = ({ match, history, friends, posts, users }) => {
                 if (user[key] !== undefined) {
                     user_item[key] = user[key];
                 }
+            }
+            // new key - image
+            user_item.image = {
+                photo: user.photo,
+                sex: user.sex,
+                avatarIndex: user.avatarIndex,
             }
 
             // put item to array

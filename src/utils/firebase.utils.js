@@ -149,7 +149,7 @@ export const addNewLangRequest = async ({ lang_id, name, code, active, blob }) =
       const uploaded = await fileRef.put(blob);
       // get download url
       download_url = await fileRef.getDownloadURL();
-      
+
     }
 
     const adminRef = _firebase.firestore().collection('langs').doc(lang_id.toString());
@@ -297,7 +297,7 @@ export const getUserByIdRequest = async (user_id) => {
   user_id = Number(user_id); // convert into integer
   const userRef = _firebase.firestore().collection('users').doc(user_id.toString());
 
-  return  _firebase.firestore().collection('users').doc(user_id.toString()).get()
+  return _firebase.firestore().collection('users').doc(user_id.toString()).get()
     .then(doc => {
       if (doc.exists) {
         return doc.data();
@@ -310,3 +310,54 @@ export const getUserByIdRequest = async (user_id) => {
       return false;
     })
 }
+
+export const updateUserProfile = async (profile, avatarFile = null, cardFile = null) => {
+  console.log(avatarFile, cardFile, profile);
+  const user_id = profile.user_id;
+
+  // update card photo
+  if (!!cardFile) {
+    let ext = getExtensionFromFileName(cardFile.name);
+    const cardRef = _firebase.storage().ref().child(`card/${user_id.toString()}.${ext}`);
+    try {
+      console.log('[Uploading card]')
+      await cardRef.put(cardFile);
+      let card_path = await cardRef.getDownloadURL();
+      profile.card_img_url = card_path;
+    } catch (e) {
+      console.error(e);
+      return {status: false, message: 'Failed to upload card image!'};
+    }
+  }
+
+  // update profile photo
+  if (!!avatarFile) {
+    let ext = getExtensionFromFileName(avatarFile.name);
+    const avatarRef = _firebase.storage().ref().child(`profile/${user_id.toString()}.${ext}`);
+    try {
+      await avatarRef.put(avatarFile);
+      let profile_photo = await avatarRef.getDownloadURL();
+      profile.photo = profile_photo;
+    } catch (e) {
+      console.error(e);
+      return {status: false, message: 'Failed to upload profile photo!'};
+    }
+  }
+
+
+  try {
+    const userRef = _firebase.firestore().collection('users').doc(user_id.toString());
+    profile.update_time = convertTimeToString();
+    await userRef.set(profile);
+    return {status: true, message: 'User has been updated!'};
+  } catch (e) {
+    return {status: false, message: 'Failed to update profile', details: e.message};
+  }
+
+}
+
+export const getExtensionFromFileName = (filename) => {
+  const tArray = filename.split('.');
+  return tArray[tArray.length - 1];
+}
+
