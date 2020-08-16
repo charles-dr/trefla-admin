@@ -127,6 +127,22 @@ html {
                 color: #13852e;
             }
         }
+
+        &.warning {
+            color: orange;
+
+            &:hover {
+                color: rgb(212, 141, 8);
+            }
+        }
+
+        &.inactive {
+            color: #898989;
+
+            &:hover {
+                color: #28a745;
+            }
+        }
     }
 }
 

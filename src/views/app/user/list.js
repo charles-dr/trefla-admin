@@ -18,7 +18,7 @@ import { Colxx, Separator } from '../../../components/common/CustomBootstrap';
 import Breadcrumb from '../../../containers/navs/Breadcrumb';
 import { ReactTableWithPaginationCard } from '../../../containers/ui/ReactTableCards';
 
-import { deletePostsOfUser, deleteUserById } from '../../../utils';
+import { deletePostsOfUser, deleteUserById, toggleBanStatus } from '../../../utils';
 import { loadAllUsers } from '../../../redux/actions';
 
 
@@ -29,6 +29,10 @@ const UserList = ({ match, history, friends, posts, users, loadAllUsersAction })
     const [delId, setDeleteId] = useState(-1);
     const [modalDetails, setModalDetails] = useState(false);
     const [modalOptions, setModalOptions] = useState({ comment: true, post: true, report: true, friend: true, chat: true });
+
+    const [banModal, setBanModal] = useState(false);
+    const [banInfo, setBanInfo] = useState({ user_id: -1, active: 1 });
+    // const [banReason, setBanReason] = useState('');
 
     const cols = [
         {
@@ -100,7 +104,7 @@ const UserList = ({ match, history, friends, posts, users, loadAllUsersAction })
         },
         {
             Header: 'Actions',
-            accessor: 'user_id',
+            accessor: 'action',
             cellClass: 'text-muted  w-10',
             Cell: (props) => (
                 <>
@@ -109,13 +113,19 @@ const UserList = ({ match, history, friends, posts, users, loadAllUsersAction })
                             className="iconsminds-file-edit info"
                             title="Edit"
                             style={{ fontSize: 18 }}
-                            onClick={() => handleOnEdit(props.value)}
+                            onClick={() => handleOnEdit(props.value.user_id)}
+                        />
+                        <i
+                            className={`${props.value.active === 1 ? 'simple-icon-ban' : 'simple-icon-energy'} ${props.value.active === 1 ? 'warning' : 'success'}`}
+                            title={`${props.value.active === 1 ? 'Ban' : 'Release'} User`}
+                            style={{ fontSize: 18 }}
+                            onClick={() => handleOnBanUser(props.value)}
                         />
                         <i
                             className="simple-icon-trash danger"
                             title="Remove"
                             style={{ fontSize: 18 }}
-                            onClick={() => handleOnDelete(props.value)}
+                            onClick={() => handleOnDelete(props.value.user_id)}
                         />
                     </div>
                 </>
@@ -162,6 +172,10 @@ const UserList = ({ match, history, friends, posts, users, loadAllUsersAction })
                 sex: user.sex,
                 avatarIndex: user.avatarIndex,
             }
+            user_item.action = {
+                user_id: user.user_id,
+                active: user.active,
+            }
 
             // put item to array
             new_users.push(user_item);
@@ -187,6 +201,34 @@ const UserList = ({ match, history, friends, posts, users, loadAllUsersAction })
     const handleOnEdit = (user_id) => {
         history.push(`/app/user/edit/${user_id}`);
     };
+    const handleOnBanUser = (ban) => {
+        setBanInfo(ban);
+        // setBanReason('');
+        // if (ban.active !== undefined && ban.active === 1) {
+        setBanModal(true);
+        // }
+
+    }
+    const onConfirmBan = async (event, errors, values) => {
+        // console.log(event, errors, values);
+        if (
+            (banInfo.active === 1 && errors.length === 0) ||
+            (banInfo.active !== 1)
+        ) {
+            // console.log(values);
+            setLoading(true);
+            const res = await toggleBanStatus(banInfo, banInfo.active === 1 ? values.banReason : '');
+            setLoading(false);
+            if (res.status === true) {
+                NotificationManager.success(res.message, `${banInfo.active === 1 ? 'Ban' : 'Release'} User`);
+                setBanModal(false);
+                loadAllUsersAction();
+            } else {
+                NotificationManager.error(res.message, `${banInfo.active === 1 ? 'Ban' : 'Release'} User`);
+            }
+        }
+    }
+
     const handleOnDelete = (user_id) => {
         setModalDetails(true);
         setDeleteId(user_id);
@@ -217,6 +259,7 @@ const UserList = ({ match, history, friends, posts, users, loadAllUsersAction })
     const setAllActive = (st) => {
         setModalOptions({ comment: st, post: st, report: st, friend: st, chat: st });
     }
+
 
     return (
         <>
@@ -250,6 +293,7 @@ const UserList = ({ match, history, friends, posts, users, loadAllUsersAction })
                 </Colxx>
             </Row>
 
+            {/* Delete Modal */}
             <Modal
                 isOpen={modalDetails}
                 toggle={() => setModalDetails(!modalDetails)}
@@ -364,6 +408,66 @@ const UserList = ({ match, history, friends, posts, users, loadAllUsersAction })
                             <Button
                                 color="secondary"
                                 onClick={() => setModalDetails(false)}
+                            >
+                                <IntlMessages id="actions.cancel" />
+                            </Button>
+                        </div>
+                    </AvForm>
+                </ModalBody>
+            </Modal>
+
+
+            {/* Ban Modal */}
+            <Modal
+                isOpen={banModal}
+                toggle={() => setBanModal(!banModal)}
+                backdrop="static"
+            >
+                <ModalHeader>
+                    Ban User
+                </ModalHeader>
+                <ModalBody>
+                    <AvForm
+                        className="av-tooltip tooltip-label-right"
+                        onSubmit={(event, errors, values) =>
+                            onConfirmBan(event, errors, values)
+                        }
+                    >
+                        {
+                            banInfo.active === 1 &&
+                            <AvGroup>
+                                <Label>Ban Reason:</Label>
+                                <AvInput type="textarea" name="banReason" id="banReason" required />
+                                <AvFeedback>Please enter ban reason!</AvFeedback>
+                            </AvGroup>
+                        }
+                        {
+                            banInfo.active !== 1 && <label>Are you sure to release this user?</label>
+                        }
+
+
+                        <Separator className="mb-5 mt-3" />
+                        <div className="d-flex justify-content-end">
+                            <Button
+                                type="submit"
+                                color="primary"
+                                className={`btn-shadow btn-multiple-state mr-2 ${
+                                    loading ? 'show-spinner' : ''
+                                    }`}
+                                size="lg"
+                            >
+                                <span className="spinner d-inline-block">
+                                    <span className="bounce1" />
+                                    <span className="bounce2" />
+                                    <span className="bounce3" />
+                                </span>
+                                <span className="label">
+                                    {banInfo.active === 1 ? 'Ban' : 'Release'}
+                                </span>
+                            </Button>{' '}
+                            <Button
+                                color="secondary"
+                                onClick={() => setBanModal(false)}
                             >
                                 <IntlMessages id="actions.cancel" />
                             </Button>

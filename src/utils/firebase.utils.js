@@ -419,6 +419,25 @@ export const getExtensionFromFileName = (filename) => {
   return tArray[tArray.length - 1];
 }
 
+export const toggleBanStatus = async ({active, user_id}, banReason) => {
+  // console.log(active, user_id, banReason);
+  active = active === 1 ? 1 : 0;
+
+  const user = await getUserByIdRequest(user_id);
+  // console.log(user);
+  user.active = 1 - active;
+  user.ban_reason = banReason;
+  user.ban_reply = '';
+  user.update_time = convertTimeToString();
+  try {
+    const userRef = _firebase.firestore().collection('users').doc(user_id.toString());
+    await userRef.set(user);
+    return {status: true, message: `User has been ${active === 1 ? 'banned' : 'released'}`};
+  } catch (e) {
+    return {status: false, message: `Failed to ${active === 1 ? 'ban' : 'release'} user...`, details: e.message};
+  }
+}
+
 export const deleteUserById = async (user_id, options) => {
   console.log(user_id, options);
 
@@ -486,7 +505,6 @@ export const deleteUserById = async (user_id, options) => {
   return { status: true, message: 'User has been deleted!' };
 }
 
-
 export const deletePostsOfUser = async user_id => {
   await _firebase.firestore().collection('posts').where('post_user_id', '==', user_id).get()
     .then(querySnapshot => {
@@ -494,6 +512,12 @@ export const deletePostsOfUser = async user_id => {
         await _firebase.firestore().collection('posts').doc(doc.id).collection('likes').get().then(qss => {
           qss.forEach(async likeDoc => {
             await _firebase.firestore().collection('posts').doc(doc.id).collection('likes').doc(likeDoc.id).delete();
+          })
+        });
+        
+        await _firebase.firestore().collection('posts').doc(doc.id).collection('comments').get().then(qss => {
+          qss.forEach(async commentDoc => {
+            await _firebase.firestore().collection('posts').doc(doc.id).collection('comments').doc(commentDoc.id).delete();
           })
         });
         await _firebase.firestore().collection('posts').doc(doc.id).delete();

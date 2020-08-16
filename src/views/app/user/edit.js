@@ -52,7 +52,7 @@ const validateName = (value) => {
 
 const INIT_USER_INFO = {
     active: 1, birthday: '1/1/1970', card_number: '', city: '', device_token: '', email: '', location_address: '', location_array: [],
-    location_coordinate: '0,0', sex: '1', user_id: -1, user_name: '',
+    location_coordinate: '0,0', sex: '1', user_id: -1, user_name: '', ban_reason: '', ban_reply: '',
 };
 
 const genderData = [
@@ -123,9 +123,9 @@ const EditUserPage = ({ history, match, loginUserAction, updateLoginAction, load
 
                     // profile photo
                     if (!!res.photo) {
-                        setAvatar({mode: 1, path: res.photo});
+                        setAvatar({ mode: 1, path: res.photo });
                     } else if (!!res.avatarIndex) {
-                        setAvatar({mode: 0, path: res.avatarIndex});
+                        setAvatar({ mode: 0, path: res.avatarIndex });
                     }
 
                     setMapData(res);
@@ -149,7 +149,7 @@ const EditUserPage = ({ history, match, loginUserAction, updateLoginAction, load
 
         // set loading
         setLoading(true);
-        
+
         console.log(cardImgFile, !!cardImgFile);
         const res = await updateUserProfile(new_profile, avatar.mode === 1 ? avatarFile : null, cardFile);
 
@@ -273,7 +273,7 @@ const EditUserPage = ({ history, match, loginUserAction, updateLoginAction, load
 
         // check if selected valid file
         if (!!file) {
-            setAvatar({mode: 1, path: URL.createObjectURL(file)});
+            setAvatar({ mode: 1, path: URL.createObjectURL(file) });
         }
     }
     const handleOnClickAvatar = (num) => {
@@ -331,11 +331,11 @@ const EditUserPage = ({ history, match, loginUserAction, updateLoginAction, load
                             <div className="all-avatars mt-1 mb-5">
                                 {
                                     [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((num, i) => (
-                                        <img 
-                                            className={`example-avatar ${avatar.path === num ? 'selected' : ''}`} 
-                                            src={`/assets/avatar/${gender && gender.value === '1' ? 'girl' : 'boy'}/${num}.png`} 
+                                        <img
+                                            className={`example-avatar ${avatar.path === num ? 'selected' : ''}`}
+                                            src={`/assets/avatar/${gender && gender.value === '1' ? 'girl' : 'boy'}/${num}.png`}
                                             onClick={() => handleOnClickAvatar(num)}
-                                            alt={`Example Avatar ${i}`} 
+                                            alt={`Example Avatar ${i}`}
                                             key={i} />
                                     ))
                                 }
@@ -550,6 +550,29 @@ const EditUserPage = ({ history, match, loginUserAction, updateLoginAction, load
                                 </Colxx>
                             </Row>
 
+
+                            <Row>
+                                <Colxx xxs="12" md="6">
+                                    <FormGroup className="form-group">
+                                        <Label>
+                                            Ban Reason
+                                        </Label>
+                                        <Field
+                                            className="form-control"
+                                            type="text"
+                                            component="textarea"
+                                            name="ban_reason"
+                                            value={profile.ban_reason}
+                                            onChange={handleOnChange}
+                                        />
+                                        {errors.ban_reason && touched.ban_reason && (
+                                            <div className="invalid-feedback d-block">
+                                                {errors.ban_reason}
+                                            </div>
+                                        )}
+                                    </FormGroup>
+                                </Colxx>
+                            </Row>
 
                             <div className="d-flex justify-content-end align-items-center">
                                 <Button
