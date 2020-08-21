@@ -22,11 +22,11 @@ import { login, updateLogin } from '../../../redux/actions';
 import { Colxx, Separator } from '../../../components/common/CustomBootstrap';
 import IntlMessages from '../../../helpers/IntlMessages';
 import Breadcrumb from '../../../containers/navs/Breadcrumb';
-import { LocationItem, UserSettings } from '../../../components/custom';
+import { LocationItem } from '../../../components/custom';
 
-import { convertTimeToString, formatTime, getMapPositionFromString, getPostByIdRequest, transformTime, updatePostRequest, addNewUserRequest } from '../../../utils';
-import { loadAllPosts, loadAllUsers } from '../../../redux/actions';
-import { reactionImages, typeIcons } from '../../../constants/custom';
+import { convertTimeToString, formatTime, getMapPositionFromString, getPostByIdRequest, transformTime, updatePostRequest } from '../../../utils';
+import { loadAllPosts } from '../../../redux/actions';
+// import { reactionImages, typeIcons } from '../../../constants/custom';
 
 const typeList = [
     { value: '0', label: 'Card', key: 0 },
@@ -39,18 +39,9 @@ const typeList = [
     { value: '33', label: 'Animal', key: 8 }
 ];
 
-const INIT_USER_INFO = {
-    active: 1, birthday: '1/1/1970', card_number: '', city: '', email: '', sex: '1', user_id: -1, user_name: '', bio: '', password: '', cpassword: '',
-};
-
 const INIT_POST_INFO = {
     active: 1, city: '', comment_num: 0, feed: '', isGuest: false, like_1_num: 0, like_2_num: 0, like_3_num: 0, like_4_num: 0, like_5_num: 0, like_6_num: 0, location_address: '', location_coordiate: '0,0', option_val: '', post_id: '', post_name: '', post_time: '', post_user_id: -1, target_date: '', type: 1
 };
-
-const genderData = [
-    { label: 'Male', value: '0', key: 0 },
-    { label: 'Female', value: '1', key: 1 },
-];
 
 const MapWithAMarker = withScriptjs(
     withGoogleMap(({ zoom, center, markers }) => (
@@ -67,10 +58,7 @@ const MapWithAMarker = withScriptjs(
 );
 
 
-const EditPostPage = ({ history, match, user_list, loadAllPostsAction, loadAllUsersAction }) => {
-    let avatarInput = null;
-    let cardImgFile = null;
-
+const EditPostPage = ({ history, match, user_list, loadAllPostsAction }) => {
     const [post, setPost] = useState(INIT_POST_INFO);
     const [userSelValues, setUserSelValues] = useState([]);
     const [user, setUser] = useState(userSelValues.length > 0 ? userSelValues[0] : {});
@@ -132,7 +120,7 @@ const EditPostPage = ({ history, match, user_list, loadAllPostsAction, loadAllUs
                 // set post type
                 for (let t of typeList) {
                     if (t.value === res.type) {
-                        setType(t); console.log(t);
+                        setType(t);
                     }
                 }
 
@@ -164,7 +152,7 @@ const EditPostPage = ({ history, match, user_list, loadAllPostsAction, loadAllUs
         params['isGuest'] = guest;
         params['active'] = active === true ? 1 : 0;
         params['target_date'] = timeAdded === true ? convertTimeToString(targetTime) : '';
-        params['post_user_id'] = user.value;
+        params['post_user_id'] = Number(user.value);
 
         //console.log(params);
 
@@ -184,26 +172,6 @@ const EditPostPage = ({ history, match, user_list, loadAllPostsAction, loadAllUs
         }
     };
 
-    const composeSubmitData = () => {
-        // let submit_profile = {};
-        // for (let key in profile) {
-        //     submit_profile[key] = profile[key];
-        // }
-
-        // // active
-        // submit_profile.active = active === true ? 1 : 0;
-        // // dob
-        // submit_profile.birthday = formatTime(dob, 'm/d/Y');
-        // // avatar
-        // if (avatar.mode === 0) {
-        //     submit_profile.avatarIndex = avatar.path;
-        // }
-        // // gender
-        // submit_profile.sex = gender.value;
-
-        // return submit_profile;
-    }
-
     const validateRequired = (name) => {
         const value = post[name];
         let error;
@@ -214,6 +182,7 @@ const EditPostPage = ({ history, match, user_list, loadAllPostsAction, loadAllUs
     }
 
     const handleOnChange = (e) => {
+        // console.log(e.target.name, e.target.value);
         setPost({ ...post, [e.target.name]: e.target.value });
     }
 
@@ -248,7 +217,7 @@ const EditPostPage = ({ history, match, user_list, loadAllPostsAction, loadAllUs
                                             <Field
                                                 className="form-control"
                                                 type="text"
-                                                name="user_name"
+                                                name="post_name"
                                                 value={post.post_name}
                                                 onChange={handleOnChange}
                                             />
@@ -426,5 +395,4 @@ const mapStateToProps = ({ posts: postApp, users: userApp }) => {
 
 export default connect(mapStateToProps, {
     loadAllPostsAction: loadAllPosts,
-    loadAllUsersAction: loadAllUsers,
 })(EditPostPage);

@@ -207,8 +207,7 @@ const PostList = ({ match, history, posts, users }) => {
     };
 
     const openAddModal = () => {
-        // console.log('[openAddModal]');
-        // setModalDetails(true);
+        history.push('/app/post/add');
     };
     const onSubmit = (event, errors, values) => {
         // console.log(errors);

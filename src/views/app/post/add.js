@@ -16,195 +16,146 @@ import classnames from 'classnames';
 import { AvRadioGroup, AvRadio } from 'availity-reactstrap-validation';
 import { NotificationManager } from '../../../components/common/react-notifications';
 
-import {
-    FormikCustomRadioGroup,
-} from '../../../containers/form-validations/FormikFields';
+import { FormikCustomRadioGroup } from '../../../containers/form-validations/FormikFields';
 import CustomSelectInput from '../../../components/common/CustomSelectInput';
 import { login, updateLogin } from '../../../redux/actions';
 import { Colxx, Separator } from '../../../components/common/CustomBootstrap';
 import IntlMessages from '../../../helpers/IntlMessages';
 import Breadcrumb from '../../../containers/navs/Breadcrumb';
-import { LocationItem, UserSettings } from '../../../components/custom';
+import { LocationItem } from '../../../components/custom';
 
-import { formatTime, getMapPositionFromString, getUserByIdRequest, transformTime, addNewUserRequest } from '../../../utils';
-import { loadAllUsers } from '../../../redux/actions';
+import { convertTimeToString, formatTime, getMapPositionFromString, getPostByIdRequest, transformTime, updatePostRequest } from '../../../utils';
+import { loadAllPosts } from '../../../redux/actions';
+// import { reactionImages, typeIcons } from '../../../constants/custom';
 
-
-const validateEmail = (value) => {
-    let error;
-    if (!value) {
-        error = 'Please enter your email address';
-    } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(value)) {
-        error = 'Invalid email address';
-    }
-    return error;
-};
-
-const validateName = (value) => {
-    let error;
-    if (!value) {
-        error = 'Please enter name';
-    } else if (value.length < 4) {
-        error = 'Value must be longer than 3 characters';
-    }
-    return error;
-};
-
-const INIT_USER_INFO = {
-    active: 1, birthday: '1/1/1970', card_number: '', city: '', email: '', sex: '1', user_id: -1, user_name: '', bio: '', password: '', cpassword: '',
-};
-
-const genderData = [
-    { label: 'Male', value: '0', key: 0 },
-    { label: 'Female', value: '1', key: 1 },
+const typeList = [
+    { value: '0', label: 'Card', key: 0 },
+    { value: '1', label: 'Date', key: 1 },
+    { value: '21', label: 'Doctor', key: 3 },
+    { value: '22', label: 'Lawyer', key: 4 },
+    { value: '23', label: 'Dealer', key: 5 },
+    { value: '31', label: 'Car', key: 6 },
+    { value: '32', label: 'House', key: 7 },
+    { value: '33', label: 'Animal', key: 8 }
 ];
 
+const INIT_POST_INFO = {
+    active: 1, city: '', comment_num: 0, feed: '', isGuest: false, like_1_num: 0, like_2_num: 0, like_3_num: 0, like_4_num: 0, like_5_num: 0, like_6_num: 0, location_address: ' ', location_coordiate: '0,0', option_val: '', post_id: '', post_name: '', post_time: '', post_user_id: -1, target_date: '', type: 1
+};
 
-const EditUserPage = ({ history, match, user_list, loadAllUsersAction }) => {
-    let avatarInput = null;
-    let cardImgFile = null;
+const MapWithAMarker = withScriptjs(
+    withGoogleMap(({ zoom, center, markers }) => (
+        <GoogleMap defaultZoom={8} defaultCenter={{ lat: -34.397, lng: 150.644 }}
+            zoom={zoom}
+            center={center}>
+            {
+                markers.map((marker, i) => (
+                    <Marker {...marker} key={i} />
+                ))
+            }
+        </GoogleMap>
+    ))
+);
 
-    const [profile, setProfile] = useState(INIT_USER_INFO);
-    const [dob, setDob] = useState(new Date());
+
+const EditPostPage = ({ history, match, post_list, user_list, loadAllPostsAction }) => {
+    const [post, setPost] = useState(INIT_POST_INFO);
+    const [userSelValues, setUserSelValues] = useState([]);
+    const [user, setUser] = useState(userSelValues.length > 0 ? userSelValues[0] : {});
+    const [type, setType] = useState(typeList[0]);
+    const [guest, setGuest] = useState(false);
     const [active, setActive] = useState(false);
-    const [avatar, setAvatar] = useState({ mode: 0, path: 0 }); // mode: 0 - avatar, 1 - file
-    const [gender, setGender] = useState(genderData[0]);
-    const [cardImage, setCardImage] = useState('/assets/img/default/default_national_card.png');
+    const [timeAdded, setTimeAdded] = useState(false);
+    const [targetTime, setTargetTime] = useState(new Date());
+
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
+        // compose the user select source
+        let list = [];
+
+        let index = 0;
+        for (let user of user_list) {
+            list.push({ label: user.user_name, value: user.user_id.toString(), key: index })
+            index++;
+        }
+        setUserSelValues(list);
+        setUser(list[0]);
+
         return () => { return true; }
-    }, [match]);
+    }, [match, user_list]);
 
-    const onUpdateProfile = async (values) => {
-        // console.log(profile, avatar, gender, active, dob, cardImage);
-        const cardFile = cardImgFile.files[0];
-        const avatarFile = avatarInput.files[0];
+    const onCreatePost = async () => {
+        // copy post
 
-        // console.log(getUserNewId());return;
-        const new_profile = composeSubmitData();
-        // console.log(new_profile, avatar.mode === 1 ? avatarInput.files[0] : null, cardImgFile.files[0]);
-        // return;
+        let params = {};
+        for (let key in post) {
+            params[key] = post[key];
+        }
 
-        // set loading
+        params['type'] = type.value;
+        params['isGuest'] = guest;
+        params['active'] = active === true ? 1 : 0;
+        params['target_date'] = timeAdded === true ? convertTimeToString(targetTime) : '';
+        params['post_user_id'] = Number(user.value);
+        params['post_time'] = convertTimeToString();
+        params['post_id'] = getPostNewId();
+        params['post_name'] = !post.post_name ? user.label : post.post_name;
+
+        console.log(params);
+
         setLoading(true);
 
-        // console.log(cardImgFile, !!cardImgFile);
-        const res = await addNewUserRequest({...new_profile, user_id: getUserNewId()}, avatar.mode === 1 ? avatarFile : null);
-        // cancel the loading
+        const res = await updatePostRequest(params);
+
         setLoading(false);
+
         if (res.status === true) {
-            NotificationManager.success(res.message, 'Add User', 3000, null, null, '');
-            // init form
-            // setProfile({ old_pass: '', password: '', cpassword: '' });
-            loadAllUsersAction();
-            history.push('/app/user');
-        } else {
-            NotificationManager.warning(res.message, 'Add User', 3000, null, null, '');
+            NotificationManager.success('Post has been created!', 'Add Post');
+            loadAllPostsAction();
+            history.push('/app/post');
+        }
+        else {
+            NotificationManager.error(res.message, 'Add Post');
         }
     };
 
-    const composeSubmitData = () => {
-        let submit_profile = {};
-        for (let key in profile) {
-            submit_profile[key] = profile[key];
-        }
-
-        // active
-        submit_profile.active = active === true ? 1 : 0;
-        // dob
-        submit_profile.birthday = formatTime(dob, 'm/d/Y');
-        // avatar
-        if (avatar.mode === 0) {
-            submit_profile.avatarIndex = avatar.path;
-        }
-        // gender
-        submit_profile.sex = gender.value;
-
-        return submit_profile;
-    }
-
-    const validateUserName = () => {
-        const value = profile.user_name;
-        let error;
-        if (!value) {
-            error = 'Please enter name!';
-        }
-        return error;
-    }
     const validateRequired = (name) => {
-        const value = profile[name];
+        const value = post[name];
         let error;
         if (!value) {
             error = 'This field is required!'
         }
         return error;
     }
-    const validatePassword = (value) => {
-        value = profile.password;
+
+    const validateUser = () => {
         let error;
-        if (!value) {
-            error = 'Please enter new password';
-        } else if (value.length < 4) {
-            error = 'Value must be longer than 3 characters';
-        }
-        return error;
-    };
-    const validateCPassword = () => {
-        let error;
-        if (profile.password !== profile.cpassword) {
-            error = 'Password does not match!';
+        if (!user || !user.value) {
+            error = 'This field is required!'
         }
         return error;
     }
+
     const handleOnChange = (e) => {
-        setProfile({ ...profile, [e.target.name]: e.target.value });
+        setPost({ ...post, [e.target.name]: e.target.value });
     }
-    const handleOnCardImgChange = (e) => {
-        const file = e.target.files[0];
 
-        // check if selected valid file
-        if (!!file) {
-            setCardImage(URL.createObjectURL(file));
-            // console.log(cardImgFile.files[0]);
-        }
-    }
-    const handleAvatarSelect = (e) => {
-        const file = e.target.files[0];
-
-        // check if selected valid file
-        if (!!file) {
-            setAvatar({ mode: 1, path: URL.createObjectURL(file) });
-        }
-    }
-    const handleOnClickAvatar = (num) => {
-        setAvatar({ mode: 0, path: num });
-    }
-    const openAvatarSelector = () => {
-        avatarInput.click();
-    }
-    const getAvatarPath = () => {
-        if (avatar.mode === 0) {
-            return `/assets/avatar/${gender && gender.value === '1' ? 'girl' : 'boy'}/${avatar.path}.png`;
-        } else {
-            return avatar.path || '/assets/avatar/avatar_boy1.png';
-        }
-    }
-    const getUserNewId = () => {
+    const getPostNewId = () => {
         let newId = -1;
-        for (let user of user_list) {
-            newId = user.user_id > newId ? user.user_id : newId;
+        for (let post of post_list) {
+            newId = post.post_id > newId ? post.post_id : newId;
         }
         return newId + 1;
     }
 
-    const initialValues = profile;
+    const initialValues = post;
 
     return (
         <>
             <Row>
                 <Colxx xxs="12">
-                    <Breadcrumb heading="menu.users" match={match} />
+                    <Breadcrumb heading="menu.posts" match={match} />
                     <Separator className="mb-5" />
                 </Colxx>
             </Row>
@@ -212,66 +163,30 @@ const EditUserPage = ({ history, match, user_list, loadAllUsersAction }) => {
             <Row >
                 <Colxx xxs="12">
                     <h3 className="mb-4">
-                        <IntlMessages id="pages.user" />
+                        New Post
                     </h3>
                 </Colxx>
 
-                <Formik initialValues={initialValues} onSubmit={onUpdateProfile}>
+                <Formik initialValues={initialValues} onSubmit={onCreatePost}>
                     {({
                         errors, touched, values }) => (
                             <Form className="av-tooltip tooltip-label-bottom mx-auto" style={{ maxWidth: 1024, width: '100%' }}>
 
-                                <div className="profile-avatar">
-                                    <div className="wrapper">
-                                        <img src={getAvatarPath()} alt="User Profile" />
-                                        <div className="hover-layer">
-                                            <div
-                                                className="glyph-icon simple-icon-picture change-avatar two"
-                                                title="Select from avatars"
-                                                onClick={openAvatarSelector}></div>
-                                            <div
-                                                className="glyph-icon simple-icon-camera change-avatar two"
-                                                title="Upload file"
-                                                onClick={openAvatarSelector}></div>
-                                        </div>
-                                    </div>
-                                    <input type="file" className="hidden-file"
-                                        ref={input => { avatarInput = input }}
-                                        onChange={handleAvatarSelect}
-                                        accept="image/*" />
-                                </div>
-
-                                <div className="all-avatars mt-1 mb-5">
-                                    {
-                                        [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((num, i) => (
-                                            <img
-                                                className={`example-avatar ${avatar.path === num ? 'selected' : ''}`}
-                                                src={`/assets/avatar/${gender && gender.value === '1' ? 'girl' : 'boy'}/${num}.png`}
-                                                onClick={() => handleOnClickAvatar(num)}
-                                                alt={`Example Avatar ${i}`}
-                                                key={i} />
-                                        ))
-                                    }
-                                </div>
-
-                                {/* name & email */}
+                                {/* Title & Content */}
                                 <Row>
                                     <Colxx xxs="12" md="6">
                                         <FormGroup className="form-group">
-                                            <Label>
-                                                <IntlMessages id="user.name" />
-                                            </Label>
+                                            <Label> Post Name </Label>
                                             <Field
                                                 className="form-control"
                                                 type="text"
-                                                name="user_name"
-                                                value={profile.user_name}
-                                                validate={validateUserName}
+                                                name="post_name"
+                                                value={post.post_name}
                                                 onChange={handleOnChange}
                                             />
-                                            {errors.user_name && touched.user_name && (
+                                            {errors.post_name && touched.post_name && (
                                                 <div className="invalid-feedback d-block">
-                                                    {errors.user_name}
+                                                    {errors.post_name}
                                                 </div>
                                             )}
                                         </FormGroup>
@@ -280,177 +195,102 @@ const EditUserPage = ({ history, match, user_list, loadAllUsersAction }) => {
                                     <Colxx xxs="12" md="6">
                                         <FormGroup className="form-group">
                                             <Label>
-                                                <IntlMessages id="user.email" />
-                                            </Label>
-                                            <Field
-                                                className="form-control"
-                                                type="text"
-                                                name="email"
-                                                value={profile.email}
-                                                validate={() => validateRequired('email')}
-                                                onChange={handleOnChange}
-                                            />
-                                            {errors.email && touched.email && (
-                                                <div className="invalid-feedback d-block">
-                                                    {errors.email}
-                                                </div>
-                                            )}
-                                        </FormGroup>
-                                    </Colxx>
-                                </Row>
-
-                                {/* password & cpassword */}
-                                <Row>
-                                    <Colxx xxs="12" md="6">
-                                        <FormGroup className="form-group">
-                                            <Label>
-                                                <IntlMessages id="user.password" />
-                                            </Label>
-                                            <Field
-                                                className="form-control"
-                                                type="password"
-                                                name="password"
-                                                value={profile.password}
-                                                validate={validatePassword}
-                                                onChange={handleOnChange}
-                                            />
-                                            {errors.password && touched.password && (
-                                                <div className="invalid-feedback d-block">
-                                                    {errors.password}
-                                                </div>
-                                            )}
-                                        </FormGroup>
-                                    </Colxx>
-
-                                    <Colxx xxs="12" md="6">
-                                        <FormGroup className="form-group">
-                                            <Label>
-                                                <IntlMessages id="user.confirm-password" />
-                                            </Label>
-                                            <Field
-                                                className="form-control"
-                                                type="password"
-                                                name="cpassword"
-                                                value={profile.cpassword}
-                                                validate={validateCPassword}
-                                                onChange={handleOnChange}
-                                            />
-                                            {errors.cpassword && touched.cpassword && (
-                                                <div className="invalid-feedback d-block">
-                                                    {errors.cpassword}
-                                                </div>
-                                            )}
-                                        </FormGroup>
-                                    </Colxx>
-                                </Row>
-
-
-                                {/* BirthDay & Gender */}
-                                <Row>
-                                    <Colxx xxs="12" md="6">
-                                        <FormGroup className="form-group">
-                                            <Label>
-                                                <IntlMessages id="user.birthday" />
-                                            </Label>
-
-                                            <DatePicker
-                                                name="birthday"
-                                                selected={dob}
-                                                onChange={setDob}
-                                                placeholderText='Birthday'
-                                            />
-                                            {errors.birthday && touched.birthday && (
-                                                <div className="invalid-feedback d-block">
-                                                    {errors.birthday}
-                                                </div>
-                                            )}
-                                        </FormGroup>
-                                    </Colxx>
-
-                                    <Colxx xxs="12" md="6">
-                                        <label>
-                                            <IntlMessages id="user.gender" />
-                                        </label>
-                                        <Select
-                                            components={{ Input: CustomSelectInput }}
-                                            className="react-select"
-                                            classNamePrefix="react-select"
-                                            value={gender}
-                                            onChange={setGender}
-                                            options={genderData}
-                                        />
-                                    </Colxx>
-                                </Row>
-
-                                {/* Card Number & Image */}
-                                <Row>
-                                    <Colxx xxs="12" md="6">
-                                        <FormGroup className="form-group">
-                                            <Label>
-                                                <IntlMessages id="user.card-number" />
-                                            </Label>
-                                            <Field
-                                                className="form-control"
-                                                type="text"
-                                                name="card_number"
-                                                value={profile.card_number}
-                                                onChange={handleOnChange}
-                                            />
-                                            {errors.card_number && touched.card_number && (
-                                                <div className="invalid-feedback d-block">
-                                                    {errors.card_number}
-                                                </div>
-                                            )}
-                                        </FormGroup>
-                                    </Colxx>
-
-                                    <Colxx xxs="12" md="6">
-                                        <FormGroup className="form-group">
-                                            <Label>
-                                                Card Image
-                                        </Label>
-                                            <input
-                                                className="form-control"
-                                                type="file"
-                                                accept="image/*"
-                                                ref={input => { cardImgFile = input }}
-                                                onChange={handleOnCardImgChange}
-                                            />
-                                            <div className="max-w-300px">
-                                                <img className="mt-2 w-full" src={cardImage} alt="Card" />
-                                            </div>
-                                        </FormGroup>
-                                    </Colxx>
-                                </Row>
-
-                                {/* Bio & Active */}
-                                <Row>
-                                    <Colxx xxs="12" md="6">
-                                        <FormGroup className="form-group">
-                                            <Label>
-                                                <IntlMessages id="user.bio" />
+                                                Content
                                             </Label>
                                             <Field
                                                 className="form-control"
                                                 type="text"
                                                 component="textarea"
-                                                name="bio"
-                                                value={profile.bio}
+                                                name="feed"
+                                                value={post.feed}
+                                                validate={() => validateRequired('feed')}
                                                 onChange={handleOnChange}
                                             />
-                                            {errors.bio && touched.bio && (
+                                            {errors.feed && touched.feed && (
                                                 <div className="invalid-feedback d-block">
-                                                    {errors.bio}
+                                                    {errors.feed}
                                                 </div>
                                             )}
                                         </FormGroup>
                                     </Colxx>
+                                </Row>
 
-                                    {/* Active */}
+                                {/* User & Type */}
+                                <Row>
+                                    <Colxx xxs="12" md="6" style={{ marginBottom: '1rem' }}>
+                                        <label> User </label>
+                                        <Select
+                                            components={{ Input: CustomSelectInput }}
+                                            className="react-select"
+                                            classNamePrefix="react-select"
+                                            value={user}
+                                            onChange={setUser}
+                                            validate={validateUser}
+                                            options={userSelValues}
+                                        />
+                                    </Colxx>
+
+
+                                    <Colxx xxs="12" md="6" style={{ marginBottom: '1rem' }}>
+                                        <label> Type </label>
+                                        <Select
+                                            components={{ Input: CustomSelectInput }}
+                                            className="react-select"
+                                            classNamePrefix="react-select"
+                                            value={type}
+                                            onChange={setType}
+                                            options={typeList}
+                                        />
+                                    </Colxx>
+                                </Row>
+
+                                {/* Target Time */}
+                                <Row>
+                                    <Colxx xxs="12" md="6" style={{marginBottom: '1rem'}}>
+                                            <Label>
+                                                Set Target Time
+                                            </Label>
+                                            <Switch
+                                                className="custom-switch custom-switch-secondary"
+                                                checked={timeAdded}
+                                                onChange={(st) => setTimeAdded(st)}
+                                            />
+                                    </Colxx>
+
+                                    {
+                                        timeAdded &&
+                                        <Colxx>
+                                            <Label>
+                                                Target Time
+                                            </Label>
+                                            <DatePicker
+                                                selected={targetTime}
+                                                onChange={date => setTargetTime(date)}
+                                                timeInputLabel="Time:"
+                                                dateFormat="MM/dd/yyyy hh:mm aa"
+                                                showTimeInput
+                                            />
+                                        </Colxx>
+                                    }
+                                </Row>
+
+                                {/* Guest  */}
+                                <Row>
+                                    <Colxx xxs="12" md="6">
+                                        <FormGroup className="form-group">
+                                            <Label> As Guest </Label>
+                                            <Switch
+                                                className="custom-switch custom-switch-secondary"
+                                                checked={guest}
+                                                onChange={(st) => setGuest(st)}
+                                            />
+                                        </FormGroup>
+                                    </Colxx>
+
                                     <Colxx xxs="12" md="6">
                                         <FormGroup className="form-group">
                                             <Label>
-                                                <IntlMessages id="user.active" />
+                                                Active
                                             </Label>
                                             <Switch
                                                 className="custom-switch custom-switch-secondary"
@@ -489,11 +329,12 @@ const EditUserPage = ({ history, match, user_list, loadAllUsersAction }) => {
 };
 
 
-const mapStateToProps = ({ users: userApp }) => {
+const mapStateToProps = ({ posts: postApp, users: userApp }) => {
     const { list: user_list } = userApp;
-    return {user_list};
+    const { list: post_list } = postApp;
+    return { post_list, user_list };
 };
 
 export default connect(mapStateToProps, {
-    loadAllUsersAction: loadAllUsers,
-})(EditUserPage);
+    loadAllPostsAction: loadAllPosts,
+})(EditPostPage);
