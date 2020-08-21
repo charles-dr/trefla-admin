@@ -419,7 +419,7 @@ export const getExtensionFromFileName = (filename) => {
   return tArray[tArray.length - 1];
 }
 
-export const toggleBanStatus = async ({active, user_id}, banReason) => {
+export const toggleBanStatus = async ({ active, user_id }, banReason) => {
   // console.log(active, user_id, banReason);
   active = active === 1 ? 1 : 0;
 
@@ -432,9 +432,9 @@ export const toggleBanStatus = async ({active, user_id}, banReason) => {
   try {
     const userRef = _firebase.firestore().collection('users').doc(user_id.toString());
     await userRef.set(user);
-    return {status: true, message: `User has been ${active === 1 ? 'banned' : 'released'}`};
+    return { status: true, message: `User has been ${active === 1 ? 'banned' : 'released'}` };
   } catch (e) {
-    return {status: false, message: `Failed to ${active === 1 ? 'ban' : 'release'} user...`, details: e.message};
+    return { status: false, message: `Failed to ${active === 1 ? 'ban' : 'release'} user...`, details: e.message };
   }
 }
 
@@ -514,7 +514,7 @@ export const deletePostsOfUser = async user_id => {
             await _firebase.firestore().collection('posts').doc(doc.id).collection('likes').doc(likeDoc.id).delete();
           })
         });
-        
+
         await _firebase.firestore().collection('posts').doc(doc.id).collection('comments').get().then(qss => {
           qss.forEach(async commentDoc => {
             await _firebase.firestore().collection('posts').doc(doc.id).collection('comments').doc(commentDoc.id).delete();
@@ -605,4 +605,21 @@ export const getPostByIdRequest = async (post_id) => {
       console.log('[Post Fetch]', err);
       return false;
     })
+}
+
+export const updatePostRequest = async (post) => {
+  const post_id = post.post_id.toString();
+
+  // console.log(post);
+  try {
+    const postRef = _firebase.firestore().collection('posts').doc(post_id);
+    await postRef.set(post); //, { merge: false }
+    return {status: true, message: 'Post has been updated'};
+  }
+  catch (err) {
+    console.log(err);
+    return {
+      status: false, message: 'Something went wrong', details: err.message
+    };
+  }
 }

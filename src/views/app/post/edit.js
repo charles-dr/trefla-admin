@@ -24,7 +24,7 @@ import IntlMessages from '../../../helpers/IntlMessages';
 import Breadcrumb from '../../../containers/navs/Breadcrumb';
 import { LocationItem, UserSettings } from '../../../components/custom';
 
-import { convertTimeToString, formatTime, getMapPositionFromString, getPostByIdRequest, transformTime, addNewUserRequest } from '../../../utils';
+import { convertTimeToString, formatTime, getMapPositionFromString, getPostByIdRequest, transformTime, updatePostRequest, addNewUserRequest } from '../../../utils';
 import { loadAllPosts, loadAllUsers } from '../../../redux/actions';
 import { reactionImages, typeIcons } from '../../../constants/custom';
 
@@ -67,7 +67,7 @@ const MapWithAMarker = withScriptjs(
 );
 
 
-const EditPostPage = ({ history, match, user_list, loadAllUsersAction }) => {
+const EditPostPage = ({ history, match, user_list, loadAllPostsAction, loadAllUsersAction }) => {
     let avatarInput = null;
     let cardImgFile = null;
 
@@ -129,12 +129,19 @@ const EditPostPage = ({ history, match, user_list, loadAllUsersAction }) => {
                 //37.421998333333335,-122.08400000000002&&2020-08-20-00-00-49:480&&1600, Amphitheatre Parkway, Mountain View, Santa Clara County, 94043, California
                 setStrLocation(`${res.location_coordinate}&&${res.post_time}&&${res.location_address}`);
 
+                // set post type
+                for (let t of typeList) {
+                    if (t.value === res.type) {
+                        setType(t); console.log(t);
+                    }
+                }
+
                 // set Target Time
                 if (!!res.target_date) {
                     setTimeAdded(true);
                     const time = transformTime(res.target_date);
                     setTargetTime(new Date(time));
-                }
+                }                
 
             })
             .catch(err => {
@@ -145,9 +152,7 @@ const EditPostPage = ({ history, match, user_list, loadAllUsersAction }) => {
         return () => { return true; }
     }, [match, user_list]);
 
-    const onUpdateProfile = async (values) => {
-        // console.log('[on Submit]', post, user, type, guest, active, timeAdded, targetTime);
-
+    const onUpdatePost = async (values) => {
         // copy post
 
         let params = {};
@@ -161,33 +166,22 @@ const EditPostPage = ({ history, match, user_list, loadAllUsersAction }) => {
         params['target_date'] = timeAdded === true ? convertTimeToString(targetTime) : '';
         params['post_user_id'] = user.value;
 
-        console.log(params);
+        //console.log(params);
 
-        // console.log(profile, avatar, gender, active, dob, cardImage);
-        // const cardFile = cardImgFile.files[0];
-        // const avatarFile = avatarInput.files[0];
+        setLoading(true);
 
-        // // console.log(getUserNewId());return;
-        // const new_profile = composeSubmitData();
-        // // console.log(new_profile, avatar.mode === 1 ? avatarInput.files[0] : null, cardImgFile.files[0]);
-        // // return;
+        const res = await updatePostRequest(params);
 
-        // // set loading
-        // setLoading(true);
+        setLoading(false);
 
-        // // console.log(cardImgFile, !!cardImgFile);
-        // const res = await addNewUserRequest({ ...new_profile, user_id: getUserNewId() }, avatar.mode === 1 ? avatarFile : null);
-        // // cancel the loading
-        // setLoading(false);
-        // if (res.status === true) {
-        //     NotificationManager.success(res.message, 'Add User', 3000, null, null, '');
-        //     // init form
-        //     // setProfile({ old_pass: '', password: '', cpassword: '' });
-        //     loadAllUsersAction();
-        //     history.push('/app/user');
-        // } else {
-        //     NotificationManager.warning(res.message, 'Add User', 3000, null, null, '');
-        // }
+        if (res.status === true) {
+            NotificationManager.success(res.message, 'Update Post');
+            loadAllPostsAction();
+            history.push('/app/post');
+        }
+        else {
+            NotificationManager.error(res.message, 'Update Post');
+        }
     };
 
     const composeSubmitData = () => {
@@ -241,7 +235,7 @@ const EditPostPage = ({ history, match, user_list, loadAllUsersAction }) => {
                     </h3>
                 </Colxx>
 
-                <Formik initialValues={initialValues} onSubmit={onUpdateProfile}>
+                <Formik initialValues={initialValues} onSubmit={onUpdatePost}>
                     {({
                         errors, touched, values }) => (
                             <Form className="av-tooltip tooltip-label-bottom mx-auto" style={{ maxWidth: 1024, width: '100%' }}>
