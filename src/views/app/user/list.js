@@ -194,7 +194,6 @@ const UserList = ({ match, history, friends, posts, users, loadAllUsersAction })
         }
     }
 
-
     const openAddModal = () => {
         history.push('/app/user/add');
     };

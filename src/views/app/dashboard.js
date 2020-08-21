@@ -1,23 +1,24 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Row, Card, CardBody } from 'reactstrap';
 import { ReactSortable } from 'react-sortablejs';
+import { connect } from 'react-redux';
 
 import IntlMessages from '../../helpers/IntlMessages';
 import { Colxx, Separator } from '../../components/common/CustomBootstrap';
 import Breadcrumb from '../../containers/navs/Breadcrumb';
 
-const DashboardPage = ({ match }) => {
+const DashboardPage = ({ match, posts, users }) => {
   const [listColumns, setListColumns] = useState([
     {
       icon: 'simple-icon-people',
       title: 'Users',
-      value: 14,
+      value: 0,
       id: 1,
     },
     {
       icon: 'simple-icon-paper-plane',
       title: 'Posts',
-      value: 32,
+      value: 0,
       id: 2,
     },
     // {
@@ -33,6 +34,26 @@ const DashboardPage = ({ match }) => {
     //   id: 4,
     // },
   ]);
+
+  useEffect(() => {
+
+    setListColumns([
+      {
+        icon: 'simple-icon-people',
+        title: 'Users',
+        value: users.length || 0,
+        id: 1,
+      },
+      {
+        icon: 'simple-icon-paper-plane',
+        title: 'Posts',
+        value: posts.length || 0,
+        id: 2,
+      },
+    ]);
+
+    return () => {}
+  }, [posts, users]);
 
   return (
     <>
@@ -83,4 +104,16 @@ const DashboardPage = ({ match }) => {
   );
 };
 
-export default DashboardPage;
+
+const mapStateToProps = ({ posts: postApp, users: userApp }) => {
+  const { list: posts } = postApp;
+  const { list: users } = userApp;
+
+  return {
+      users, posts
+  };
+};
+
+export default connect(mapStateToProps, {
+
+})(DashboardPage);

@@ -98,6 +98,9 @@ html {
 /* Table Action Column */
 
 .tbl-actions {
+
+    white-space: nowrap;
+
     i {
         margin-left: 5px;
         margin-right: 5px;

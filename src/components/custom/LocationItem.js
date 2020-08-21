@@ -18,15 +18,20 @@ const LocationItem = ({ strInfo }) => {
     }
     return (
         <div className="location-item">
-            <p className="mb-2">
-                <span className="glyph-icon iconsminds-stopwatch mr-1"></span>
-                {getTime()}
-            </p>
-            <p className="font-weight-semibold">{getLocation()}</p>
-            <p className="font-weight-medium">
-                <span className="glyph-icon simple-icon-location-pin mr-1"></span>
-                {getCoordinates()}
-            </p>
+            {
+                !!strInfo &&
+                <>
+                    <p className="mb-2">
+                        <span className="glyph-icon iconsminds-stopwatch mr-1"></span>
+                        {getTime()}
+                    </p>
+                    <p className="font-weight-semibold">{getLocation()}</p>
+                    <p className="font-weight-medium">
+                        <span className="glyph-icon simple-icon-location-pin mr-1"></span>
+                        {getCoordinates()}
+                    </p>
+                </>
+            }
         </div>
     );
 }

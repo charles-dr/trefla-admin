@@ -2,6 +2,7 @@ import React, { Suspense } from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
 
 const PostList = React.lazy(() => import('./list'));
+const PostEdit = React.lazy(() => import('./edit'));
 
 const PostModule = ({ match }) => (
   <Suspense fallback={<div className="loading" />}>
@@ -10,6 +11,10 @@ const PostModule = ({ match }) => (
       <Route
         path={`${match.url}/list`}
         render={(props) => <PostList {...props} />}
+      />
+      <Route
+        path={`${match.url}/edit/:id`}
+        render={(props) => <PostEdit {...props} />}
       />
       <Redirect to="/error" />
     </Switch>

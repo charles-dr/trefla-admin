@@ -95,6 +95,7 @@ module.exports = {
   'pages.languages': 'Languages',
   'pages.language': 'Language',
   'pages.password': 'Password',
+  'pages.post': 'Post',
   'pages.posts': 'Posts',
   'pages.profile': 'Profile',
   'pages.schools': 'Schools',

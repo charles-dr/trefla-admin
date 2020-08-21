@@ -353,7 +353,7 @@ export const addNewUserRequest = async (profile, avatarFile) => {
 }
 
 export const updateUserProfile = async (profile, avatarFile = null, cardFile = null) => {
-  console.log(avatarFile, cardFile, profile);
+  // console.log(avatarFile, cardFile, profile);
   const user_id = profile.user_id;
 
   // update card photo
@@ -579,4 +579,30 @@ export const deleteFriendsOfUser = async (user_id) => {
         await _firebase.firestore().collection('friends').doc(doc.id).delete();
       });
     });
+}
+
+
+
+////////////////////////////////////////////////////////////////
+//                                                            //
+//                         P   O   S   T                      //
+//                                                            // 
+////////////////////////////////////////////////////////////////
+
+export const getPostByIdRequest = async (post_id) => {
+  post_id = Number(post_id); // convert into integer
+  const postRef = _firebase.firestore().collection('posts').doc(post_id.toString());
+
+  return _firebase.firestore().collection('posts').doc(post_id.toString()).get()
+    .then(doc => {
+      if (doc.exists) {
+        return doc.data();
+      } else {
+        return false;
+      }
+    })
+    .catch(err => {
+      console.log('[Post Fetch]', err);
+      return false;
+    })
 }

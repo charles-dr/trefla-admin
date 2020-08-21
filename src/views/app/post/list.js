@@ -18,6 +18,8 @@ import { ReactTableWithPaginationCard } from '../../../containers/ui/ReactTableC
 import { getPostTableContent } from '../../../api/functions.api';
 import { _firebase, transformTime } from '../../../utils';
 
+import { reactionImages, typeIcons } from '../../../constants/custom';
+
 const INIT_UNIT = {
     _id: '',
     districtId: '',
@@ -25,21 +27,8 @@ const INIT_UNIT = {
     district: { districtName: '', city: { cityName: '' } },
 };
 
-const typeIcons = {
-    '0': 'simple-icon-credit-card',
-    '1': 'iconsminds-heart',
-    '21': 'iconsminds-first-aid',
-    '22': 'iconsminds-scale',
-    '23': 'iconsminds-shop',
-    '31': 'iconsminds-car',
-    '32': 'iconsminds-home',
-    '33': 'iconsminds-dog'
-};
 
-const reactionImages = ['like.png', 'love.png', 'wow.png', 'haha.png', 'sad.png', 'angry.png'];
-
-
-const PostList = ({ match, posts, users }) => {
+const PostList = ({ match, history, posts, users }) => {
     const [pageLoaded, setPageLoaded] = useState(true);
     const [data, setData] = useState([]);
     const [modalDetails, setModalDetails] = useState(false);
@@ -53,10 +42,16 @@ const PostList = ({ match, posts, users }) => {
             Cell: (props) => <>{props.value}</>,
         },
         {
-            Header: 'Type',
-            accessor: 'type',
+            Header: 'Post Name',
+            accessor: 'post_name_',
             cellClass: 'text-muted  w-5',
-            Cell: (props) => <><div className={`glyph-icon ${typeIcons[props.value]}`} style={{ fontSize: 20 }}></div></>,
+            Cell: (props) => <>
+                { props.value.post_name && props.value.post_name}
+                { !props.value.post_name && 
+                <Badge color="warning" pill className="mb-1">
+                    Not Specified
+                </Badge> }
+            </>,
         },
         {
             Header: 'Content',
@@ -65,11 +60,17 @@ const PostList = ({ match, posts, users }) => {
             Cell: (props) => <>{props.value}</>,
         },
         {
-            Header: 'Coordinate',
-            accessor: 'location_coordinate',
-            cellClass: 'text-muted  w-10',
-            Cell: (props) => <>{formatCoordinate(props.value)}</>,
+            Header: 'Type',
+            accessor: 'type',
+            cellClass: 'text-muted  w-5',
+            Cell: (props) => <><div className={`glyph-icon ${typeIcons[props.value]}`} style={{ fontSize: 20 }}></div></>,
         },
+        // {
+        //     Header: 'Coordinate',
+        //     accessor: 'location_coordinate',
+        //     cellClass: 'text-muted  w-10',
+        //     Cell: (props) => <>{formatCoordinate(props.value)}</>,
+        // },
         {
             Header: 'Location',
             accessor: 'location_address',
@@ -107,13 +108,14 @@ const PostList = ({ match, posts, users }) => {
             Cell: (props) => (
                 <>
                     <div className="tbl-actions">
-                        {/* <i
-                            className="iconsminds-file-edit"
-                            title="Edit"
-                            onClick={() => handleOnEdit(props.value)}
-                        /> */}
                         <i
-                            className="simple-icon-trash"
+                            className="iconsminds-file-edit info"
+                            title="Edit"
+                            style={{ fontSize: 18 }}
+                            onClick={() => handleOnEdit(props.value)}
+                        />
+                        <i
+                            className="simple-icon-trash danger"
                             title="Remove"
                             style={{ fontSize: 18 }}
                             onClick={() => handleOnDelete(props.value)}
@@ -175,6 +177,9 @@ const PostList = ({ match, posts, users }) => {
             post_item['user_name'] = getUserNameById(post.post_user_id);
             // add new field 'likes'
             post_item['likes'] = `${post.like_1_num},${post.like_2_num},${post.like_3_num},${post.like_4_num},${post.like_5_num},${post.like_6_num}`;
+            // add new field 'post_name_';
+            post_item['post_name_'] = {user_name: getUserNameById(post.post_user_id), post_name: post.post_name};
+            
             // put item to array
             new_posts.push(post_item);
         }
@@ -192,12 +197,8 @@ const PostList = ({ match, posts, users }) => {
         }
     }
 
-    const openAddModal = () => {
-        // console.log('[openAddModal]');
-        // setModalDetails(true);
-    };
-    const handleOnEdit = (_id) => {
-        // getSchoolById({ variables: { _id: _id, force: new Date().getTime().toString() } });
+    const handleOnEdit = (post_id) => {
+        history.push(`/app/post/edit/${post_id}`);
     };
     const handleOnDelete = (_id) => {
         // if (window.confirm('Are you sure to delete data?')) {
@@ -205,6 +206,10 @@ const PostList = ({ match, posts, users }) => {
         // }
     };
 
+    const openAddModal = () => {
+        // console.log('[openAddModal]');
+        // setModalDetails(true);
+    };
     const onSubmit = (event, errors, values) => {
         // console.log(errors);
         // console.log(values, unit);
@@ -220,6 +225,8 @@ const PostList = ({ match, posts, users }) => {
     const handleOnCheck = (column, colIndex) => {
         console.log(column, colIndex);
     };
+
+
     return (
         <>
             <Row>
@@ -250,7 +257,6 @@ const PostList = ({ match, posts, users }) => {
                     />
                 </Colxx>
             </Row>
-
         </>
     );
 };
