@@ -157,7 +157,7 @@ export const addNewLangRequest = async ({ lang_id, name, code, active, blob }) =
 
     let download_url = '';
     if (blob) {
-      const uploaded = await fileRef.put(blob);
+      await fileRef.put(blob);
       // get download url
       download_url = await fileRef.getDownloadURL();
 
@@ -306,7 +306,6 @@ export const getAllUsers = () => {
 
 export const getUserByIdRequest = async (user_id) => {
   user_id = Number(user_id); // convert into integer
-  const userRef = _firebase.firestore().collection('users').doc(user_id.toString());
 
   return _firebase.firestore().collection('users').doc(user_id.toString()).get()
     .then(doc => {
@@ -323,7 +322,6 @@ export const getUserByIdRequest = async (user_id) => {
 }
 
 export const addNewUserRequest = async (profile, avatarFile) => {
-  console.log('[user data]', profile, user_id);
   const user_id = profile.user_id;
 
   if (!profile.email) { return { status: false, message: 'Email is required!' }; }
@@ -604,7 +602,7 @@ export const getPostByIdRequest = async (post_id) => {
   post_id = Number(post_id); // convert into integer
   const postRef = _firebase.firestore().collection('posts').doc(post_id.toString());
 
-  return _firebase.firestore().collection('posts').doc(post_id.toString()).get()
+  return postRef.get()
     .then(doc => {
       if (doc.exists) {
         return doc.data();

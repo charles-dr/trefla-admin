@@ -1,6 +1,6 @@
-import React, { createRef, useState, useEffect } from 'react';
-import { Row, Card, CardTitle, Label, FormGroup, Button, Nav, NavItem, TabContent, TabPane } from 'reactstrap';
-import { NavLink, Redirect, useHistory } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Row, Label, FormGroup, Button, Nav, NavItem, TabContent, TabPane } from 'reactstrap';
+import { NavLink } from 'react-router-dom';
 import { connect } from 'react-redux';
 
 import DatePicker from 'react-datepicker';
@@ -13,14 +13,8 @@ import { withScriptjs, withGoogleMap, GoogleMap, Marker } from 'react-google-map
 import classnames from 'classnames';
 
 
-import { AvRadioGroup, AvRadio } from 'availity-reactstrap-validation';
 import { NotificationManager } from '../../../components/common/react-notifications';
-
-import {
-    FormikCustomRadioGroup,
-} from '../../../containers/form-validations/FormikFields';
 import CustomSelectInput from '../../../components/common/CustomSelectInput';
-import { login, updateLogin } from '../../../redux/actions';
 import { Colxx, Separator } from '../../../components/common/CustomBootstrap';
 import IntlMessages from '../../../helpers/IntlMessages';
 import Breadcrumb from '../../../containers/navs/Breadcrumb';
@@ -29,26 +23,6 @@ import { LocationItem, UserSettings } from '../../../components/custom';
 import { formatTime, getMapPositionFromString, getUserByIdRequest, transformTime, updateUserProfile } from '../../../utils';
 import { loadAllUsers } from '../../../redux/actions';
 
-
-const validateEmail = (value) => {
-    let error;
-    if (!value) {
-        error = 'Please enter your email address';
-    } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(value)) {
-        error = 'Invalid email address';
-    }
-    return error;
-};
-
-const validateName = (value) => {
-    let error;
-    if (!value) {
-        error = 'Please enter name';
-    } else if (value.length < 4) {
-        error = 'Value must be longer than 3 characters';
-    }
-    return error;
-};
 
 const INIT_USER_INFO = {
     active: 1, birthday: '1/1/1970', card_number: '', city: '', device_token: '', email: '', location_address: '', location_array: [],
@@ -59,7 +33,6 @@ const genderData = [
     { label: 'Male', value: '0', key: 0 },
     { label: 'Female', value: '1', key: 1 },
 ];
-
 
 const MapWithAMarker = withScriptjs(
     withGoogleMap(({ zoom, center, markers }) => (
@@ -240,23 +213,6 @@ const EditUserPage = ({ history, match, loginUserAction, updateLoginAction, load
         }
         return error;
     }
-    const validatePassword = (value) => {
-        value = profile.password;
-        let error;
-        if (!value) {
-            error = 'Please enter new password';
-        } else if (value.length < 4) {
-            error = 'Value must be longer than 3 characters';
-        }
-        return error;
-    };
-    const validateCPassword = () => {
-        let error;
-        if (profile.password !== profile.cpassword) {
-            error = 'Password does not match!';
-        }
-        return error;
-    }
     const handleOnChange = (e) => {
         setProfile({ ...profile, [e.target.name]: e.target.value });
     }
@@ -279,16 +235,6 @@ const EditUserPage = ({ history, match, loginUserAction, updateLoginAction, load
     }
     const handleOnClickAvatar = (num) => {
         setAvatar({ mode: 0, path: num });
-    }
-    // const setGender = (e) => {
-    //     console.log(e);
-    //     setProfile({...profile, sex: e.value});
-    // }
-    const setFieldValue = (e) => {
-        console.log(e);
-    }
-    const setFieldTouched = (e) => {
-        console.log(e);
     }
     const openAvatarSelector = () => {
         avatarInput.click();

@@ -1,6 +1,5 @@
-import React, { createRef, useState, useEffect } from 'react';
-import { Row, Card, CardTitle, Label, FormGroup, Button, Nav, NavItem, TabContent, TabPane } from 'reactstrap';
-import { NavLink, Redirect, useHistory } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Row, Label, FormGroup, Button } from 'reactstrap';
 import { connect } from 'react-redux';
 
 import DatePicker from 'react-datepicker';
@@ -9,24 +8,15 @@ import Switch from 'rc-switch';
 import 'rc-switch/assets/index.css';
 import Select from 'react-select';
 import { Formik, Form, Field, } from 'formik';
-import { withScriptjs, withGoogleMap, GoogleMap, Marker } from 'react-google-maps';
-import classnames from 'classnames';
 
-
-import { AvRadioGroup, AvRadio } from 'availity-reactstrap-validation';
 import { NotificationManager } from '../../../components/common/react-notifications';
-
-import { FormikCustomRadioGroup } from '../../../containers/form-validations/FormikFields';
 import CustomSelectInput from '../../../components/common/CustomSelectInput';
-import { login, updateLogin } from '../../../redux/actions';
 import { Colxx, Separator } from '../../../components/common/CustomBootstrap';
 import IntlMessages from '../../../helpers/IntlMessages';
 import Breadcrumb from '../../../containers/navs/Breadcrumb';
-import { LocationItem } from '../../../components/custom';
 
-import { convertTimeToString, formatTime, getMapPositionFromString, getPostByIdRequest, transformTime, updatePostRequest } from '../../../utils';
+import { convertTimeToString, updatePostRequest } from '../../../utils';
 import { loadAllPosts } from '../../../redux/actions';
-// import { reactionImages, typeIcons } from '../../../constants/custom';
 
 const typeList = [
     { value: '0', label: 'Card', key: 0 },
@@ -42,20 +32,6 @@ const typeList = [
 const INIT_POST_INFO = {
     active: 1, city: '', comment_num: 0, feed: '', isGuest: false, like_1_num: 0, like_2_num: 0, like_3_num: 0, like_4_num: 0, like_5_num: 0, like_6_num: 0, location_address: ' ', location_coordiate: '0,0', option_val: '', post_id: '', post_name: '', post_time: '', post_user_id: -1, target_date: '', type: 1
 };
-
-const MapWithAMarker = withScriptjs(
-    withGoogleMap(({ zoom, center, markers }) => (
-        <GoogleMap defaultZoom={8} defaultCenter={{ lat: -34.397, lng: 150.644 }}
-            zoom={zoom}
-            center={center}>
-            {
-                markers.map((marker, i) => (
-                    <Marker {...marker} key={i} />
-                ))
-            }
-        </GoogleMap>
-    ))
-);
 
 
 const EditPostPage = ({ history, match, post_list, user_list, loadAllPostsAction }) => {

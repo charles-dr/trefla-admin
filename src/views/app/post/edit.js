@@ -1,6 +1,5 @@
-import React, { createRef, useState, useEffect } from 'react';
-import { Row, Card, CardTitle, Label, FormGroup, Button, Nav, NavItem, TabContent, TabPane } from 'reactstrap';
-import { NavLink, Redirect, useHistory } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Row, Label, FormGroup, Button } from 'reactstrap';
 import { connect } from 'react-redux';
 
 import DatePicker from 'react-datepicker';
@@ -10,23 +9,17 @@ import 'rc-switch/assets/index.css';
 import Select from 'react-select';
 import { Formik, Form, Field, } from 'formik';
 import { withScriptjs, withGoogleMap, GoogleMap, Marker } from 'react-google-maps';
-import classnames from 'classnames';
 
 
-import { AvRadioGroup, AvRadio } from 'availity-reactstrap-validation';
 import { NotificationManager } from '../../../components/common/react-notifications';
-
-import { FormikCustomRadioGroup } from '../../../containers/form-validations/FormikFields';
 import CustomSelectInput from '../../../components/common/CustomSelectInput';
-import { login, updateLogin } from '../../../redux/actions';
 import { Colxx, Separator } from '../../../components/common/CustomBootstrap';
 import IntlMessages from '../../../helpers/IntlMessages';
 import Breadcrumb from '../../../containers/navs/Breadcrumb';
 import { LocationItem } from '../../../components/custom';
 
-import { convertTimeToString, formatTime, getMapPositionFromString, getPostByIdRequest, transformTime, updatePostRequest } from '../../../utils';
+import { convertTimeToString, getMapPositionFromString, getPostByIdRequest, transformTime, updatePostRequest } from '../../../utils';
 import { loadAllPosts } from '../../../redux/actions';
-// import { reactionImages, typeIcons } from '../../../constants/custom';
 
 const typeList = [
     { value: '0', label: 'Card', key: 0 },

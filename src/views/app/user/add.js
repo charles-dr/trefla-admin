@@ -1,6 +1,5 @@
-import React, { createRef, useState, useEffect } from 'react';
-import { Row, Card, CardTitle, Label, FormGroup, Button, Nav, NavItem, TabContent, TabPane } from 'reactstrap';
-import { NavLink, Redirect, useHistory } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Row, Label, FormGroup, Button } from 'reactstrap';
 import { connect } from 'react-redux';
 
 import DatePicker from 'react-datepicker';
@@ -9,46 +8,15 @@ import Switch from 'rc-switch';
 import 'rc-switch/assets/index.css';
 import Select from 'react-select';
 import { Formik, Form, Field, } from 'formik';
-import { withScriptjs, withGoogleMap, GoogleMap, Marker } from 'react-google-maps';
-import classnames from 'classnames';
 
-
-import { AvRadioGroup, AvRadio } from 'availity-reactstrap-validation';
 import { NotificationManager } from '../../../components/common/react-notifications';
-
-import {
-    FormikCustomRadioGroup,
-} from '../../../containers/form-validations/FormikFields';
 import CustomSelectInput from '../../../components/common/CustomSelectInput';
-import { login, updateLogin } from '../../../redux/actions';
 import { Colxx, Separator } from '../../../components/common/CustomBootstrap';
 import IntlMessages from '../../../helpers/IntlMessages';
 import Breadcrumb from '../../../containers/navs/Breadcrumb';
-import { LocationItem, UserSettings } from '../../../components/custom';
 
-import { formatTime, getMapPositionFromString, getUserByIdRequest, transformTime, addNewUserRequest } from '../../../utils';
+import { formatTime, addNewUserRequest } from '../../../utils';
 import { loadAllUsers } from '../../../redux/actions';
-
-
-const validateEmail = (value) => {
-    let error;
-    if (!value) {
-        error = 'Please enter your email address';
-    } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(value)) {
-        error = 'Invalid email address';
-    }
-    return error;
-};
-
-const validateName = (value) => {
-    let error;
-    if (!value) {
-        error = 'Please enter name';
-    } else if (value.length < 4) {
-        error = 'Value must be longer than 3 characters';
-    }
-    return error;
-};
 
 const INIT_USER_INFO = {
     active: 1, birthday: '1/1/1970', card_number: '', city: '', email: '', sex: '1', user_id: -1, user_name: '', bio: '', password: '', cpassword: '',
@@ -78,10 +46,8 @@ const EditUserPage = ({ history, match, user_list, loadAllUsersAction }) => {
 
     const onUpdateProfile = async (values) => {
         // console.log(profile, avatar, gender, active, dob, cardImage);
-        const cardFile = cardImgFile.files[0];
         const avatarFile = avatarInput.files[0];
 
-        // console.log(getUserNewId());return;
         const new_profile = composeSubmitData();
         // console.log(new_profile, avatar.mode === 1 ? avatarInput.files[0] : null, cardImgFile.files[0]);
         // return;

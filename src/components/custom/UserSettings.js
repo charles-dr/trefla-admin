@@ -2,11 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { useHistory } from "react-router-dom";
 
-import { Button, FormGroup, Label, Row } from 'reactstrap';
+import { Button } from 'reactstrap';
 import Switch from 'rc-switch';
 import 'rc-switch/assets/index.css';
 
-import { Colxx } from '../common/CustomBootstrap';
 import IntlMessages from '../../helpers/IntlMessages';
 import { NotificationManager } from '../common/react-notifications';
 import { updateUserProfile } from '../../utils';

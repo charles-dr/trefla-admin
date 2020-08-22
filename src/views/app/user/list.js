@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
-import { Badge, Button, FormGroup, Label, Modal, ModalHeader, ModalBody, Row } from 'reactstrap';
+import { Badge, Button, Label, Modal, ModalHeader, ModalBody, Row } from 'reactstrap';
 
 import Switch from 'rc-switch';
 import 'rc-switch/assets/index.css';
 import {
     AvForm,
-    AvField,
     AvGroup,
     AvInput,
     AvFeedback,
@@ -18,7 +17,7 @@ import { Colxx, Separator } from '../../../components/common/CustomBootstrap';
 import Breadcrumb from '../../../containers/navs/Breadcrumb';
 import { ReactTableWithPaginationCard } from '../../../containers/ui/ReactTableCards';
 
-import { deletePostsOfUser, deleteUserById, toggleBanStatus } from '../../../utils';
+import { deleteUserById, toggleBanStatus } from '../../../utils';
 import { loadAllUsers } from '../../../redux/actions';
 
 
@@ -181,17 +180,6 @@ const UserList = ({ match, history, friends, posts, users, loadAllUsersAction })
             new_users.push(user_item);
         }
         setData(new_users);
-    }
-    const getUserNameById = id => {
-        if (users.length > 0) {
-            for (let user of users) {
-                if (Number(user.user_id) === Number(id)) {
-                    return user.user_name;
-                }
-            }
-        } else {
-            return '';
-        }
     }
 
     const openAddModal = () => {

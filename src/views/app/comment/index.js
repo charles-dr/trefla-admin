@@ -1,9 +1,8 @@
 import React, { Suspense } from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
 
-const PostList = React.lazy(() => import('./list'));
-const PostEdit = React.lazy(() => import('./edit'));
-const PostAdd = React.lazy(() => import('./add'));
+const CommentList = React.lazy(() => import('./list'));
+const CommentEdit = React.lazy(() => import('./edit'));
 
 
 const PostModule = ({ match }) => (
@@ -12,15 +11,11 @@ const PostModule = ({ match }) => (
       <Redirect exact from={`${match.url}/`} to={`${match.url}/list`} />
       <Route
         path={`${match.url}/list`}
-        render={(props) => <PostList {...props} />}
+        render={(props) => <CommentList {...props} />}
       />
       <Route
         path={`${match.url}/edit/:id`}
-        render={(props) => <PostEdit {...props} />}
-      />
-      <Route
-        path={`${match.url}/add`}
-        render={(props) => <PostAdd {...props} />}
+        render={(props) => <CommentEdit {...props} />}
       />
       <Redirect to="/error" />
     </Switch>

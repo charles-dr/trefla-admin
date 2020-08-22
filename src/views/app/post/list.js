@@ -1,13 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
-import { Badge, Button, Label, Modal, ModalHeader, ModalBody, Row } from 'reactstrap';
-import {
-    AvForm,
-    AvField,
-    AvGroup,
-    AvInput,
-    AvFeedback,
-} from 'availity-reactstrap-validation';
+import { Badge, Button, Modal, ModalHeader, ModalBody, Row } from 'reactstrap';
 
 import IntlMessages from '../../../helpers/IntlMessages';
 import { NotificationManager } from '../../../components/common/react-notifications';
@@ -22,9 +15,7 @@ import { reactionImages, typeIcons } from '../../../constants/custom';
 
 
 const PostList = ({ match, history, posts, users, loadAllPostsAction }) => {
-    const [pageLoaded, setPageLoaded] = useState(true);
     const [data, setData] = useState([]);
-    const [modalDetails, setModalDetails] = useState(false);
     const [delModal, setDelModal] = useState(false);
     const [delId, setDelId] = useState(-1);
     const [loading, setLoading] = useState(false);
@@ -61,12 +52,6 @@ const PostList = ({ match, history, posts, users, loadAllPostsAction }) => {
             cellClass: 'text-muted  w-5',
             Cell: (props) => <><div className={`glyph-icon ${typeIcons[props.value]}`} style={{ fontSize: 20 }}></div></>,
         },
-        // {
-        //     Header: 'Coordinate',
-        //     accessor: 'location_coordinate',
-        //     cellClass: 'text-muted  w-10',
-        //     Cell: (props) => <>{formatCoordinate(props.value)}</>,
-        // },
         {
             Header: 'Location',
             accessor: 'location_address',
@@ -95,7 +80,7 @@ const PostList = ({ match, history, posts, users, loadAllPostsAction }) => {
             Header: 'Active',
             accessor: 'active',
             cellClass: 'text-muted  w-5',
-            Cell: (props) => <><Badge color={props.value == 1 ? 'success' : 'danger'} pill className="mb-1">{props.value == 1 ? 'Active' : 'Disabled'}</Badge></>,
+            Cell: (props) => <><Badge color={props.value === 1 ? 'success' : 'danger'} pill className="mb-1">{props.value === 1 ? 'Active' : 'Disabled'}</Badge></>,
         },
         {
             Header: 'Actions',
@@ -126,7 +111,7 @@ const PostList = ({ match, history, posts, users, loadAllPostsAction }) => {
     useEffect(() => {
         // console.log(users, posts);
 
-        const tableRows = recomposePosts();
+        recomposePosts();
 
         return () => { };
     }, [match, users, posts]);
@@ -151,13 +136,6 @@ const PostList = ({ match, history, posts, users, loadAllPostsAction }) => {
                 No reactions
             </Badge>;
         }
-    }
-    const formatCoordinate = (coord) => {
-        const arr = coord.split(',');
-        return <>
-            <p>X: {arr[0]}</p>
-            <p>Y: {arr[1]}</p>
-        </>
     }
     const recomposePosts = () => {
         let new_posts = [];
@@ -225,11 +203,6 @@ const PostList = ({ match, history, posts, users, loadAllPostsAction }) => {
             NotificationManager.error(res.message, 'Delete Post');
         }
     };
-    const handleOnChange = (e) => {
-        // setUnit({ ...unit, [e.target.name]: e.target.value });
-    };
-
-
 
     return (
         <>
