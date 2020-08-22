@@ -623,3 +623,34 @@ export const updatePostRequest = async (post) => {
     };
   }
 }
+
+export const deletePostByIdRequest = async (post_id) => {
+  post_id = post_id.toString();
+
+  try {
+    const postRef = _firebase.firestore().collection('posts').doc(post_id);
+
+    // delete comments of the post
+    await _firebase.firestore().collection('comments').where('type', '==', 'POST').where('target_id', '==', post_id).get().then(qss => {
+      qss.forEach(async commentDoc => {
+        await _firebase.firestore().collection('comments').doc(commentDoc.id).delete();
+      });
+    });
+
+    // delete reports of the postRef
+    await _firebase.firestore().collection('reports').where('type', '==', 'POST').where('target_id', '==', post_id).get().then(qss => {
+      qss.forEach(async reportDoc => {
+        await _firebase.firestore().collection('reports').doc(reportDoc.id).delete();
+      });
+    });
+
+    // delete post
+    await postRef.delete();
+
+    return { status: true, message: 'Post has been deleted!' };
+  }
+  catch (err) {
+    console.error(err);
+    return { status: false, message: 'Something went wrong!', details: err.message };
+  }
+}

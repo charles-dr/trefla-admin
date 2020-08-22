@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
-import { Badge, Button, Label, Row } from 'reactstrap';
+import { Badge, Button, Label, Modal, ModalHeader, ModalBody, Row } from 'reactstrap';
 import {
     AvForm,
     AvField,
@@ -15,24 +15,20 @@ import { Colxx, Separator } from '../../../components/common/CustomBootstrap';
 import Breadcrumb from '../../../containers/navs/Breadcrumb';
 import { ReactTableWithPaginationCard } from '../../../containers/ui/ReactTableCards';
 
-import { getPostTableContent } from '../../../api/functions.api';
-import { _firebase, transformTime } from '../../../utils';
 
+import { deletePostByIdRequest, transformTime } from '../../../utils';
+import { loadAllPosts } from '../../../redux/actions';
 import { reactionImages, typeIcons } from '../../../constants/custom';
 
-const INIT_UNIT = {
-    _id: '',
-    districtId: '',
-    name: '',
-    district: { districtName: '', city: { cityName: '' } },
-};
 
-
-const PostList = ({ match, history, posts, users }) => {
+const PostList = ({ match, history, posts, users, loadAllPostsAction }) => {
     const [pageLoaded, setPageLoaded] = useState(true);
     const [data, setData] = useState([]);
     const [modalDetails, setModalDetails] = useState(false);
-    const [unit, setUnit] = useState(INIT_UNIT);
+    const [delModal, setDelModal] = useState(false);
+    const [delId, setDelId] = useState(-1);
+    const [loading, setLoading] = useState(false);
+
 
     const cols = [
         {
@@ -46,11 +42,11 @@ const PostList = ({ match, history, posts, users }) => {
             accessor: 'post_name_',
             cellClass: 'text-muted  w-5',
             Cell: (props) => <>
-                { props.value.post_name && props.value.post_name}
-                { !props.value.post_name && 
-                <Badge color="warning" pill className="mb-1">
-                    Not Specified
-                </Badge> }
+                {props.value.post_name && props.value.post_name}
+                {!props.value.post_name &&
+                    <Badge color="warning" pill className="mb-1">
+                        Not Specified
+                </Badge>}
             </>,
         },
         {
@@ -178,8 +174,8 @@ const PostList = ({ match, history, posts, users }) => {
             // add new field 'likes'
             post_item['likes'] = `${post.like_1_num},${post.like_2_num},${post.like_3_num},${post.like_4_num},${post.like_5_num},${post.like_6_num}`;
             // add new field 'post_name_';
-            post_item['post_name_'] = {user_name: getUserNameById(post.post_user_id), post_name: post.post_name};
-            
+            post_item['post_name_'] = { user_name: getUserNameById(post.post_user_id), post_name: post.post_name };
+
             // put item to array
             new_posts.push(post_item);
         }
@@ -200,30 +196,39 @@ const PostList = ({ match, history, posts, users }) => {
     const handleOnEdit = (post_id) => {
         history.push(`/app/post/edit/${post_id}`);
     };
-    const handleOnDelete = (_id) => {
-        // if (window.confirm('Are you sure to delete data?')) {
-        //     deleteSchoolById({ variables: { _id: _id } });
-        // }
+    const handleOnDelete = (post_id) => {
+        setDelId(post_id);
+        setDelModal(true);
     };
 
-    const openAddModal = () => {
+    const navigateToAddPage = () => {
         history.push('/app/post/add');
     };
-    const onSubmit = (event, errors, values) => {
-        // console.log(errors);
-        // console.log(values, unit);
-        // if (errors.length === 0) {
-        //     // submit
-        //     if (unit._id === "") { addNewSchool({ variables: values}); }
-        //     else { updateSchoolById({ variables: {...values, _id: unit._id }}); }
-        // }
+
+    const proceedDelete = async () => {
+        console.log('[delete now]', delId);
+
+        setLoading(true);
+
+        const res = await deletePostByIdRequest(delId);
+
+        setLoading(false);
+
+        setDelId(-1);
+
+        if (res.status === true) {
+            setDelModal(false);
+            NotificationManager.success(res.message, 'Delete Post');
+            loadAllPostsAction();
+        }
+        else { 
+            NotificationManager.error(res.message, 'Delete Post');
+        }
     };
     const handleOnChange = (e) => {
         // setUnit({ ...unit, [e.target.name]: e.target.value });
     };
-    const handleOnCheck = (column, colIndex) => {
-        console.log(column, colIndex);
-    };
+
 
 
     return (
@@ -243,7 +248,7 @@ const PostList = ({ match, history, posts, users }) => {
                 </Colxx>
 
                 <Colxx className="d-flex justify-content-end" xxs={12}>
-                    <Button color="primary" className="mb-2" onClick={openAddModal}>
+                    <Button color="primary" className="mb-2" onClick={navigateToAddPage}>
                         <i className="simple-icon-plus mr-1" />
                         <IntlMessages id="actions.add" />
                     </Button>{' '}
@@ -256,6 +261,48 @@ const PostList = ({ match, history, posts, users }) => {
                     />
                 </Colxx>
             </Row>
+
+            {/* Ban Modal */}
+            <Modal
+                isOpen={delModal}
+                toggle={() => setDelModal(!delModal)}
+                backdrop="static"
+            >
+                <ModalHeader>
+                    Delete Post
+                </ModalHeader>
+                <ModalBody>
+                    <p>Are you sure to delete this post?</p>
+
+                    <Separator className="mb-5 mt-3" />
+                    <div className="d-flex justify-content-end">
+                        <Button
+                            type="button"
+                            color="primary"
+                            className={`btn-shadow btn-multiple-state mr-2 ${
+                                loading ? 'show-spinner' : ''
+                                }`}
+                            size="lg"
+                            onClick={proceedDelete}
+                        >
+                            <span className="spinner d-inline-block">
+                                <span className="bounce1" />
+                                <span className="bounce2" />
+                                <span className="bounce3" />
+                            </span>
+                            <span className="label">
+                                Delete
+                            </span>
+                        </Button>{' '}
+                        <Button
+                            color="secondary"
+                            onClick={() => setDelModal(false)}
+                        >
+                            <IntlMessages id="actions.cancel" />
+                        </Button>
+                    </div>
+                </ModalBody>
+            </Modal>
         </>
     );
 };
@@ -269,4 +316,6 @@ const mapStateToProps = ({ posts: postApp, users: userApp }) => {
     };
 };
 
-export default connect(mapStateToProps)(PostList);
+export default connect(mapStateToProps, {
+    loadAllPostsAction: loadAllPosts
+})(PostList);
