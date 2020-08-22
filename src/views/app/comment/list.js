@@ -223,9 +223,6 @@ const CommentList = ({ match, history, comments, posts, users, loadAllPostsActio
         }
     };
 
-
-
-
     return (
         <>
             <Row>

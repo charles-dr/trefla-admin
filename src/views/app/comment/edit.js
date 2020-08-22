@@ -23,7 +23,7 @@ const INIT_COMMENT_INFO = {
 };
 
 
-const EditPostPage = ({ history, match, user_list, loadAllPostsAction }) => {
+const EditCommentPage = ({ history, match, user_list, loadAllPostsAction }) => {
     
     const [comment, setComment] = useState(INIT_COMMENT_INFO);
     const [userSelValues, setUserSelValues] = useState([]);
@@ -245,4 +245,4 @@ const mapStateToProps = ({ posts: postApp, users: userApp }) => {
 
 export default connect(mapStateToProps, {
     loadAllPostsAction: loadAllPosts,
-})(EditPostPage);
+})(EditCommentPage);
