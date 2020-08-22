@@ -179,6 +179,7 @@ const EditUserPage = ({ history, match, loginUserAction, updateLoginAction, load
         // avatar
         if (avatar.mode === 0) {
             submit_profile.avatarIndex = avatar.path;
+            submit_profile.photo = '';
         }
         // gender
         submit_profile.sex = gender.value;
