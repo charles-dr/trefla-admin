@@ -36,6 +36,9 @@ export const AUTH_AVATAR = 'AUTH_AVATAR';
 export const AUTH_AVATAR_UPDATE = 'AUTH_AVATAR_UPDATE';
 
 
+export const COMMENTS_GET = 'COMMENT.GET';
+export const COMMENTS_ARRIVED = 'COMMENT.ARRIVED';
+
 export const FRIEND_GET = 'FRIEND_GET';
 export const FRIEND_ARRIVED = 'FRIEND_ARRIVED';
 
@@ -52,6 +55,7 @@ export * from './menu/actions';
 export * from './settings/actions';
 
 export * from './auth/actions';
+export * from './comment/actions';
 export * from './friend/actions';
 export * from './lang/actions';
 export * from './posts/actions';

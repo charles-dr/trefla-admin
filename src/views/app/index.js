@@ -6,6 +6,7 @@ import AppLayout from '../../layout/AppLayout';
 
 import {
   downloadAvatar,
+  loadAllComments,
   loadAllFriends,
   loadAllLangs,
   loadAllPosts,
@@ -13,13 +14,14 @@ import {
   loadAuthInfo
 } from '../../redux/actions';
 
+const CommentModule = React.lazy(() => import('./comment'));
 const LangModule = React.lazy(() => import('./lang'));
 const PostModule = React.lazy(() => import('./post'));
 const SettingModule = React.lazy(() => import('./settings'));
 const UserModule = React.lazy(() => import('./user'));
 const DashboardPage = React.lazy(() => import('./dashboard'));
 
-const App = ({ match, downloadAvatarAction, getAllFriendsAction, getAllLangsAction, getAllPostsAction, getAllUsersAction, loadAuthInfoAction, login }) => {
+const App = ({ match, downloadAvatarAction, getAllCommentsAction, getAllFriendsAction, getAllLangsAction, getAllPostsAction, getAllUsersAction, loadAuthInfoAction, login }) => {
   const history = useHistory();
   useEffect(() => {
     if (!login) {
@@ -27,10 +29,11 @@ const App = ({ match, downloadAvatarAction, getAllFriendsAction, getAllLangsActi
       history.push('/auth/login');
     }
     // load all data
-    getAllUsersAction();
+    getAllCommentsAction();
     getAllFriendsAction();
     getAllLangsAction();
     getAllPostsAction();
+    getAllUsersAction();
     loadAuthInfoAction();
     downloadAvatarAction();
   }, [getAllUsersAction, getAllPostsAction])
@@ -44,6 +47,10 @@ const App = ({ match, downloadAvatarAction, getAllFriendsAction, getAllLangsActi
             <Route
               path={`${match.url}/dashboard`}
               render={(props) => <DashboardPage {...props} />}
+            />
+            <Route 
+              path={`${match.url}/comment`}
+              render={(props) => <CommentModule {...props} />}
             />
             <Route
               path={`${match.url}/lang`}
@@ -77,6 +84,7 @@ const mapStateToProps = ({ menu, auth }) => {
 
 export default withRouter(connect(mapStateToProps, {
   downloadAvatarAction: downloadAvatar,
+  getAllCommentsAction: loadAllComments,
   getAllFriendsAction: loadAllFriends,
   getAllLangsAction: loadAllLangs,
   getAllPostsAction: loadAllPosts,

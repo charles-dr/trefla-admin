@@ -18,6 +18,12 @@ const data = [
     to: '/app/post',
   },
   {
+    id: 'commentmenu',
+    icon: 'simple-icon-bubbles',
+    label: 'menu.comments',
+    to: '/app/comment',
+  },
+  {
     id: 'languages',
     icon: 'simple-icon-globe',
     label: 'menu.languages',

@@ -69,6 +69,8 @@ module.exports = {
 
   'menu.add': 'Add',
   'menu.config': 'Config',
+  'menu.comments': 'Comments',
+  'menu.comment': 'Comment',
   'menu.dashboard': 'Dashboard',
   'menu.edit': 'Edit',
   'menu.languages': 'Languages',
@@ -89,6 +91,7 @@ module.exports = {
   'pages.error-code': 'Error code',
   'pages.go-back-home': 'GO BACK HOME',
 
+  'pages.comment': 'Comment',
   'pages.config': 'Config',
   'pages.dashboard': 'Dashboard',
   'pages.delete-user': 'Delete User',

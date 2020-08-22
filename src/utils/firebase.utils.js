@@ -74,6 +74,17 @@ export const getAllPosts = () => {
     });
 }
 
+export const getAllComments = () => {
+  return _firebase.firestore().collection('comments').orderBy('comment_id', 'asc').get()
+    .then((querySnapshot) => {
+      const rows = [];
+      querySnapshot.forEach((doc) => {
+        rows.push(doc.data());
+      });
+      return rows;
+    });
+}
+
 export const getAdminInfo = async () => {
   return _firebase.firestore().collection('admin').doc('0').get()
     .then(function (doc) {
@@ -652,5 +663,47 @@ export const deletePostByIdRequest = async (post_id) => {
   catch (err) {
     console.error(err);
     return { status: false, message: 'Something went wrong!', details: err.message };
+  }
+}
+
+
+////////////////////////////////////////////////////////////////
+//                                                            //
+//                  C   O   M   M   E   N   T                 //
+//                                                            // 
+////////////////////////////////////////////////////////////////
+
+export const getCommentByIdRequest = async (comment_id) => {
+  comment_id = Number(comment_id); // convert into integer
+  const commentRef = _firebase.firestore().collection('comments').doc(comment_id.toString());
+
+  return commentRef.get()
+    .then(doc => {
+      if (doc.exists) {
+        return doc.data();
+      } else {
+        return false;
+      }
+    })
+    .catch(err => {
+      console.log('[Comment Fetch]', err);
+      return false;
+    })
+}
+
+export const updateCommentRequest = async (comment) => {
+  const comment_id = comment.comment_id.toString();
+
+  // console.log(post);
+  try {
+    const commentRef = _firebase.firestore().collection('comments').doc(comment_id);
+    await commentRef.set(comment); //, { merge: false }
+    return {status: true, message: 'Comment has been updated'};
+  }
+  catch (err) {
+    console.log(err);
+    return {
+      status: false, message: 'Something went wrong', details: err.message
+    };
   }
 }
