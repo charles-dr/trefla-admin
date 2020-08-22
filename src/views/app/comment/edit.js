@@ -237,7 +237,6 @@ const EditCommentPage = ({ history, match, user_list, loadAllPostsAction }) => {
     );
 };
 
-
 const mapStateToProps = ({ posts: postApp, users: userApp }) => {
     const { list: user_list } = userApp;
     return { user_list };

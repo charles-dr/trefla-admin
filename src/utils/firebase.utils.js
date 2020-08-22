@@ -705,3 +705,27 @@ export const updateCommentRequest = async (comment) => {
     };
   }
 }
+
+export const deleteCommentByIdRequest = async (comment_id) => {
+  comment_id = comment_id.toString();
+
+  try {
+    const commentRef = _firebase.firestore().collection('comments').doc(comment_id);
+
+    // delete comments to the comment
+    await _firebase.firestore().collection('comments').where('type', '==', 'COMMENT').where('target_id', '==', comment_id).get().then(qss => {
+      qss.forEach(async commentDoc => {
+        await _firebase.firestore().collection('comments').doc(commentDoc.id).delete();
+      });
+    });
+
+    // delete post
+    await commentRef.delete();
+
+    return { status: true, message: 'Comment has been deleted!' };
+  }
+  catch (err) {
+    console.error(err);
+    return { status: false, message: 'Something went wrong!', details: err.message };
+  }
+}

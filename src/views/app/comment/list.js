@@ -9,12 +9,12 @@ import Breadcrumb from '../../../containers/navs/Breadcrumb';
 import { ReactTableWithPaginationCard } from '../../../containers/ui/ReactTableCards';
 
 
-import { deletePostByIdRequest, transformTime } from '../../../utils';
-import { loadAllPosts } from '../../../redux/actions';
+import { deleteCommentByIdRequest, transformTime } from '../../../utils';
+import { loadAllComments } from '../../../redux/actions';
 import { reactionImages } from '../../../constants/custom';
 
 
-const CommentList = ({ match, history, comments, posts, users, loadAllPostsAction }) => {
+const CommentList = ({ match, history, comments, posts, users, loadAllCommentsAction }) => {
     const [data, setData] = useState([]);
     const [delModal, setDelModal] = useState(false);
     const [delId, setDelId] = useState(-1);
@@ -207,7 +207,7 @@ const CommentList = ({ match, history, comments, posts, users, loadAllPostsActio
 
         setLoading(true);
 
-        const res = await deletePostByIdRequest(delId);
+        const res = await deleteCommentByIdRequest(delId);
 
         setLoading(false);
 
@@ -216,7 +216,7 @@ const CommentList = ({ match, history, comments, posts, users, loadAllPostsActio
         if (res.status === true) {
             setDelModal(false);
             NotificationManager.success(res.message, 'Delete Post');
-            loadAllPostsAction();
+            loadAllCommentsAction();
         }
         else { 
             NotificationManager.error(res.message, 'Delete Post');
@@ -247,17 +247,17 @@ const CommentList = ({ match, history, comments, posts, users, loadAllPostsActio
                 </Colxx>
             </Row>
 
-            {/* Ban Modal */}
+            {/* Delete Modal */}
             <Modal
                 isOpen={delModal}
                 toggle={() => setDelModal(!delModal)}
                 backdrop="static"
             >
                 <ModalHeader>
-                    Delete Post
+                    Delete Comment
                 </ModalHeader>
                 <ModalBody>
-                    <p>Are you sure to delete this post?</p>
+                    <p>Are you sure to delete this comment?</p>
 
                     <Separator className="mb-5 mt-3" />
                     <div className="d-flex justify-content-end">
@@ -303,5 +303,5 @@ const mapStateToProps = ({ comments: commentApp, posts: postApp, users: userApp 
 };
 
 export default connect(mapStateToProps, {
-    loadAllPostsAction: loadAllPosts
+    loadAllCommentsAction: loadAllComments
 })(CommentList);
