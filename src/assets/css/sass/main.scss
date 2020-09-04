@@ -139,6 +139,14 @@ html {
             }
         }
 
+        &.refresh {
+            color: #a744e8;
+
+            &:hover {
+                color: #6a10a7;
+            }
+        }
+
         &.inactive {
             color: #898989;
 

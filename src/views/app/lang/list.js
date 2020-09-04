@@ -9,7 +9,7 @@ import Breadcrumb from '../../../containers/navs/Breadcrumb';
 import { ReactTableWithPaginationCard } from '../../../containers/ui/ReactTableCards';
 
 import { loadAllLangs } from '../../../redux/actions';
-import { deleteLangByIdRequest, getLangInfoByIdRequest, getLangFileContentRequest, transformTime } from '../../../utils';
+import { deleteLangByIdRequest, getLangInfoByIdRequest, getLangFileContentRequest, refreshLanguage, transformTime } from '../../../utils';
 
 
 const UserList = ({ history, match, langs, loadAllLangsAction }) => {
@@ -17,6 +17,7 @@ const UserList = ({ history, match, langs, loadAllLangsAction }) => {
     const [data, setData] = useState([]);
     const [confirm, setConfirm] = useState(false);
     const [delId, setDelId] = useState(-1);
+    const [processing, setProcessing] = useState(false);
 
 
     const cols = [
@@ -62,6 +63,12 @@ const UserList = ({ history, match, langs, loadAllLangsAction }) => {
                             title="Download"
                             style={{ fontSize: 18 }}
                             onClick={() => handleOnDownload(props.value)}
+                        />
+                        <i
+                            className="simple-icon-refresh refresh"
+                            title="Download"
+                            style={{ fontSize: 18 }}
+                            onClick={() => refreshLangKeys(props.value)}
                         />
                         <i
                             className="simple-icon-trash danger"
@@ -157,61 +164,135 @@ const UserList = ({ history, match, langs, loadAllLangsAction }) => {
         tempLink.setAttribute('download', download_name);
         tempLink.click();
     }
+    const refreshLangKeys = async (lang_id) => {
+        console.log(lang_id, lang_id == 0, lang_id === 0);
 
-    return (
-        <>
-            <Row>
-                <Colxx xxs="12">
-                    <Breadcrumb heading="menu.languages" match={match} />
-                    <Separator className="mb-5" />
-                </Colxx>
-            </Row>
+        // no need to refresh English here.
+        if (Number(lang_id) === 0) {
+            NotificationManager.warning('This is the default language!', 'Sync Language');
+            return;
+        }
 
-            <Row>
-                <Colxx xxs="12">
-                    <h3 className="mb-4">
-                        <IntlMessages id="pages.languages" />
-                    </h3>
-                </Colxx>
+        // lang object
+        let lang_target = {};
+        for (let lang of langs) {
+            if (lang.lang_id === lang_id) {
+                lang_target = lang;
+            }
+        }
+        let lang_default = langs[0];
 
-                <Colxx className="d-flex justify-content-end" xxs={12}>
-                    <Button color="primary" className="mb-2" onClick={toAddPage}>
-                        <i className="simple-icon-plus mr-1" />
-                        <IntlMessages id="actions.add" />
+        setProcessing(true);
+
+        const res = await refreshLanguage(lang_target, lang_default);
+
+        setProcessing(false);
+
+        if (res.status === true) {
+            NotificationManager.success(res.message);
+        } else {
+            NotificationManager.error(res.message);
+        }
+
+        // console.log(lang_target);
+    }
+    const refreshAllLangs = async () => {
+        setProcessing(true);
+        try {
+            for (let lang of langs) {
+                if (Number(lang.lang_id) === 0) {
+                    continue;
+                }
+
+                await refreshLanguage(lang, langs[0]);
+            }
+
+            setProcessing(false);
+            NotificationManager.success('All languages are synchronized!', 'Sync Language');
+        } catch (err) {
+            console.log(err);
+            setProcessing(false);
+            NotificationManager.error(err.message, 'Sync Language');
+        }
+    }
+
+
+return (
+    <>
+        <Row>
+            <Colxx xxs="12">
+                <Breadcrumb heading="menu.languages" match={match} />
+                <Separator className="mb-5" />
+            </Colxx>
+        </Row>
+
+        <Row>
+            <Colxx xxs="12">
+                <h3 className="mb-4">
+                    <IntlMessages id="pages.languages" />
+                </h3>
+            </Colxx>
+
+            <Colxx className="d-flex justify-content-end" xxs={12}>
+                <Button color="info" className="mb-2 mr-2" onClick={refreshAllLangs}>
+                    <i className="simple-icon-refresh mr-1" />
+                        Sync All Langs
                     </Button>{' '}
-                </Colxx>
+                <Button color="primary" className="mb-2" onClick={toAddPage}>
+                    <i className="simple-icon-plus mr-1" />
+                    <IntlMessages id="actions.add" />
+                </Button>{' '}
+            </Colxx>
 
-                <Colxx xxs="12">
-                    <ReactTableWithPaginationCard
-                        cols={cols}
-                        data={data}
-                    />
-                </Colxx>
-            </Row>
+            <Colxx xxs="12">
+                <ReactTableWithPaginationCard
+                    cols={cols}
+                    data={data}
+                />
+            </Colxx>
+        </Row>
 
-            <Modal
-                isOpen={confirm}
-                toggle={() => setConfirm(!confirm)}
-                backdrop={'static'}
-            >
-                <ModalHeader>Confirm</ModalHeader>
-                <ModalBody>
-                    Are you sure to remove this language?
+        {/* Confirm Delete */}
+        <Modal
+            isOpen={confirm}
+            toggle={() => setConfirm(!confirm)}
+            backdrop={'static'}
+        >
+            <ModalHeader>Confirm</ModalHeader>
+            <ModalBody>
+                Are you sure to remove this language?
                   </ModalBody>
-                <ModalFooter>
-                    <Button color="primary" onClick={deleteLanguage}>
-                        Ok
+            <ModalFooter>
+                <Button color="primary" onClick={deleteLanguage}>
+                    Ok
                     </Button>{' '}
-                    <Button
-                        color="secondary"
-                        onClick={() => setConfirm(false)}
-                    >
-                        Cancel
+                <Button
+                    color="secondary"
+                    onClick={() => setConfirm(false)}
+                >
+                    Cancel
                     </Button>
-                </ModalFooter>
-            </Modal>
-        </>
-    );
+            </ModalFooter>
+        </Modal>
+
+        {/* Loading & Please wait */}
+        <Modal
+            isOpen={processing}
+            toggle={() => setProcessing(!processing)}
+            backdrop={'static'}
+        >
+            <ModalHeader>Alert</ModalHeader>
+            <ModalBody>
+                <span className="spinner d-inline-block">
+                    <span className="bounce1" />
+                    <span className="bounce2" />
+                    <span className="bounce3" />
+                </span>
+                    Processing. Pleaset wait...
+                  </ModalBody>
+        </Modal>
+    </>
+);
 };
 
 const mapStateToProps = ({ langs: langApp }) => {

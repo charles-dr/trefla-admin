@@ -41,8 +41,8 @@ const CommentList = ({ match, history, comments, posts, users, loadAllCommentsAc
             accessor: 'type',
             cellClass: 'text-muted  w-5',
             Cell: (props) => <>
-                { props.value === 'COMMENT' && <Badge color="outline-info" pill className="mb-1"> Comment </Badge> }
-                { props.value !== 'COMMENT' && <Badge color="outline-primary" pill className="mb-1"> Post </Badge> }
+                {props.value === 'COMMENT' && <Badge color="outline-info" pill className="mb-1"> Comment </Badge>}
+                {props.value !== 'COMMENT' && <Badge color="outline-primary" pill className="mb-1"> Post </Badge>}
             </>,
         },
         {
@@ -58,9 +58,9 @@ const CommentList = ({ match, history, comments, posts, users, loadAllCommentsAc
             accessor: 'isGuest',
             cellClass: 'text-muted  w-5',
             Cell: (props) => <>
-                { props.value && <Badge color="outline-success" pill className="mb-1"> True </Badge> }
-                { !props.value && <Badge color="outline-danger" pill className="mb-1"> False </Badge> }
-                </>,
+                {props.value && <Badge color="outline-success" pill className="mb-1"> True </Badge>}
+                {!props.value && <Badge color="outline-danger" pill className="mb-1"> False </Badge>}
+            </>,
         },
         {
             Header: 'Likes',
@@ -87,14 +87,14 @@ const CommentList = ({ match, history, comments, posts, users, loadAllCommentsAc
             Cell: (props) => (
                 <>
                     <div className="tbl-actions">
-                        <NavLink 
+                        <NavLink
                             href={`/app/comment/edit/${props.value}`}
-                            style={{display: 'inline-block', padding: '0.5rem'}}
-                            ><i
-                            className="iconsminds-file-edit info"
-                            title="Edit"
-                            style={{ fontSize: 18 }}
-                        /></NavLink>
+                            style={{ display: 'inline-block', padding: '0.5rem' }}
+                        ><i
+                                className="iconsminds-file-edit info"
+                                title="Edit"
+                                style={{ fontSize: 18 }}
+                            /></NavLink>
                         <i
                             className="simple-icon-trash danger"
                             title="Remove"
@@ -178,22 +178,28 @@ const CommentList = ({ match, history, comments, posts, users, loadAllCommentsAc
             return '';
         }
     }
-    const getParentContent = ({type, target_id}) => {
+    const getParentContent = ({ type, target_id }) => {
         if (type === 'POST') {
             for (let post of posts) {
                 if (post.post_id === target_id) {
                     return <NavLink href={`/app/post/edit/${target_id}`}>{post.feed}</NavLink>;
                 }
             }
+            return <>
+                <Badge color="outline-warning" pill className="mb-1"> Deleted </Badge>
+            </>
         } else if (type === 'COMMENT') {
             for (let comment of comments) {
                 if (comment.comment_id === target_id) {
                     return <NavLink href={`/app/comment/edit/${target_id}`}>{comment.comment}</NavLink>
                 }
             }
+            return <>
+                <Badge color="outline-warning" pill className="mb-1"> Deleted </Badge>
+            </>
         } else {
             return <>
-            <Badge color="outline-warning" pill className="mb-1"> Deleted </Badge>
+                <Badge color="outline-danger" pill className="mb-1"> Unknown </Badge>
             </>
         }
     }
@@ -203,7 +209,7 @@ const CommentList = ({ match, history, comments, posts, users, loadAllCommentsAc
         setDelModal(true);
     };
     const proceedDelete = async () => {
-        console.log('[delete now]', delId);
+        // console.log('[delete now]', delId);
 
         setLoading(true);
 
@@ -218,7 +224,7 @@ const CommentList = ({ match, history, comments, posts, users, loadAllCommentsAc
             NotificationManager.success(res.message, 'Delete Post');
             loadAllCommentsAction();
         }
-        else { 
+        else {
             NotificationManager.error(res.message, 'Delete Post');
         }
     };

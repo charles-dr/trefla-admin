@@ -160,7 +160,6 @@ export const addNewLangRequest = async ({ lang_id, name, code, active, blob }) =
       await fileRef.put(blob);
       // get download url
       download_url = await fileRef.getDownloadURL();
-
     }
 
     const adminRef = _firebase.firestore().collection('langs').doc(lang_id.toString());
@@ -281,6 +280,41 @@ export const updateConfigRequest = async ({ lang_version }) => {
     await _firebase.firestore().collection('config').doc(config_id).set(config);
     return { status: true, message: 'Data has been saved!' };
   } catch (err) {
+    return { status: false, message: err.message };
+  }
+}
+
+export const refreshLanguage = async (lang_target, lang_default) => {
+  try {
+    const res_target = await getLangFileContentRequest(lang_target.code);
+    const res_default = await getLangFileContentRequest(lang_default.code);
+
+    const content_target = res_target.data;
+    const content_default = res_default.data;
+
+    // console.log(content_target, content_default);
+    const content_new = {};
+
+    for (let key in content_default) {
+      if (content_target[key] !== undefined) {
+        content_new[key] = content_target[key];
+      } else {
+        content_new[key] = content_default[key];
+      }
+    }
+
+    // console.log(content_new);
+    const blob = new Blob([JSON.stringify(content_new)], { type: 'application/json' })
+    const res_update = await addNewLangRequest({ lang_id: lang_target.lang_id, name: lang_target.name, code: lang_target.code, active: lang_target.active, blob: blob })
+
+    if (res_update.status === true) {
+      return {status: true, message: `${lang_target.name} has been synchronized!`};
+    } else {
+      return {status: false, message: `Failed to synchronize ${lang_target.name} asset!`};
+    }
+
+  } catch (err) {
+    console.log(err);
     return { status: false, message: err.message };
   }
 }
@@ -623,7 +657,7 @@ export const updatePostRequest = async (post) => {
   try {
     const postRef = _firebase.firestore().collection('posts').doc(post_id);
     await postRef.set(post); //, { merge: false }
-    return {status: true, message: 'Post has been updated'};
+    return { status: true, message: 'Post has been updated' };
   }
   catch (err) {
     console.log(err);
@@ -696,7 +730,7 @@ export const updateCommentRequest = async (comment) => {
   try {
     const commentRef = _firebase.firestore().collection('comments').doc(comment_id);
     await commentRef.set(comment); //, { merge: false }
-    return {status: true, message: 'Comment has been updated'};
+    return { status: true, message: 'Comment has been updated' };
   }
   catch (err) {
     console.log(err);
