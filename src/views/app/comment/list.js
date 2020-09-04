@@ -114,7 +114,7 @@ const CommentList = ({ match, history, comments, posts, users, loadAllCommentsAc
         recomposeComments();
 
         return () => { };
-    }, [match, users, posts, comments]);
+    }, [users, posts, comments]);
 
     const formatLikes = (str_likes) => {
         const arr_likes = str_likes.split(',');
@@ -233,7 +233,7 @@ const CommentList = ({ match, history, comments, posts, users, loadAllCommentsAc
         <>
             <Row>
                 <Colxx xxs="12">
-                    <Breadcrumb heading="menu.posts" match={match} />
+                    <Breadcrumb heading="menu.comments" match={match} />
                     <Separator className="mb-5" />
                 </Colxx>
             </Row>
@@ -241,7 +241,7 @@ const CommentList = ({ match, history, comments, posts, users, loadAllCommentsAc
             <Row>
                 <Colxx xxs="12">
                     <h3 className="mb-4">
-                        <IntlMessages id="pages.posts" />
+                        <IntlMessages id="pages.comments" />
                     </h3>
                 </Colxx>
 

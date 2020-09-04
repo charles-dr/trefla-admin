@@ -10,6 +10,19 @@ const data = [
     icon: 'simple-icon-people',
     label: 'menu.users',
     to: '/app/user',
+    subs: [
+      {
+        icon: 'simple-icon-list',
+        label: 'menu.list',
+        to: '/app/user/list',
+      },
+      {
+        icon: 'iconsminds-id-card',
+        label: 'menu.verification',
+        to: '/app/user/verification',
+      }
+    ]
+
   },
   {
     id: 'postmenu',

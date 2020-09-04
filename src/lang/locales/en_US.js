@@ -85,6 +85,8 @@ module.exports = {
   'menu.setting': 'Setting',
   'menu.users': 'Users',
   'menu.user': 'User',
+  'menu.verification': 'Verification',
+  'menu.verifications': 'Verifications',
 
   /* 04.Error Page */
   'pages.error-title': 'Ooops... looks like an error occurred!',
@@ -92,6 +94,7 @@ module.exports = {
   'pages.go-back-home': 'GO BACK HOME',
 
   'pages.comment': 'Comment',
+  'pages.comments': 'Comments',
   'pages.config': 'Config',
   'pages.dashboard': 'Dashboard',
   'pages.delete-user': 'Delete User',
@@ -105,6 +108,7 @@ module.exports = {
   'pages.settings': 'Settings',
   'pages.users': 'Users',
   'pages.user': 'User',
+  'pages.verification': 'Verification',
 
   'table.react-pagination': 'React Pagination',
 };

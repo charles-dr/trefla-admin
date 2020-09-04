@@ -28,6 +28,7 @@
     "react-dropzone-component": "^3.2.0",
     "react-google-maps": "^9.4.5",
     "react-image-lightbox": "^5.1.1",
+    "react-images-viewer": "^1.6.2",
     "react-intl": "4.6.3",
     "react-lines-ellipsis": "^0.14.1",
     "react-perfect-scrollbar": "^1.5.8",
