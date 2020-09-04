@@ -20,7 +20,7 @@ import { Colxx, Separator } from '../../../components/common/CustomBootstrap';
 import Breadcrumb from '../../../containers/navs/Breadcrumb';
 import { ReactTableWithPaginationCard } from '../../../containers/ui/ReactTableCards';
 
-import { deleteUserById, toggleBanStatus } from '../../../utils';
+import { deleteUserById, toggleBanStatus, updateUserProfile } from '../../../utils';
 import { loadAllUsers } from '../../../redux/actions';
 
 
@@ -35,7 +35,7 @@ const UserList = ({ match, history, friends, posts, users, loadAllUsersAction })
     const [cardImgs, setCardImgs] = useState([]);
     const [currentImage, setCurrentImg] = useState(0);
     const [viewerOpen, setViewerOpen] = useState(false);
-    
+
 
     const [banModal, setBanModal] = useState(false);
     const [banInfo, setBanInfo] = useState({ user_id: -1, active: 1 });
@@ -50,7 +50,7 @@ const UserList = ({ match, history, friends, posts, users, loadAllUsersAction })
             cellClass: 'list-item-heading w-15',
             Cell: (props) => <>
                 <Link to={`/app/user/edit/${props.value.id}`}>{props.value.name}</Link>
-                </>,
+            </>,
         },
         {
             Header: 'Image',
@@ -96,9 +96,9 @@ const UserList = ({ match, history, friends, posts, users, loadAllUsersAction })
             Cell: (props) => <>
                 {!props.value.url && <Badge color="dark" pill className="mb-1">No Image</Badge>}
                 {props.value.url && (
-                    <img src={props.value.url} alt="Card" 
+                    <img src={props.value.url} alt="Card"
                         onClick={() => showCardImage(props.value.user_id)}
-                        style={{width: 100, height: 'auto', 'cursor': 'pointer'}}
+                        style={{ width: 100, height: 'auto', 'cursor': 'pointer' }}
                     />
                 )}
             </>,
@@ -132,19 +132,19 @@ const UserList = ({ match, history, friends, posts, users, loadAllUsersAction })
                             className="iconsminds-security-check success"
                             title="Verify Now"
                             style={{ fontSize: 18 }}
-                            onClick={() => handleOnEdit(props.value.user_id)}
+                            onClick={() => verifyUserById(props.value.user_id)}
                         />}
                         {props.value.verified && <i
                             className={`iconsminds-turn-right-3 info`}
                             title={`Tarnsfer Verification`}
                             style={{ fontSize: 18 }}
-                            onClick={() => handleOnBanUser(props.value)}
+                            onClick={() => TrasferVerification(props.value)}
                         />}
                         {props.value.verified && <i
                             className="iconsminds-security-bug danger"
                             title="Unverify Now"
                             style={{ fontSize: 18 }}
-                            onClick={() => handleOnDelete(props.value.user_id)}
+                            onClick={() => UnverifyUserById(props.value.user_id)}
                         />}
                     </div>
                 </>
@@ -230,17 +230,44 @@ const UserList = ({ match, history, friends, posts, users, loadAllUsersAction })
     const openAddModal = () => {
         history.push('/app/user/add');
     };
-    const handleOnEdit = (user_id) => {
-        // history.push(`/app/user/edit/${user_id}`);
-        NotificationManager.info('Coming soon');
-    };
-    const handleOnBanUser = (ban) => {
-        setBanInfo(ban);
-        // setBanReason('');
-        // if (ban.active !== undefined && ban.active === 1) {
-        setBanModal(true);
-        // }
+    const verifyUserById = async (user_id) => {
+        try {
+            // history.push(`/app/user/edit/${user_id}`);
+            const usersF = users.filter(user => user.user_id === user_id);
+            console.log(usersF[0]);
+            let profile = usersF[0];
+            profile.verified = 1;
 
+            const res = await updateUserProfile(profile);
+            if (res.status === true) {
+                NotificationManager.success('User has been verified', 'Verification');
+                loadAllUsersAction();
+            } else{
+                NotificationManager.error(res.message, 'Verification');
+            }
+        } catch (err) {
+            NotificationManager.error('Error while updating verification!', 'Verification');
+        }
+    };
+    const UnverifyUserById = async (user_id) => {
+        try {
+            const usersF = users.filter(user => user.user_id === user_id);
+            let profile = usersF[0];
+            profile.verified = 0;
+
+            const res = await updateUserProfile(profile);
+            if (res.status === true) {
+                NotificationManager.success('User has been unverified', 'Verification');
+                loadAllUsersAction();
+            } else{
+                NotificationManager.error(res.message, 'Verification');
+            }
+        } catch (err) {
+            NotificationManager.error('Error while updating verification!', 'Verification');
+        }
+    };
+    const TrasferVerification = (ban) => {
+        NotificationManager.info('Coming soon');
     }
     const onConfirmBan = async (event, errors, values) => {
         // console.log(event, errors, values);
@@ -261,11 +288,6 @@ const UserList = ({ match, history, friends, posts, users, loadAllUsersAction })
             }
         }
     }
-
-    const handleOnDelete = (user_id) => {
-        setModalDetails(true);
-        setDeleteId(user_id);
-    };
     const onConfirmDelete = async () => {
         console.log(delId, modalOptions);
 
@@ -355,8 +377,8 @@ const UserList = ({ match, history, friends, posts, users, loadAllUsersAction })
             </Row>
 
             <ImgsViewer
-                imgs = {cardImgs}
-                currImg = {currentImage}
+                imgs={cardImgs}
+                currImg={currentImage}
                 isOpen={viewerOpen}
                 onClickPrev={gotoPreviousImage}
                 onClickNext={gotoNextImage}
