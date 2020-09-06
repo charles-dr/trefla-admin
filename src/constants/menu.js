@@ -37,6 +37,12 @@ const data = [
     to: '/app/comment',
   },
   {
+    id: 'reportmenu',
+    icon: 'simple-icon-shield',
+    label: 'menu.reports',
+    to: '/app/report',
+  },
+  {
     id: 'languages',
     icon: 'simple-icon-globe',
     label: 'menu.languages',

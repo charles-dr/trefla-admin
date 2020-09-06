@@ -13,6 +13,7 @@ export const serialize = function (obj) {
   return str.join('&');
 };
 
+// YYYY-mm-dd-HH-ii-ss:tz -> YYYY-mm-dd HH:ii:ss
 export const transformTime = (str_time) => {
   const arr1 = str_time.split(':');
   const date_arr = arr1[0].split('-');

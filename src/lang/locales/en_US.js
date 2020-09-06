@@ -18,6 +18,9 @@ module.exports = {
 
   'config.lang-version': 'Language Version',
 
+
+  
+
   /* 02.User Login, Logout, Register */
   'user.login-title': 'Login',
   'user.register': 'Register',
@@ -80,6 +83,8 @@ module.exports = {
   'menu.post': 'Post',
   'menu.posts': 'Posts',
   'menu.profile': 'Profile',
+  'menu.reports': 'Reports',
+  'menu.report': 'Report',
   'menu.schools': 'Schools',
   'menu.settings': 'Settings',
   'menu.setting': 'Setting',
@@ -103,6 +108,9 @@ module.exports = {
   'pages.password': 'Password',
   'pages.post': 'Post',
   'pages.posts': 'Posts',
+  'pages.recent-posts': 'Recent Posts',
+  'pages.report': 'Report',
+  'pages.reports': 'Reports',
   'pages.profile': 'Profile',
   'pages.schools': 'Schools',
   'pages.settings': 'Settings',

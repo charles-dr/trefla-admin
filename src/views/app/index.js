@@ -10,6 +10,7 @@ import {
   loadAllFriends,
   loadAllLangs,
   loadAllPosts,
+  loadAllReports,
   loadAllUsers,
   loadAuthInfo
 } from '../../redux/actions';
@@ -17,17 +18,19 @@ import {
 const CommentModule = React.lazy(() => import('./comment'));
 const LangModule = React.lazy(() => import('./lang'));
 const PostModule = React.lazy(() => import('./post'));
+const ReportModule = React.lazy(() => import('./report'));
 const SettingModule = React.lazy(() => import('./settings'));
 const UserModule = React.lazy(() => import('./user'));
 const DashboardPage = React.lazy(() => import('./dashboard'));
 
-const App = ({ match, downloadAvatarAction, getAllCommentsAction, getAllFriendsAction, getAllLangsAction, getAllPostsAction, getAllUsersAction, loadAuthInfoAction, login }) => {
+const App = ({ match, downloadAvatarAction, getAllCommentsAction, getAllFriendsAction, getAllLangsAction, getAllPostsAction, getAllReportsAction, getAllUsersAction, loadAuthInfoAction, login }) => {
   const history = useHistory();
   useEffect(() => {
     if (!login) {
       console.log('[->] Login');
       history.push('/auth/login');
     }
+    
     // load all data
     getAllCommentsAction();
     getAllFriendsAction();
@@ -36,6 +39,7 @@ const App = ({ match, downloadAvatarAction, getAllCommentsAction, getAllFriendsA
     getAllUsersAction();
     loadAuthInfoAction();
     downloadAvatarAction();
+    getAllReportsAction();
   }, [getAllUsersAction, getAllPostsAction])
   return (
     <AppLayout>
@@ -55,7 +59,13 @@ const App = ({ match, downloadAvatarAction, getAllCommentsAction, getAllFriendsA
             <Route
               path={`${match.url}/lang`}
               render={(props) => <LangModule {...props} />}
-            />            
+            />    
+
+            <Route 
+              path={`${match.url}/report`}
+              render={(props) => <ReportModule {...props} /> }
+            />  
+
             <Route
               path={`${match.url}/post`}
               render={(props) => <PostModule {...props} />}
@@ -88,6 +98,7 @@ export default withRouter(connect(mapStateToProps, {
   getAllFriendsAction: loadAllFriends,
   getAllLangsAction: loadAllLangs,
   getAllPostsAction: loadAllPosts,
+  getAllReportsAction: loadAllReports,
   getAllUsersAction: loadAllUsers,
   loadAuthInfoAction: loadAuthInfo,
 })(App));

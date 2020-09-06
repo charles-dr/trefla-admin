@@ -7,53 +7,42 @@ import IntlMessages from '../../helpers/IntlMessages';
 import { Colxx, Separator } from '../../components/common/CustomBootstrap';
 import Breadcrumb from '../../containers/navs/Breadcrumb';
 
-const DashboardPage = ({ match, posts, users }) => {
-  const [listColumns, setListColumns] = useState([
-    {
-      icon: 'simple-icon-people',
-      title: 'Users',
-      value: 0,
-      id: 1,
-    },
-    {
-      icon: 'simple-icon-paper-plane',
-      title: 'Posts',
-      value: 0,
-      id: 2,
-    },
-    // {
-    //   icon: 'iconsminds-arrow-refresh',
-    //   title: 'Refund Requests',
-    //   value: 74,
-    //   id: 3,
-    // },
-    // {
-    //   icon: 'iconsminds-mail-read',
-    //   title: 'New Comments',
-    //   value: 25,
-    //   id: 4,
-    // },
+import IconCardsCarousel from '../../containers/dashboards/IconCardsCarousel';
+import RecentOrders from '../../containers/dashboards/RecentOrders';
+import SalesChartCard from '../../containers/dashboards/SalesChartCard';
+
+import { statIn7Days } from '../../utils';
+
+
+const DashboardPage = ({ match, history, comments, posts, reports, users }) => {
+  const [iconCarouselData, setIconCarouselData] = useState([
+    { title: 'pages.users', icon: 'simple-icon-people', value: 0 },
+    { title: 'pages.posts', icon: 'simple-icon-paper-plane', value: 0 },
+    { title: 'pages.comments', icon: 'simple-icon-bubbles', value: 0 },
+    { title: 'pages.reports', icon: 'simple-icon-shield', value: 0 },
   ]);
+  const [stat, setStat] = useState({
+    posts: [0, 0, 0, 0, 0, 0, 0]
+  });
+
 
   useEffect(() => {
-
-    setListColumns([
-      {
-        icon: 'simple-icon-people',
-        title: 'Users',
-        value: users.length || 0,
-        id: 1,
-      },
-      {
-        icon: 'simple-icon-paper-plane',
-        title: 'Posts',
-        value: posts.length || 0,
-        id: 2,
-      },
+    setIconCarouselData([
+      { title: 'pages.users', icon: 'simple-icon-people', value: users.length, onClick: () => history.push('/app/user') },
+      { title: 'pages.posts', icon: 'simple-icon-paper-plane', value: posts.length, onClick: () => history.push('/app/post') },
+      { title: 'pages.comments', icon: 'simple-icon-bubbles', value: comments.length, onClick: () => history.push('/app/comment') },
+      { title: 'pages.reports', icon: 'simple-icon-shield', value: reports.length, onClick: () => history.push('/app/report') },
     ]);
+      // const data = statIn7Days(posts, 'post_time');
+      // console.log('[post data]', data);
+    return () => { }
+  }, [posts, users, comments, reports]);
 
+  useEffect(() => {
+    const data = statIn7Days(posts, 'post_time');
+    setStat({...stat, posts: data});
     return () => {}
-  }, [posts, users]);
+  }, [match, posts]);
 
   return (
     <>
@@ -72,45 +61,34 @@ const DashboardPage = ({ match, posts, users }) => {
       </Row>
 
       <Row>
-        <Colxx xxs="12" className="">
-        <ReactSortable
-            className="row icon-cards-row mb-2"
-            list={listColumns}
-            setList={(list) => setListColumns(list)}
-          >
-            {listColumns.map((item) => (
-              <Colxx
-                key={`column_${item.id}`}
-                xxs="6"
-                sm="4"
-                md="3"
-                className="mb-4"
-              >
-                <Card>
-                  <CardBody className="text-center">
-                    <i className={item.icon} />
-                    <p className="card-text font-weight-semibold mb-0">
-                      {item.title}
-                    </p>
-                    <p className="lead text-center">{item.value}</p>
-                  </CardBody>
-                </Card>
-              </Colxx>
-            ))}
-          </ReactSortable>
+        <Colxx lg="12" xl="6">
+          <IconCardsCarousel data={iconCarouselData} />
+
+          <Row>
+            <Colxx md="12" className="mb-4">
+              <SalesChartCard stat={stat} />
+            </Colxx>
+          </Row>
         </Colxx>
+
+        <Colxx lg="12" xl="6" className="mb-4">
+          <RecentOrders />
+        </Colxx>
+
       </Row>
     </>
   );
 };
 
 
-const mapStateToProps = ({ posts: postApp, users: userApp }) => {
+const mapStateToProps = ({ posts: postApp, users: userApp, comments: commentApp, reports: reportApp }) => {
   const { list: posts } = postApp;
   const { list: users } = userApp;
+  const { list: comments } = commentApp;
+  const { list: reports } = reportApp;
 
   return {
-      users, posts
+    users, posts, comments, reports
   };
 };
 

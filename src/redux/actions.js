@@ -48,6 +48,9 @@ export const LANG_ARRIVED = 'LANG_ARRIVED';
 export const POSTS_GET = 'POSTS_GET';
 export const POSTS_ARRIVED = 'POSTS_ARRIVED';
 
+export const REPORTS_GET = 'REPORTS_GET';
+export const REPORTS_ARRIVED = 'REPORTS_ARRIVED';
+
 export const USERS_GET = 'USERS_GET';
 export const USERS_ARRIVED = 'USERS_ARRIVED';
 
@@ -59,4 +62,5 @@ export * from './comment/actions';
 export * from './friend/actions';
 export * from './lang/actions';
 export * from './posts/actions';
+export * from './reports/actions';
 export * from './users/actions';

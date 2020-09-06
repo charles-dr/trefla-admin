@@ -2,7 +2,8 @@ import firebase from 'firebase/app';
 import 'firebase/firestore';
 import 'firebase/storage';
 
-import { convertTimeToString } from './common.utils';
+import { convertTimeToString, formatTwoDigits, transformTime } from './common.utils';
+import { MONTHS } from '../constants/custom';
 
 
 const config_id = 'ZYvvzsj8CMffIcHhY689';
@@ -308,9 +309,9 @@ export const refreshLanguage = async (lang_target, lang_default) => {
     const res_update = await addNewLangRequest({ lang_id: lang_target.lang_id, name: lang_target.name, code: lang_target.code, active: lang_target.active, blob: blob })
 
     if (res_update.status === true) {
-      return {status: true, message: `${lang_target.name} has been synchronized!`};
+      return { status: true, message: `${lang_target.name} has been synchronized!` };
     } else {
-      return {status: false, message: `Failed to synchronize ${lang_target.name} asset!`};
+      return { status: false, message: `Failed to synchronize ${lang_target.name} asset!` };
     }
 
   } catch (err) {
@@ -764,3 +765,95 @@ export const deleteCommentByIdRequest = async (comment_id) => {
     return { status: false, message: 'Something went wrong!', details: err.message };
   }
 }
+
+
+////////////////////////////////////////////////////////////////
+//                                                            //
+//                         P   O   S   T                      //
+//                                                            // 
+////////////////////////////////////////////////////////////////
+
+export const getAllReports = () => {
+  return _firebase.firestore().collection('reports').orderBy('report_id', 'asc').get()
+    .then((querySnapshot) => {
+      const rows = [];
+      querySnapshot.forEach((doc) => {
+        rows.push(doc.data());
+      });
+      return rows;
+    });
+}
+
+export const deleteReportByIdRequest = async (report_id) => {
+  report_id = report_id.toString();
+
+  try {
+    const reportRef = _firebase.firestore().collection('reports').doc(report_id);
+
+    // delete the report
+
+    // delete post
+    await reportRef.delete();
+
+    return { status: true, message: 'Report has been deleted!' };
+  }
+  catch (err) {
+    console.error(err);
+    return { status: false, message: 'Something went wrong!', details: err.message };
+  }
+}
+
+
+
+
+
+////////////////////////////////////////////////////////////////
+//                                                            //
+//                     DATA  MANIPULATION                     //
+//                                                            // 
+////////////////////////////////////////////////////////////////
+
+export const recent7Days = () => {
+  const time = new Date().getTime();
+
+  let days = [];
+  for (let i = 0; i < 7; i++) {
+    days.push(getSimpleFormatDay(time - (6 - i) * 86400 * 1000));
+  }
+
+  return days;
+}
+
+export const getSimpleFormatDay = (time = null) => {
+  if (!time) {
+    time = new Date().getTime();
+  }
+
+  const dt = new Date(time);
+
+  let m = dt.getMonth();
+  let d = dt.getDate();
+  let d2 = formatTwoDigits(d);
+
+  return `${MONTHS[m]} ${d}`;
+}
+
+export const statIn7Days = (data, time_key) => {
+  let stat = [0, 0, 0, 0, 0, 0, 0];
+
+  const current_time = new Date().getTime();
+
+  // for (let i = 6; i >= 0; i++) {
+  for (let item of data) {
+    const str_time = transformTime(item[time_key]);
+    const timeDiff = current_time - (new Date(str_time).getTime());
+    const dayDiff = Math.floor(timeDiff / 1000 / 3600 / 24);
+    if (dayDiff < 7) {
+      stat[(6 - dayDiff)]++;
+    }
+  }
+  // }
+
+  return stat;
+}
+

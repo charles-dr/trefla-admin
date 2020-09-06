@@ -6,6 +6,7 @@ import comments from './comment/reducer';
 import friends from './friend/reducer';
 import langs from './lang/reducer';
 import posts from './posts/reducer';
+import reports from './reports/reducer';
 import users from './users/reducer';
 
 const reducers = combineReducers({
@@ -16,6 +17,7 @@ const reducers = combineReducers({
   friends,
   langs,
   posts,
+  reports,
   users,
 });
 
