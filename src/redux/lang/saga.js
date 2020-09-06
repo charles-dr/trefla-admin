@@ -4,11 +4,11 @@ import { getAllLangRequest } from '../../utils/firebase.utils';
 
 // fetch posts
 function* fetchLangs(action) {
-    let langs = yield call(getAllLangRequest);
-    // console.log(langs);
-    yield put({type: LANG_ARRIVED, payload: langs});
+  const langs = yield call(getAllLangRequest);
+  // console.log(langs);
+  yield put({ type: LANG_ARRIVED, payload: langs });
 }
 
 export default function* postSaga() {
-    yield takeEvery(LANG_GET, fetchLangs);
+  yield takeEvery(LANG_GET, fetchLangs);
 }

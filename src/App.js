@@ -25,9 +25,7 @@ const ViewError = React.lazy(() =>
   import(/* webpackChunkName: "views-error" */ './views/error')
 );
 
-const ViewAuth = React.lazy(() =>
-  import('./views/auth')
-);
+const ViewAuth = React.lazy(() => import('./views/auth'));
 
 class App extends React.Component {
   constructor(props) {
@@ -97,7 +95,7 @@ const mapStateToProps = ({ settings }) => {
   return { locale };
 };
 const mapActionsToProps = {
-  checkLoginSessionAction: checkLoginSession
+  checkLoginSessionAction: checkLoginSession,
 };
 
 export default connect(mapStateToProps, mapActionsToProps)(App);

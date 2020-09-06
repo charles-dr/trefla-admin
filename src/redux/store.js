@@ -9,11 +9,12 @@ const sagaMiddleware = createSagaMiddleware();
 const middlewares = [sagaMiddleware];
 
 export function configureStore(initialState) {
-
   const store = createStore(
     reducers,
     initialState,
-    process.env.NODE_ENV === 'development' ? composeWithDevTools(applyMiddleware(...middlewares)) : compose(applyMiddleware(...middlewares))
+    process.env.NODE_ENV === 'development'
+      ? composeWithDevTools(applyMiddleware(...middlewares))
+      : compose(applyMiddleware(...middlewares))
   );
 
   sagaMiddleware.run(sagas);

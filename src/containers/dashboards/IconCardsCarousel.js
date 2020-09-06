@@ -3,7 +3,6 @@ import React from 'react';
 import IconCard from '../../components/cards/IconCard';
 import GlideComponent from '../../components/carousel/GlideComponent';
 
-
 const IconCardsCarousel = ({ className = 'icon-cards-row', data }) => {
   return (
     <div className={className}>
@@ -24,7 +23,7 @@ const IconCardsCarousel = ({ className = 'icon-cards-row', data }) => {
         {data.map((item, index) => {
           return (
             <div key={`icon_card_${index}`} onClick={item.onClick}>
-              <IconCard {...item} className="mb-4"/>
+              <IconCard {...item} className="mb-4" />
             </div>
           );
         })}

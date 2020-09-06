@@ -5,7 +5,7 @@ import commentSage from './comment/saga';
 import friendSasga from './friend/saga';
 import langSaga from './lang/saga';
 import postSaga from './posts/saga';
-import reportSaga from './reports/saga.js'
+import reportSaga from './reports/saga.js';
 import userSaga from './users/saga';
 
 export default function* rootSaga(getState) {
@@ -16,6 +16,6 @@ export default function* rootSaga(getState) {
     langSaga(),
     postSaga(),
     reportSaga(),
-    userSaga()
+    userSaga(),
   ]);
 }

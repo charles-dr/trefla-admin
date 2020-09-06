@@ -1,6 +1,5 @@
-import { POSTS_GET }
-    from '../actions';
+import { POSTS_GET } from '../actions';
 
 export const loadAllPosts = () => ({
-    type: POSTS_GET
-})
+  type: POSTS_GET,
+});

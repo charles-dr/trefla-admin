@@ -49,7 +49,8 @@ const TopNav = ({
   clickOnMobileMenuAction,
   changeLocaleAction,
   logoutAction,
-  avatar, admin_name
+  avatar,
+  admin_name,
 }) => {
   const [isInFullScreen, setIsInFullScreen] = useState(false);
   const [searchKeyword, setSearchKeyword] = useState('');
@@ -179,7 +180,7 @@ const TopNav = ({
 
   const handleLogout = () => {
     console.log('logout');
-    logoutAction({history});
+    logoutAction({ history });
   };
 
   const menuButtonClick = (e, _clickCount, _conClassnames) => {
@@ -300,8 +301,16 @@ const TopNav = ({
               </span>
             </DropdownToggle>
             <DropdownMenu className="mt-3" right>
-              <DropdownItem onClick={() => history.push('/app/settings/profile')}>Profile</DropdownItem>
-              <DropdownItem onClick={() => history.push('/app/settings/password')}>Update password</DropdownItem>
+              <DropdownItem
+                onClick={() => history.push('/app/settings/profile')}
+              >
+                Profile
+              </DropdownItem>
+              <DropdownItem
+                onClick={() => history.push('/app/settings/password')}
+              >
+                Update password
+              </DropdownItem>
               <DropdownItem divider />
               <DropdownItem onClick={() => handleLogout()}>
                 Sign out
@@ -317,14 +326,17 @@ const TopNav = ({
 const mapStateToProps = ({ auth, menu, settings }) => {
   const { containerClassnames, menuClickCount, selectedMenuHasSubItems } = menu;
   const { locale } = settings;
-  const { info: {name}, avatar } = auth;
+  const {
+    info: { name },
+    avatar,
+  } = auth;
   return {
     containerClassnames,
     menuClickCount,
     selectedMenuHasSubItems,
     locale,
     admin_name: name,
-    avatar
+    avatar,
   };
 };
 export default injectIntl(

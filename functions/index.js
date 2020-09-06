@@ -3,6 +3,8 @@ const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 const express = require('express');
 const cors = require('cors');
+const nodemailer = require('nodemailer');
+
 const serviceAccount = require('./trefla-firebase-adminsdk-ic030-de756cf0e9.json');
 
 admin.initializeApp({
@@ -17,6 +19,14 @@ const app = express();
 
 app.use(cors({ origin: true }));
 
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: 'martinstevanovic000@gmail.com',
+    pass: 'blizanac1',
+  },
+});
+
 app.get('/user', (req, res) => {
   const response = {
     status: true,
@@ -29,10 +39,10 @@ app.get('/posts', async (req, res) => {
   const users = await admin
     .firestore()
     .collection('users')
-    .orderBy('name', req.query.dir === 1 ? 'asc' : 'desc')
-    .startAt(Number(req.query.start))
+    // .orderBy('name', req.query.dir === 1 ? 'asc' : 'desc')
+    // .startAt(Number(req.query.start))
 
-    .limit(Number(req.query.length))
+    // .limit(Number(req.query.length))
     .get()
     .then((querySnapshot) => {
       const rows = [];
@@ -51,7 +61,7 @@ app.get('/lang/download', async (req, res) => {
     langRef
       .getDownloadURL()
       .then((url) => {
-        return { status: true, url: url };
+        return { status: true, url };
       })
       .catch((err) => {
         return { stauts: false, error: err.message };
@@ -62,6 +72,31 @@ app.get('/lang/download', async (req, res) => {
       message: e.message,
     });
   }
+});
+
+app.get('/email-test', async (req, res) => {
+  const mailOptions = {
+    from: 'martinstevanovic000@gmail.com',
+    to: 'alerk.star@gmail.com',
+    subject: 'Sending Email using Node.js',
+    text: 'That was easy!',
+  };
+
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      console.log(error);
+      res.json({
+        status: false,
+        error,
+      });
+    } else {
+      console.log(`Email sent: ${info.response}`);
+      res.json({
+        status: true,
+        info: info.response,
+      });
+    }
+  });
 });
 
 exports.api = functions.https.onRequest(app);

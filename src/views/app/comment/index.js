@@ -4,7 +4,6 @@ import { Redirect, Route, Switch } from 'react-router-dom';
 const CommentList = React.lazy(() => import('./list'));
 const CommentEdit = React.lazy(() => import('./edit'));
 
-
 const PostModule = ({ match }) => (
   <Suspense fallback={<div className="loading" />}>
     <Switch>

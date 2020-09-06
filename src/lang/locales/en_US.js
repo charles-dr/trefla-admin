@@ -18,9 +18,6 @@ module.exports = {
 
   'config.lang-version': 'Language Version',
 
-
-  
-
   /* 02.User Login, Logout, Register */
   'user.login-title': 'Login',
   'user.register': 'Register',

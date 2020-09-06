@@ -20,9 +20,8 @@ const data = [
         icon: 'iconsminds-id-card',
         label: 'menu.verification',
         to: '/app/user/verification',
-      }
-    ]
-
+      },
+    ],
   },
   {
     id: 'postmenu',

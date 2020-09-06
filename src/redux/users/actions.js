@@ -1,6 +1,5 @@
-import { USERS_GET }
-    from '../actions';
+import { USERS_GET } from '../actions';
 
 export const loadAllUsers = () => ({
-    type: USERS_GET
-})
+  type: USERS_GET,
+});

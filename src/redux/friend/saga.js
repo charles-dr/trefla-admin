@@ -4,11 +4,11 @@ import { getAllFriends } from '../../utils/firebase.utils';
 
 // fetch users
 function* fetchFriends(action) {
-    let friends = yield call(getAllFriends);
-    // console.log('[Saga] friends', friends);
-    yield put({type: FRIEND_ARRIVED, payload: friends});
+  const friends = yield call(getAllFriends);
+  // console.log('[Saga] friends', friends);
+  yield put({ type: FRIEND_ARRIVED, payload: friends });
 }
 
 export default function* friendSaga() {
-    yield takeEvery(FRIEND_GET, fetchFriends);
+  yield takeEvery(FRIEND_GET, fetchFriends);
 }

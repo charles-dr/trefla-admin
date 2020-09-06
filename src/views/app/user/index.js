@@ -23,7 +23,7 @@ const UserModule = ({ match }) => (
         render={(props) => <UserEdit {...props} />}
       />
 
-      <Route 
+      <Route
         path={`${match.url}/verification`}
         render={(props) => <UserVerificationList {...props} />}
       />

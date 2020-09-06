@@ -4,11 +4,11 @@ import { getAllComments } from '../../utils/firebase.utils';
 
 // fetch posts
 function* fetchComments(action) {
-    let comments = yield call(getAllComments);
-    // console.log('[Saga] posts', posts);
-    yield put({type: COMMENTS_ARRIVED, payload: comments});
+  const comments = yield call(getAllComments);
+  // console.log('[Saga] posts', posts);
+  yield put({ type: COMMENTS_ARRIVED, payload: comments });
 }
 
 export default function* postSaga() {
-    yield takeEvery(COMMENTS_GET, fetchComments);
+  yield takeEvery(COMMENTS_GET, fetchComments);
 }

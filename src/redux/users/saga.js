@@ -4,11 +4,11 @@ import { getAllUsers } from '../../utils/firebase.utils';
 
 // fetch users
 function* fetchUsers(action) {
-    let users = yield call(getAllUsers);
-    // console.log('[Saga] users', users);
-    yield put({type: USERS_ARRIVED, payload: users});
+  const users = yield call(getAllUsers);
+  // console.log('[Saga] users', users);
+  yield put({ type: USERS_ARRIVED, payload: users });
 }
 
 export default function* userSaga() {
-    yield takeEvery(USERS_GET, fetchUsers);
+  yield takeEvery(USERS_GET, fetchUsers);
 }

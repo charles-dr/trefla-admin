@@ -8,115 +8,131 @@ import { Colxx, Separator } from '../../../components/common/CustomBootstrap';
 import Breadcrumb from '../../../containers/navs/Breadcrumb';
 import { ReactTableWithPaginationCard } from '../../../containers/ui/ReactTableCards';
 
-
 import { deletePostByIdRequest, transformTime } from '../../../utils';
 import { loadAllPosts } from '../../../redux/actions';
 import { reactionImages, typeIcons } from '../../../constants/custom';
 
-
 const PostList = ({ match, history, posts, users, loadAllPostsAction }) => {
-    const [data, setData] = useState([]);
-    const [delModal, setDelModal] = useState(false);
-    const [delId, setDelId] = useState(-1);
-    const [loading, setLoading] = useState(false);
+  const [data, setData] = useState([]);
+  const [delModal, setDelModal] = useState(false);
+  const [delId, setDelId] = useState(-1);
+  const [loading, setLoading] = useState(false);
 
+  const cols = [
+    {
+      Header: 'User',
+      accessor: 'user_name',
+      cellClass: 'list-item-heading w-15',
+      Cell: (props) => <>{props.value}</>,
+    },
+    {
+      Header: 'Post Name',
+      accessor: 'post_name_',
+      cellClass: 'text-muted  w-5',
+      Cell: (props) => (
+        <>
+          {props.value.post_name && props.value.post_name}
+          {!props.value.post_name && (
+            <Badge color="warning" pill className="mb-1">
+              Not Specified
+            </Badge>
+          )}
+        </>
+      ),
+    },
+    {
+      Header: 'Content',
+      accessor: 'feed',
+      cellClass: 'text-muted  w-25',
+      Cell: (props) => <>{props.value}</>,
+    },
+    {
+      Header: 'Type',
+      accessor: 'type',
+      cellClass: 'text-muted  w-5',
+      Cell: (props) => (
+        <>
+          <div
+            className={`glyph-icon ${typeIcons[props.value]}`}
+            style={{ fontSize: 20 }}
+          ></div>
+        </>
+      ),
+    },
+    {
+      Header: 'Location',
+      accessor: 'location_address',
+      cellClass: 'text-muted  w-25',
+      Cell: (props) => <>{props.value}</>,
+    },
+    {
+      Header: 'Likes',
+      accessor: 'likes',
+      cellClass: 'text-muted  w-25',
+      Cell: (props) => <>{formatLikes(props.value)}</>,
+    },
+    {
+      Header: 'Comments',
+      accessor: 'comment_num',
+      cellClass: 'text-muted  w-5',
+      Cell: (props) => <>{props.value}</>,
+    },
+    {
+      Header: 'Time',
+      accessor: 'post_time',
+      cellClass: 'text-muted  w-20',
+      Cell: (props) => <>{transformTime(props.value)}</>,
+    },
+    {
+      Header: 'Active',
+      accessor: 'active',
+      cellClass: 'text-muted  w-5',
+      Cell: (props) => (
+        <>
+          <Badge
+            color={props.value === 1 ? 'success' : 'danger'}
+            pill
+            className="mb-1"
+          >
+            {props.value === 1 ? 'Active' : 'Disabled'}
+          </Badge>
+        </>
+      ),
+    },
+    {
+      Header: 'Actions',
+      accessor: 'post_id',
+      cellClass: 'text-muted  w-20',
+      Cell: (props) => (
+        <>
+          <div className="tbl-actions">
+            <i
+              className="iconsminds-file-edit info"
+              title="Edit"
+              style={{ fontSize: 18 }}
+              onClick={() => handleOnEdit(props.value)}
+            />
+            <i
+              className="simple-icon-trash danger"
+              title="Remove"
+              style={{ fontSize: 18 }}
+              onClick={() => handleOnDelete(props.value)}
+            />
+          </div>
+        </>
+      ),
+    },
+  ];
 
-    const cols = [
-        {
-            Header: 'User',
-            accessor: 'user_name',
-            cellClass: 'list-item-heading w-15',
-            Cell: (props) => <>{props.value}</>,
-        },
-        {
-            Header: 'Post Name',
-            accessor: 'post_name_',
-            cellClass: 'text-muted  w-5',
-            Cell: (props) => <>
-                {props.value.post_name && props.value.post_name}
-                {!props.value.post_name &&
-                    <Badge color="warning" pill className="mb-1">
-                        Not Specified
-                </Badge>}
-            </>,
-        },
-        {
-            Header: 'Content',
-            accessor: 'feed',
-            cellClass: 'text-muted  w-25',
-            Cell: (props) => <>{props.value}</>,
-        },
-        {
-            Header: 'Type',
-            accessor: 'type',
-            cellClass: 'text-muted  w-5',
-            Cell: (props) => <><div className={`glyph-icon ${typeIcons[props.value]}`} style={{ fontSize: 20 }}></div></>,
-        },
-        {
-            Header: 'Location',
-            accessor: 'location_address',
-            cellClass: 'text-muted  w-25',
-            Cell: (props) => <>{props.value}</>,
-        },
-        {
-            Header: 'Likes',
-            accessor: 'likes',
-            cellClass: 'text-muted  w-25',
-            Cell: (props) => <>{formatLikes(props.value)}</>,
-        },
-        {
-            Header: 'Comments',
-            accessor: 'comment_num',
-            cellClass: 'text-muted  w-5',
-            Cell: (props) => <>{props.value}</>,
-        },
-        {
-            Header: 'Time',
-            accessor: 'post_time',
-            cellClass: 'text-muted  w-20',
-            Cell: (props) => <>{transformTime(props.value)}</>,
-        },
-        {
-            Header: 'Active',
-            accessor: 'active',
-            cellClass: 'text-muted  w-5',
-            Cell: (props) => <><Badge color={props.value === 1 ? 'success' : 'danger'} pill className="mb-1">{props.value === 1 ? 'Active' : 'Disabled'}</Badge></>,
-        },
-        {
-            Header: 'Actions',
-            accessor: 'post_id',
-            cellClass: 'text-muted  w-20',
-            Cell: (props) => (
-                <>
-                    <div className="tbl-actions">
-                        <i
-                            className="iconsminds-file-edit info"
-                            title="Edit"
-                            style={{ fontSize: 18 }}
-                            onClick={() => handleOnEdit(props.value)}
-                        />
-                        <i
-                            className="simple-icon-trash danger"
-                            title="Remove"
-                            style={{ fontSize: 18 }}
-                            onClick={() => handleOnDelete(props.value)}
-                        />
-                    </div>
-                </>
-            ),
-        },
-    ];
+  useEffect(() => {
+    // console.log(users, posts);
 
+    recomposePosts();
 
-    useEffect(() => {
-        // console.log(users, posts);
+    return () => {};
+  }, [match, users, posts, recomposePosts]);
 
-        recomposePosts();
-
-        return () => { };
-    }, [match, users, posts]);
-
-    const formatLikes = (str_likes) => {
+  const formatLikes = (str_likes) => {
         const arr_likes = str_likes.split(',');
         const total = arr_likes.reduce((a, b) => Number(a) + Number(b), 0);
 
@@ -131,164 +147,159 @@ const PostList = ({ match, history, posts, users, loadAllPostsAction }) => {
                 }
                 <span style={{ paddingLeft: 10, verticalAlign: 'middle', fontSize: 16 }}>{total}</span>
             </>;
-        } else {
+        } 
             return <Badge color="warning" pill className="mb-1">
                 No reactions
             </Badge>;
+        
+  };
+  const recomposePosts = () => {
+    let new_posts = [];
+    for (const post of posts) {
+      let post_item = {};
+      // copy all key-values
+      for (const key in post) {
+        if (post[key] !== undefined) {
+          post_item[key] = post[key];
         }
+      }
+      // add new field 'user_name'
+      post_item.user_name = getUserNameById(post.post_user_id);
+      // add new field 'likes'
+      post_item[
+        'likes'
+      ] = `${post.like_1_num},${post.like_2_num},${post.like_3_num},${post.like_4_num},${post.like_5_num},${post.like_6_num}`;
+      // add new field 'post_name_';
+      post_item['post_name_'] = {
+        user_name: getUserNameById(post.post_user_id),
+        post_name: post.post_name,
+      };
+
+      // put item to array
+      new_posts.push(post_item);
     }
-    const recomposePosts = () => {
-        let new_posts = [];
-        for (let post of posts) {
-            let post_item = {};
-            // copy all key-values
-            for (let key in post) {
-                if (post[key] !== undefined) {
-                    post_item[key] = post[key];
-                }
-            }
-            // add new field 'user_name'
-            post_item['user_name'] = getUserNameById(post.post_user_id);
-            // add new field 'likes'
-            post_item['likes'] = `${post.like_1_num},${post.like_2_num},${post.like_3_num},${post.like_4_num},${post.like_5_num},${post.like_6_num}`;
-            // add new field 'post_name_';
-            post_item['post_name_'] = { user_name: getUserNameById(post.post_user_id), post_name: post.post_name };
-
-            // put item to array
-            new_posts.push(post_item);
+    setData(new_posts);
+  };
+  const getUserNameById = (id) => {
+    if (users.length > 0) {
+      for (const user of users) {
+        if (Number(user.user_id) === Number(id)) {
+          return user.user_name;
         }
-        setData(new_posts);
+      }
+    } else {
+      return '';
     }
-    const getUserNameById = id => {
-        if (users.length > 0) {
-            for (let user of users) {
-                if (Number(user.user_id) === Number(id)) {
-                    return user.user_name;
-                }
-            }
-        } else {
-            return '';
-        }
+  };
+
+  const handleOnEdit = (post_id) => {
+    history.push(`/app/post/edit/${post_id}`);
+  };
+  const handleOnDelete = (post_id) => {
+    setDelId(post_id);
+    setDelModal(true);
+  };
+
+  const navigateToAddPage = () => {
+    history.push('/app/post/add');
+  };
+
+  const proceedDelete = async () => {
+    console.log('[delete now]', delId);
+
+    setLoading(true);
+
+    const res = await deletePostByIdRequest(delId);
+
+    setLoading(false);
+
+    setDelId(-1);
+
+    if (res.status === true) {
+      setDelModal(false);
+      NotificationManager.success(res.message, 'Delete Post');
+      loadAllPostsAction();
+    } else {
+      NotificationManager.error(res.message, 'Delete Post');
     }
+  };
 
-    const handleOnEdit = (post_id) => {
-        history.push(`/app/post/edit/${post_id}`);
-    };
-    const handleOnDelete = (post_id) => {
-        setDelId(post_id);
-        setDelModal(true);
-    };
+  return (
+    <>
+      <Row>
+        <Colxx xxs="12">
+          <Breadcrumb heading="menu.posts" match={match} />
+          <Separator className="mb-5" />
+        </Colxx>
+      </Row>
 
-    const navigateToAddPage = () => {
-        history.push('/app/post/add');
-    };
+      <Row>
+        <Colxx xxs="12">
+          <h3 className="mb-4">
+            <IntlMessages id="pages.posts" />
+          </h3>
+        </Colxx>
 
-    const proceedDelete = async () => {
-        console.log('[delete now]', delId);
+        <Colxx className="d-flex justify-content-end" xxs={12}>
+          <Button color="primary" className="mb-2" onClick={navigateToAddPage}>
+            <i className="simple-icon-plus mr-1" />
+            <IntlMessages id="actions.add" />
+          </Button>{' '}
+        </Colxx>
 
-        setLoading(true);
+        <Colxx xxs="12">
+          <ReactTableWithPaginationCard cols={cols} data={data} />
+        </Colxx>
+      </Row>
 
-        const res = await deletePostByIdRequest(delId);
+      {/* Ban Modal */}
+      <Modal
+        isOpen={delModal}
+        toggle={() => setDelModal(!delModal)}
+        backdrop="static"
+      >
+        <ModalHeader>Delete Post</ModalHeader>
+        <ModalBody>
+          <p>Are you sure to delete this post?</p>
 
-        setLoading(false);
-
-        setDelId(-1);
-
-        if (res.status === true) {
-            setDelModal(false);
-            NotificationManager.success(res.message, 'Delete Post');
-            loadAllPostsAction();
-        }
-        else { 
-            NotificationManager.error(res.message, 'Delete Post');
-        }
-    };
-
-    return (
-        <>
-            <Row>
-                <Colxx xxs="12">
-                    <Breadcrumb heading="menu.posts" match={match} />
-                    <Separator className="mb-5" />
-                </Colxx>
-            </Row>
-
-            <Row>
-                <Colxx xxs="12">
-                    <h3 className="mb-4">
-                        <IntlMessages id="pages.posts" />
-                    </h3>
-                </Colxx>
-
-                <Colxx className="d-flex justify-content-end" xxs={12}>
-                    <Button color="primary" className="mb-2" onClick={navigateToAddPage}>
-                        <i className="simple-icon-plus mr-1" />
-                        <IntlMessages id="actions.add" />
-                    </Button>{' '}
-                </Colxx>
-
-                <Colxx xxs="12">
-                    <ReactTableWithPaginationCard
-                        cols={cols}
-                        data={data}
-                    />
-                </Colxx>
-            </Row>
-
-            {/* Ban Modal */}
-            <Modal
-                isOpen={delModal}
-                toggle={() => setDelModal(!delModal)}
-                backdrop="static"
+          <Separator className="mb-5 mt-3" />
+          <div className="d-flex justify-content-end">
+            <Button
+              type="button"
+              color="primary"
+              className={`btn-shadow btn-multiple-state mr-2 ${
+                loading ? 'show-spinner' : ''
+              }`}
+              size="lg"
+              onClick={proceedDelete}
             >
-                <ModalHeader>
-                    Delete Post
-                </ModalHeader>
-                <ModalBody>
-                    <p>Are you sure to delete this post?</p>
-
-                    <Separator className="mb-5 mt-3" />
-                    <div className="d-flex justify-content-end">
-                        <Button
-                            type="button"
-                            color="primary"
-                            className={`btn-shadow btn-multiple-state mr-2 ${
-                                loading ? 'show-spinner' : ''
-                                }`}
-                            size="lg"
-                            onClick={proceedDelete}
-                        >
-                            <span className="spinner d-inline-block">
-                                <span className="bounce1" />
-                                <span className="bounce2" />
-                                <span className="bounce3" />
-                            </span>
-                            <span className="label">
-                                Delete
-                            </span>
-                        </Button>{' '}
-                        <Button
-                            color="secondary"
-                            onClick={() => setDelModal(false)}
-                        >
-                            <IntlMessages id="actions.cancel" />
-                        </Button>
-                    </div>
-                </ModalBody>
-            </Modal>
-        </>
-    );
+              <span className="spinner d-inline-block">
+                <span className="bounce1" />
+                <span className="bounce2" />
+                <span className="bounce3" />
+              </span>
+              <span className="label">Delete</span>
+            </Button>{' '}
+            <Button color="secondary" onClick={() => setDelModal(false)}>
+              <IntlMessages id="actions.cancel" />
+            </Button>
+          </div>
+        </ModalBody>
+      </Modal>
+    </>
+  );
 };
 
 const mapStateToProps = ({ posts: postApp, users: userApp }) => {
-    const { list: posts } = postApp;
-    const { list: users } = userApp;
+  const { list: posts } = postApp;
+  const { list: users } = userApp;
 
-    return {
-        users, posts
-    };
+  return {
+    users,
+    posts,
+  };
 };
 
 export default connect(mapStateToProps, {
-    loadAllPostsAction: loadAllPosts
+  loadAllPostsAction: loadAllPosts,
 })(PostList);

@@ -35,7 +35,6 @@ export const AUTH_INFO_LOADED = 'AUTH_INFO_LOADED';
 export const AUTH_AVATAR = 'AUTH_AVATAR';
 export const AUTH_AVATAR_UPDATE = 'AUTH_AVATAR_UPDATE';
 
-
 export const COMMENTS_GET = 'COMMENT.GET';
 export const COMMENTS_ARRIVED = 'COMMENT.ARRIVED';
 

@@ -1,6 +1,5 @@
-import { FRIEND_GET }
-    from '../actions';
+import { FRIEND_GET } from '../actions';
 
 export const loadAllFriends = () => ({
-    type: FRIEND_GET
-})
+  type: FRIEND_GET,
+});

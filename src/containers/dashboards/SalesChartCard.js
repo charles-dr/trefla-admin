@@ -35,16 +35,19 @@ const formatChartData = (data) => {
         fill: false,
       },
     ],
-  }
+  };
   return res;
-}
+};
 
 const SalesChartCard = ({ stat }) => {
-
   const [chartData, setChartData] = useState(formatChartData(stat));
 
   useEffect(() => {
     setChartData(formatChartData(stat));
+
+    return () => {
+      setChartData({posts: [0,0,0,0,0,0,0]});
+    }
   }, [stat]);
 
   return (
@@ -68,9 +71,7 @@ const SalesChartCard = ({ stat }) => {
         </UncontrolledDropdown> */}
       </div>
       <CardBody>
-        <CardTitle>
-          Posts (Last 7 days)
-        </CardTitle>
+        <CardTitle>Posts (Last 7 days)</CardTitle>
         <div className="dashboard-line-chart">
           <LineChart shadow data={chartData} />
         </div>

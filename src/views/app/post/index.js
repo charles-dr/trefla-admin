@@ -5,7 +5,6 @@ const PostList = React.lazy(() => import('./list'));
 const PostEdit = React.lazy(() => import('./edit'));
 const PostAdd = React.lazy(() => import('./add'));
 
-
 const PostModule = ({ match }) => (
   <Suspense fallback={<div className="loading" />}>
     <Switch>

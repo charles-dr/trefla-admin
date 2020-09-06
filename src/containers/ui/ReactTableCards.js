@@ -13,12 +13,7 @@ import DatatablePagination from '../../components/DatatablePagination';
 
 import products from '../../data/products';
 
-function Table({
-  columns,
-  data,
-  divided = false,
-  defaultPageSize = 10,
-}) {
+function Table({ columns, data, divided = false, defaultPageSize = 10 }) {
   const {
     getTableProps,
     getTableBodyProps,
@@ -54,7 +49,6 @@ function Table({
                 <th
                   key={`th_${columnIndex}`}
                   {...column.getHeaderProps(column.getSortByToggleProps())}
-
                   className={
                     column.isSorted
                       ? column.isSortedDesc
@@ -98,8 +92,8 @@ function Table({
         canPrevious={canPreviousPage}
         canNext={canNextPage}
         pageSizeOptions={[10, 20, 30, 40, 50]}
-        showPageSizeOptions={true}
-        showPageJump={true}
+        showPageSizeOptions
+        showPageJump
         defaultPageSize={pageSize}
         onPageChange={(p) => gotoPage(p)}
         onPageSizeChange={(s) => setPageSize(s)}

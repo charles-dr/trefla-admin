@@ -30,7 +30,14 @@ const validateEmail = (value) => {
   return error;
 };
 
-const Login = ({ history, loading, login, message, loginUserAction, updateLoginAction }) => {
+const Login = ({
+  history,
+  loading,
+  login,
+  message,
+  loginUserAction,
+  updateLoginAction,
+}) => {
   // const history = useHistory();
   const [email] = useState('');
   const [password] = useState('');
@@ -40,15 +47,22 @@ const Login = ({ history, loading, login, message, loginUserAction, updateLoginA
     if (!login && !!message) {
       NotificationManager.warning(message, 'Login Error', 3000, null, null, '');
     } else if (login && !!message) {
-      NotificationManager.success(message, 'Login Success', 3000, null, null, '');
+      NotificationManager.success(
+        message,
+        'Login Success',
+        3000,
+        null,
+        null,
+        ''
+      );
     }
-    updateLoginAction({status: login, message: ''});
+    updateLoginAction({ status: login, message: '' });
     if (login) {
       history.push('/app');
     }
 
-    return () => {}
-  }, [login, message]);
+    return () => {};
+  }, [history, login, message, updateLoginAction]);
 
   const onUserLogin = (values) => {
     if (!loading) {
@@ -67,7 +81,6 @@ const Login = ({ history, loading, login, message, loginUserAction, updateLoginA
         <Card className="auth-card">
           <div className="position-relative image-side ">
             <p className="text-white h2">MAGIC IS IN THE DETAILS</p>
-            
           </div>
           <div className="form-side">
             <NavLink to="/" className="white">
@@ -140,7 +153,7 @@ const Login = ({ history, loading, login, message, loginUserAction, updateLoginA
   );
 };
 
-const mapStateToProps = ({auth}) => {
+const mapStateToProps = ({ auth }) => {
   // const { loading, error } = authUser;
   const { loading, login, message } = auth;
   // return { loading, error };
@@ -149,5 +162,5 @@ const mapStateToProps = ({auth}) => {
 
 export default connect(mapStateToProps, {
   loginUserAction: login,
-  updateLoginAction: updateLogin
+  updateLoginAction: updateLogin,
 })(Login);

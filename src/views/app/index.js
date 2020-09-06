@@ -1,5 +1,11 @@
 import React, { Suspense, useEffect } from 'react';
-import { Route, withRouter, Switch, Redirect, useHistory } from 'react-router-dom';
+import {
+  Route,
+  withRouter,
+  Switch,
+  Redirect,
+  useHistory,
+} from 'react-router-dom';
 import { connect } from 'react-redux';
 
 import AppLayout from '../../layout/AppLayout';
@@ -12,7 +18,7 @@ import {
   loadAllPosts,
   loadAllReports,
   loadAllUsers,
-  loadAuthInfo
+  loadAuthInfo,
 } from '../../redux/actions';
 
 const CommentModule = React.lazy(() => import('./comment'));
@@ -23,14 +29,25 @@ const SettingModule = React.lazy(() => import('./settings'));
 const UserModule = React.lazy(() => import('./user'));
 const DashboardPage = React.lazy(() => import('./dashboard'));
 
-const App = ({ match, downloadAvatarAction, getAllCommentsAction, getAllFriendsAction, getAllLangsAction, getAllPostsAction, getAllReportsAction, getAllUsersAction, loadAuthInfoAction, login }) => {
+const App = ({
+  match,
+  downloadAvatarAction,
+  getAllCommentsAction,
+  getAllFriendsAction,
+  getAllLangsAction,
+  getAllPostsAction,
+  getAllReportsAction,
+  getAllUsersAction,
+  loadAuthInfoAction,
+  login,
+}) => {
   const history = useHistory();
   useEffect(() => {
     if (!login) {
       console.log('[->] Login');
       history.push('/auth/login');
     }
-    
+
     // load all data
     getAllCommentsAction();
     getAllFriendsAction();
@@ -40,31 +57,46 @@ const App = ({ match, downloadAvatarAction, getAllCommentsAction, getAllFriendsA
     loadAuthInfoAction();
     downloadAvatarAction();
     getAllReportsAction();
-  }, [getAllUsersAction, getAllPostsAction])
+  }, [
+    getAllUsersAction,
+    getAllPostsAction,
+    login,
+    getAllCommentsAction,
+    getAllFriendsAction,
+    getAllLangsAction,
+    loadAuthInfoAction,
+    downloadAvatarAction,
+    getAllReportsAction,
+    history,
+  ]);
   return (
     <AppLayout>
       <div className="dashboard-wrapper">
         <Suspense fallback={<div className="loading" />}>
           <Switch>
-            <Redirect exact from={`${match.url}/`} to={`${match.url}/dashboard`} />
+            <Redirect
+              exact
+              from={`${match.url}/`}
+              to={`${match.url}/dashboard`}
+            />
 
             <Route
               path={`${match.url}/dashboard`}
               render={(props) => <DashboardPage {...props} />}
             />
-            <Route 
+            <Route
               path={`${match.url}/comment`}
               render={(props) => <CommentModule {...props} />}
             />
             <Route
               path={`${match.url}/lang`}
               render={(props) => <LangModule {...props} />}
-            />    
+            />
 
-            <Route 
+            <Route
               path={`${match.url}/report`}
-              render={(props) => <ReportModule {...props} /> }
-            />  
+              render={(props) => <ReportModule {...props} />}
+            />
 
             <Route
               path={`${match.url}/post`}
@@ -92,13 +124,15 @@ const mapStateToProps = ({ menu, auth }) => {
   return { containerClassnames, login };
 };
 
-export default withRouter(connect(mapStateToProps, {
-  downloadAvatarAction: downloadAvatar,
-  getAllCommentsAction: loadAllComments,
-  getAllFriendsAction: loadAllFriends,
-  getAllLangsAction: loadAllLangs,
-  getAllPostsAction: loadAllPosts,
-  getAllReportsAction: loadAllReports,
-  getAllUsersAction: loadAllUsers,
-  loadAuthInfoAction: loadAuthInfo,
-})(App));
+export default withRouter(
+  connect(mapStateToProps, {
+    downloadAvatarAction: downloadAvatar,
+    getAllCommentsAction: loadAllComments,
+    getAllFriendsAction: loadAllFriends,
+    getAllLangsAction: loadAllLangs,
+    getAllPostsAction: loadAllPosts,
+    getAllReportsAction: loadAllReports,
+    getAllUsersAction: loadAllUsers,
+    loadAuthInfoAction: loadAuthInfo,
+  })(App)
+);

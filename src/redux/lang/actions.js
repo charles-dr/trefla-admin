@@ -1,6 +1,5 @@
-import { LANG_GET }
-    from '../actions';
+import { LANG_GET } from '../actions';
 
 export const loadAllLangs = () => ({
-    type: LANG_GET
-})
+  type: LANG_GET,
+});

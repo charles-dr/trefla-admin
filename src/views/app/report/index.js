@@ -4,7 +4,6 @@ import { Redirect, Route, Switch } from 'react-router-dom';
 const ReportList = React.lazy(() => import('./list'));
 const ReportEdit = React.lazy(() => import('./edit'));
 
-
 const ReportModule = ({ match }) => (
   <Suspense fallback={<div className="loading" />}>
     <Switch>
