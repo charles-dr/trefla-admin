@@ -21,6 +21,9 @@ app.use(cors({ origin: true }));
 
 const transporter = nodemailer.createTransport({
   service: 'gmail',
+  // host: 'smtp.gmail.com',
+  // port: 587,
+  // secure: false,
   auth: {
     user: 'martinstevanovic000@gmail.com',
     pass: 'blizanac1',
@@ -75,8 +78,9 @@ app.get('/lang/download', async (req, res) => {
 });
 
 app.get('/email-test', async (req, res) => {
+  // refer: https://github.com/firebase/functions-samples/blob/master/quickstarts/email-users/functions/index.js
   const mailOptions = {
-    from: 'martinstevanovic000@gmail.com',
+    from: 'Martin Stevanovic <martinstevanovic000@gmail.com>',
     to: 'alerk.star@gmail.com',
     subject: 'Sending Email using Node.js',
     text: 'That was easy!',
