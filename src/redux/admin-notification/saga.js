@@ -5,7 +5,7 @@ import { loadAdminNotificationRequest } from '../../utils/firebase.utils';
 // fetch posts
 function* fetchAdminNotifications(action) {
   const adminNotis = yield call(loadAdminNotificationRequest);
-  console.log(adminNotis);
+  // console.log(adminNotis);
   yield put({ type: ADMIN_NOTI_ARRIVED, payload: adminNotis });
 }
 

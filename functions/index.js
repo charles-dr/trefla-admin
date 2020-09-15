@@ -49,7 +49,7 @@ function sendMail({ from, to, subject, body }) {
 }
 
 /**
- * @function send email to user A for the consent about ID transfer
+ * @description send email to user A for the consent about ID transfer
  * @params noti_id
  * @return object
  */
@@ -138,7 +138,16 @@ app.post('/id-transfer/consent-email', async (req, res) => {
     subject: emailTempl.subject,
     body: htmlBody,
   })
-    .then((info) => {
+    .then(async (info) => {
+      // update notification as email sent
+      let consent_emails = notification.consent_emails || [];
+      consent_emails.push(new Date().getTime());
+      await admin
+        .firestore()
+        .collection('admin_notifications')
+        .doc(noti_id.toString())
+        .set({ consent_emails: consent_emails }, { merge: true });
+
       return res.json({
         status: true,
         message: 'Email has been sent successfully.',
@@ -152,6 +161,69 @@ app.post('/id-transfer/consent-email', async (req, res) => {
         error: error,
       });
     });
+});
+
+/**
+ * @description decide to verify which account.
+ * @param verified - object
+ * @member from boolean
+ * @member to boolean
+ * @param noti_id number
+ * @return object
+ */
+app.post('/id-transfer/judge', async (req, res) => {
+  try {
+    const { noti_id, verified } = req.body;
+
+    // get admin notification data;
+    const adminNotiDoc = await admin
+      .firestore()
+      .collection('admin_notifications')
+      .doc(noti_id.toString())
+      .get();
+    if (!adminNotiDoc.exists) {
+      return res.json({ status: false, message: "Data doesn't exist!" });
+    }
+    const notification = adminNotiDoc.data();
+
+    // two user information
+    const fromUserDoc = await admin
+      .firestore()
+      .collection('users')
+      .doc(notification.old_user_id.toString())
+      .get();
+    const toUserDoc = await admin
+      .firestore()
+      .collection('users')
+      .doc(notification.user_id.toString())
+      .get();
+    if (!fromUserDoc.exists) {
+      return res.json({ status: false, message: "Old user doesn't exist!" });
+    }
+    if (!toUserDoc.exists) {
+      return res.json({ status, message: "New user doesn't exist!" });
+    }
+
+    // update user verified status
+    await admin
+      .firestore()
+      .collection('users')
+      .doc(notification.old_user_id.toString())
+      .set({ verified: verified.from }, { merge: true });
+    await admin
+      .firestore()
+      .collection('users')
+      .doc(notification.user_id.toString())
+      .set({ verified: verified.to }, { merge: true });
+
+    return res.json({
+      status: true,
+      message: 'ID Transfer has been processed!',
+    });
+  } catch (error) {
+    console.log(error);
+    return res.json({ status: false, message: error.message });
+  }
 });
 
 app.get('/user', (req, res) => {
@@ -331,8 +403,14 @@ exports.createNotification = functions.firestore
 
       htmlBody = htmlBody
         .replace(new RegExp('%AdminName%', 'g'), adminDoc.data().name)
-        .replace(new RegExp('%fromUser%', 'g'), fromUserDoc.data().user_name)
-        .replace(new RegExp('%toUser%', 'g'), toUserDoc.data().user_name)
+        .replace(
+          new RegExp('%fromUser%', 'g'),
+          `${fromUserDoc.data().user_name} (${fromUserDoc.data().email})`
+        )
+        .replace(
+          new RegExp('%toUser%', 'g'),
+          `${toUserDoc.data().user_name} (${toUserDoc.data().email})`
+        )
         .replace(new RegExp('%time%', 'g'), time);
     }
 

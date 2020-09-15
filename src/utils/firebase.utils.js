@@ -1248,3 +1248,47 @@ export const loadAdminNotificationRequest = async () => {
     return rows;
   });
 }
+
+export const addVerificationRequest = async (noti_id, user_id) => {
+  await _firebase
+    .firestore()
+    .collection('admin_notifications')
+    .doc(noti_id.toString())
+    .set({
+      type: "11",
+      noti_id,
+      user_id
+    });
+  return {status: true, message: 'New Verification request has been added!'};
+}
+
+export const addIDTransferRequest = async (noti_id, old_user_id, user_id) => {
+  await _firebase
+  .firestore()
+  .collection('admin_notifications')
+  .doc(noti_id.toString())
+  .set({
+    type: "12",
+    noti_id,
+    old_user_id,
+    user_id
+  });
+return {status: true, message: 'New ID Transfer request has been added!'};
+}
+
+export const deleteAdminNotiByIdRequest = async (id) => {
+  try {
+    const adminNotiRef = _firebase
+      .firestore()
+      .collection('admin_notifications')
+      .doc(id.toString());
+    await adminNotiRef.delete();
+    return { status: true, message: 'Data has been deleted!' };
+  } catch (err) {
+    return {
+      status: false,
+      message: 'Something went wrong!',
+      details: err.message,
+    };
+  }
+};

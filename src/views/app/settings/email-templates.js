@@ -48,7 +48,7 @@ const EmailTemplateList = ({ history, match, langs, templates, loadAllLangsActio
       Cell: (props) => <>{shortenHTMLBody(props.value)}</>,
     },
     {
-      Header: 'Usage',
+      Header: 'Use Case',
       accessor: 'usage',
       cellClass: 'text-muted  w-25',
       Cell: (props) => <>{props.value}</>,

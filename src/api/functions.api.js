@@ -2,6 +2,35 @@ import axios from './index';
 
 import { serialize } from '../utils';
 
+export const sendConsentEmail = async (data) => {
+  try {
+    const {data: res, status} = await axios.post('/id-transfer/consent-email', data);
+    console.log(res, status);
+    return res;
+  } catch (e) {
+    return {
+      status: false,
+      message: e.message
+    };
+  }
+}
+
+export const judgeIDTransferRequest = async (data) => {
+  try {
+    const {data: res, status} = await axios.post('/id-transfer/judge', data);
+    console.log(res, status);
+    return res;
+  } catch (e) {
+    return {
+      status: false,
+      message: e.message
+    };
+  }
+  
+}
+
+
+
 export const userTest = async () => {
   console.log('[Base Url]', process.env.REACT_APP_FUNCTIONS_ENDPOINT);
   try {
