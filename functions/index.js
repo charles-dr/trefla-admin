@@ -62,111 +62,6 @@ function sendMail({ from, to, subject, body }) {
   });
 }
 
-exports.createNotification = functions.firestore
-  .document('admin_notifications/{notiId}')
-  .onCreate(async (snap, context) => {
-    const notiId = context.params.notiId;
-    const data = snap.data();
-    console.log('[New noti detected]', notiId);
-    console.log('[data]', data);
-
-    // get admin email
-    const configDoc = await admin
-      .firestore()
-      .collection('config')
-      .doc('ZYvvzsj8CMffIcHhY689')
-      .get();
-    if (!configDoc.exists) {
-      return false;
-    }
-
-    console.log('[config]', configDoc.data());
-    const admin_email = configDoc.data().admin_email;
-
-    // get admin info
-    const adminDoc = await admin.firestore().collection('admin').doc('0').get();
-
-    let subject = '';
-    let htmlBody = '';
-    const time = new Date().toUTCString();
-    // get email templates
-    if (data.type === '11') {
-      const templDoc = await admin
-        .firestore()
-        .collection('email_templates')
-        .doc('verify_id')
-        .get();
-      if (!templDoc.exists) {
-        // default subject & body
-        subject = 'ID Verification Request';
-        htmlBody = `Hi Admin. <br/>
-        New ID verification request. <br/>
-        Name: %username% <br/>
-        Email: %email% <br/>
-        Time: %time% <br/>
-        `;
-      } else {
-        subject = templDoc.data().subject;
-        htmlBody = templDoc.data().body;
-      }
-      // get user information
-      const userDoc = await admin
-        .firestore()
-        .collection('users')
-        .doc(data.user_id.toString())
-        .get();
-
-      htmlBody = htmlBody
-        .replace(new RegExp('%AdminName%', 'g'), adminDoc.data().name)
-        .replace(new RegExp('%username%', 'g'), userDoc.data().user_name)
-        .replace(new RegExp('%email%', 'g'), userDoc.data().email)
-        .replace(new RegExp('%time%', 'g'), time);
-    } else if (data.type === '12') {
-      const templDoc = await admin
-        .firestore()
-        .collection('email_templates')
-        .doc('verify_transfer')
-        .get();
-      if (!templDoc.exists) {
-        (subject = 'ID Verification Transfer Request'),
-          (htmlBody = `Hi Admin. <br/>
-        ID verification transfer requested. <br/>
-        From: %fromUser% <br/>
-        to: %toUser% <br/>
-        time: %time% </br/>
-      `);
-      } else {
-        subject = templDoc.data().subject;
-        htmlBody = templDoc.data().body;
-      }
-      // get users' information
-      const fromUserDoc = await admin
-        .firestore()
-        .collection('users')
-        .doc(data.old_user_id.toString())
-        .get();
-      const toUserDoc = await admin
-        .firestore()
-        .collection('users')
-        .doc(data.user_id.toString())
-        .get();
-
-      htmlBody = htmlBody
-        .replace(new RegExp('%AdminName%', 'g'), adminDoc.data().name)
-        .replace(new RegExp('%fromUser%', 'g'), fromUserDoc.data().user_name)
-        .replace(new RegExp('%toUser%', 'g'), toUserDoc.data().user_name)
-        .replace(new RegExp('%time%', 'g'), time);
-    }
-
-    const mailSent = sendMail({
-      from: 'Trefla <admin@trefla.com>',
-      to: admin_email,
-      subject: subject,
-      body: htmlBody,
-    });
-    return mailSent;
-  });
-
 /**
  * @function send email to user A for the consent about ID transfer
  * @params noti_id
@@ -174,6 +69,8 @@ exports.createNotification = functions.firestore
  */
 app.post('/id-transfer/consent-email', async (req, res) => {
   const params = req.body;
+  const noti_id = req.body.noti_id;
+  console.log('noti_id', noti_id);
 
   // get notification
   const notiDoc = await admin
@@ -181,7 +78,7 @@ app.post('/id-transfer/consent-email', async (req, res) => {
     .collection('admin_notifications')
     .doc(noti_id.toString())
     .get();
-  if (notiDoc.exists) {
+  if (!notiDoc.exists) {
     res.json({
       status: false,
       message: 'Not found the request for ID transfer!',
@@ -189,6 +86,7 @@ app.post('/id-transfer/consent-email', async (req, res) => {
   }
 
   const notification = notiDoc.data();
+  console.log('[notification]', notification);
 
   // get user infos
   const fromUserDoc = await admin
@@ -230,9 +128,9 @@ app.post('/id-transfer/consent-email', async (req, res) => {
     toUser = toUserDoc.data(),
     emailTempl = emailTemplDoc.data();
 
-  let htmlBody = emailTempl
-    .replace(new RegExp('%username%', 'g'), fromUser.username)
-    .replace(new RegExp('%toUser%', 'g', toUser.username))
+  let htmlBody = emailTempl.body
+    .replace(new RegExp('%username%', 'g'), fromUser.user_name)
+    .replace(new RegExp('%toUser%', 'g', toUser.user_name))
     .replace(new RegExp('%email%', 'g'), toUser.email);
 
   // get admin config
@@ -343,3 +241,108 @@ app.get('/test', async (req, res) => {
 });
 
 exports.api = functions.https.onRequest(app);
+
+exports.createNotification = functions.firestore
+  .document('admin_notifications/{notiId}')
+  .onCreate(async (snap, context) => {
+    const notiId = context.params.notiId;
+    const data = snap.data();
+    console.log('[New noti detected]', notiId);
+    console.log('[data]', data);
+
+    // get admin email
+    const configDoc = await admin
+      .firestore()
+      .collection('config')
+      .doc('ZYvvzsj8CMffIcHhY689')
+      .get();
+    if (!configDoc.exists) {
+      return false;
+    }
+
+    console.log('[config]', configDoc.data());
+    const admin_email = configDoc.data().admin_email;
+
+    // get admin info
+    const adminDoc = await admin.firestore().collection('admin').doc('0').get();
+
+    let subject = '';
+    let htmlBody = '';
+    const time = new Date().toUTCString();
+    // get email templates
+    if (data.type === '11') {
+      const templDoc = await admin
+        .firestore()
+        .collection('email_templates')
+        .doc('verify_id')
+        .get();
+      if (!templDoc.exists) {
+        // default subject & body
+        subject = 'ID Verification Request';
+        htmlBody = `Hi Admin. <br/>
+        New ID verification request. <br/>
+        Name: %username% <br/>
+        Email: %email% <br/>
+        Time: %time% <br/>
+        `;
+      } else {
+        subject = templDoc.data().subject;
+        htmlBody = templDoc.data().body;
+      }
+      // get user information
+      const userDoc = await admin
+        .firestore()
+        .collection('users')
+        .doc(data.user_id.toString())
+        .get();
+
+      htmlBody = htmlBody
+        .replace(new RegExp('%AdminName%', 'g'), adminDoc.data().name)
+        .replace(new RegExp('%username%', 'g'), userDoc.data().user_name)
+        .replace(new RegExp('%email%', 'g'), userDoc.data().email)
+        .replace(new RegExp('%time%', 'g'), time);
+    } else if (data.type === '12') {
+      const templDoc = await admin
+        .firestore()
+        .collection('email_templates')
+        .doc('verify_transfer')
+        .get();
+      if (!templDoc.exists) {
+        (subject = 'ID Verification Transfer Request'),
+          (htmlBody = `Hi Admin. <br/>
+        ID verification transfer requested. <br/>
+        From: %fromUser% <br/>
+        to: %toUser% <br/>
+        time: %time% </br/>
+      `);
+      } else {
+        subject = templDoc.data().subject;
+        htmlBody = templDoc.data().body;
+      }
+      // get users' information
+      const fromUserDoc = await admin
+        .firestore()
+        .collection('users')
+        .doc(data.old_user_id.toString())
+        .get();
+      const toUserDoc = await admin
+        .firestore()
+        .collection('users')
+        .doc(data.user_id.toString())
+        .get();
+
+      htmlBody = htmlBody
+        .replace(new RegExp('%AdminName%', 'g'), adminDoc.data().name)
+        .replace(new RegExp('%fromUser%', 'g'), fromUserDoc.data().user_name)
+        .replace(new RegExp('%toUser%', 'g'), toUserDoc.data().user_name)
+        .replace(new RegExp('%time%', 'g'), time);
+    }
+
+    const mailSent = sendMail({
+      from: 'Trefla <admin@trefla.com>',
+      to: admin_email,
+      subject: subject,
+      body: htmlBody,
+    });
+    return mailSent;
+  });
