@@ -45,21 +45,7 @@ function sendMail({ from, to, subject, body }) {
     html: body,
   };
 
-  transporter.sendMail(mailOptions, (error, info) => {
-    if (error) {
-      console.log(error);
-      return {
-        status: false,
-        error,
-      };
-    } else {
-      console.log(`Email sent: ${info.response}`);
-      return {
-        status: true,
-        info: info.response,
-      };
-    }
-  });
+  return transporter.sendMail(mailOptions);
 }
 
 /**
@@ -70,7 +56,7 @@ function sendMail({ from, to, subject, body }) {
 app.post('/id-transfer/consent-email', async (req, res) => {
   const params = req.body;
   const noti_id = req.body.noti_id;
-  console.log('noti_id', noti_id);
+  // console.log('noti_id', noti_id);
 
   // get notification
   const notiDoc = await admin
@@ -86,7 +72,7 @@ app.post('/id-transfer/consent-email', async (req, res) => {
   }
 
   const notification = notiDoc.data();
-  console.log('[notification]', notification);
+  // console.log('[notification]', notification);
 
   // get user infos
   const fromUserDoc = await admin
@@ -130,7 +116,7 @@ app.post('/id-transfer/consent-email', async (req, res) => {
 
   let htmlBody = emailTempl.body
     .replace(new RegExp('%username%', 'g'), fromUser.user_name)
-    .replace(new RegExp('%toUser%', 'g', toUser.user_name))
+    .replace(new RegExp('%toUser%', 'g'), toUser.user_name)
     .replace(new RegExp('%email%', 'g'), toUser.email);
 
   // get admin config
@@ -146,14 +132,26 @@ app.post('/id-transfer/consent-email', async (req, res) => {
     });
   }
 
-  const emailSent = sendMail({
+  const emailSent = await sendMail({
     from: `Trefla Admin <${configDoc.data().admin_email}>`,
     to: fromUser.email,
     subject: emailTempl.subject,
     body: htmlBody,
-  });
-
-  res.json(emailSent);
+  })
+    .then((info) => {
+      return res.json({
+        status: true,
+        message: 'Email has been sent successfully.',
+        response: info.response,
+      });
+    })
+    .catch((error) => {
+      return res.json({
+        status: false,
+        message: 'Something went wrong!',
+        error: error,
+      });
+    });
 });
 
 app.get('/user', (req, res) => {
@@ -338,7 +336,7 @@ exports.createNotification = functions.firestore
         .replace(new RegExp('%time%', 'g'), time);
     }
 
-    const mailSent = sendMail({
+    const mailSent = await sendMail({
       from: 'Trefla <admin@trefla.com>',
       to: admin_email,
       subject: subject,
