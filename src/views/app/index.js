@@ -12,6 +12,7 @@ import AppLayout from '../../layout/AppLayout';
 
 import {
   downloadAvatar,
+  loadAllAdminNotiAction,
   loadAllComments,
   loadAllFriends,
   loadAllLangs,
@@ -38,6 +39,7 @@ const App = ({
   getAllPostsAction,
   getAllReportsAction,
   getAllUsersAction,
+  loadAllAdminNotiAction$,
   loadAuthInfoAction,
   login,
 }) => {
@@ -57,6 +59,7 @@ const App = ({
     loadAuthInfoAction();
     downloadAvatarAction();
     getAllReportsAction();
+    loadAllAdminNotiAction$();
   }, [
     getAllUsersAction,
     getAllPostsAction,
@@ -133,6 +136,7 @@ export default withRouter(
     getAllPostsAction: loadAllPosts,
     getAllReportsAction: loadAllReports,
     getAllUsersAction: loadAllUsers,
+    loadAllAdminNotiAction$: loadAllAdminNotiAction,
     loadAuthInfoAction: loadAuthInfo,
   })(App)
 );

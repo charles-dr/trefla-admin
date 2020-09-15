@@ -333,7 +333,7 @@ export const getConfigRequest = async () => {
     });
 };
 
-export const updateConfigRequest = async ({ lang_version }) => {
+export const updateConfigRequest = async ({ lang_version, admin_email }) => {
   const config = await getConfigRequest();
 
   if (!config)
@@ -343,6 +343,7 @@ export const updateConfigRequest = async ({ lang_version }) => {
     };
 
   config.lang_version = lang_version;
+  config.admin_email = admin_email;
 
   try {
     await _firebase.firestore().collection('config').doc(config_id).set(config);
@@ -1166,3 +1167,84 @@ export const statIn7Days = (data, time_key) => {
 
   return stat;
 };
+
+
+
+////////////////////////////////////////////////////////////////
+//                                                            //
+//                        EMAIL TEMPLATES                     //
+//                                                            //
+////////////////////////////////////////////////////////////////
+
+
+export const loadEmailTemplatesRequest = async () => {
+  return _firebase
+    .firestore()
+    .collection('email_templates')
+    // .orderBy('report_id', 'asc')
+    .get()
+    .then((querySnapshot) => {
+      const rows = [];
+      querySnapshot.forEach((doc) => {
+        rows.push(doc.data());
+      });
+      return rows;
+    });
+}
+
+export const getEmailTemplateByIdRequest = async (id) => {
+  const templRef = _firebase
+    .firestore()
+    .collection('email_templates')
+    .doc(id.replace(new RegExp('-', 'g'), '_'));
+
+  return templRef
+    .get()
+    .then((doc) => {
+      if (doc.exists) {
+        return doc.data();
+      }
+      return false;
+    })
+    .catch((err) => {
+      console.log('[Template Fetch]', err);
+      return false;
+    });
+
+}
+
+export const updateEmailTemplateRequest = async (templ) => {
+  const templ_id = templ.id.replace(new RegExp('-', 'g'), '_');
+
+  try {
+    await _firebase.firestore().collection('email_templates').doc(templ_id).set(templ);
+    return { status: true, message: 'Email template has been saved!' };
+  } catch (err) {
+    return { status: false, message: err.message };
+  }
+}
+
+
+
+
+////////////////////////////////////////////////////////////////
+//                                                            //
+//                      ADMIN NOTIFICATION                    //
+//                                                            //
+////////////////////////////////////////////////////////////////
+
+
+export const loadAdminNotificationRequest = async () => {
+  return _firebase
+  .firestore()
+  .collection('admin_notifications')
+  // .orderBy('report_id', 'asc')
+  .get()
+  .then((querySnapshot) => {
+    const rows = [];
+    querySnapshot.forEach((doc) => {
+      rows.push(doc.data());
+    });
+    return rows;
+  });
+}

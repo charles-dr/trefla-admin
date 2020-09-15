@@ -18,7 +18,7 @@ const PasswordPage = ({
   loginUserAction,
   updateLoginAction,
 }) => {
-  const [config, setConfig] = useState({ lang_version: '' });
+  const [config, setConfig] = useState({ lang_version: '', admin_email: '' });
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -62,6 +62,15 @@ const PasswordPage = ({
     let error;
     if (!value) {
       error = 'Language version is required!';
+    }
+    return error;
+  };
+
+  const validateAdminEmail = () => {
+    const value = config.admin_email;
+    let error;
+    if (!value) {
+      error = 'Admin Email is required!';
     }
     return error;
   };
@@ -111,6 +120,26 @@ const PasswordPage = ({
                     {errors.lang_version && touched.lang_version && (
                       <div className="invalid-feedback d-block">
                         {errors.lang_version}
+                      </div>
+                    )}
+                  </FormGroup>
+                </Colxx>
+                <Colxx xxs="12" md="6">
+                  <FormGroup className="form-group">
+                    <Label>
+                      Admin Email(Notification)
+                    </Label>
+                    <Field
+                      className="form-control"
+                      type="email"
+                      name="admin_email"
+                      value={config.admin_email}
+                      validate={validateLangVersion}
+                      onChange={handleOnChange}
+                    />
+                    {errors.admin_email && touched.admin_email && (
+                      <div className="invalid-feedback d-block">
+                        {errors.admin_email}
                       </div>
                     )}
                   </FormGroup>

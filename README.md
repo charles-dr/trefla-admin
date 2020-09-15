@@ -3,6 +3,11 @@
 
 ## Firebase
 
+### Emulators
+```bash
+firebase emulators:start
+```
+
 ### Deploy All
 ```node
 firebase deploy 

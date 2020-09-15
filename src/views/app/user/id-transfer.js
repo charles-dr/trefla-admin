@@ -35,10 +35,11 @@ import {
 } from '../../../utils';
 import { loadAllUsers } from '../../../redux/actions';
 
-const UserList = ({
+const VerificationList = ({
   match,
   history,
   friends,
+  notifications,
   posts,
   users,
   loadAllUsersAction,
@@ -56,30 +57,38 @@ const UserList = ({
     chat: true,
   });
 
-  const [cardImgs, setCardImgs] = useState([]);
-  const [currentImage, setCurrentImg] = useState(0);
-  const [viewerOpen, setViewerOpen] = useState(false);
-
   const [banModal, setBanModal] = useState(false);
   const [banInfo, setBanInfo] = useState({ user_id: -1, active: 1 });
   // const [banReason, setBanReason] = useState('');
 
   const cols = [
     {
-      Header: 'Name',
-      accessor: 'user',
+      Header: 'Transfer From',
+      accessor: 'fromUser',
       cellClass: 'list-item-heading w-15',
       Cell: (props) => (
         <>
-          <Link to={`/app/user/edit/${props.value.id}`}>
-            {props.value.name}
-          </Link>
+          <div className="text-center">
+            <img
+              src={getUserAvatarUrl(props.value)}
+              style={{ width: 50, height: 50, borderRadius: '50%' }}
+              alt={props.value.user_name} /> <br/>
+            <Link to={`/app/user/edit/${props.value.user_id}`}>
+              {props.value.user_name}
+            </Link> <br/>
+            
+            <div><label><b>Email</b>:</label>{' '}{props.value.email}</div>
+            <div><label><b>Card Number</b>:</label>{' '}{props.value.card_number}</div>
+            {props.value.card_img_url && <img src={props.value.card_img_url}
+              style={{maxWidth: 200}} 
+              alt="ID Card" />}
+          </div>
         </>
       ),
     },
     {
-      Header: 'Image',
-      accessor: 'image',
+      Header: 'Transfer To',
+      accessor: 'toUser',
       cellClass: 'list-item-heading w-10',
       Cell: (props) => (
         <>
@@ -87,125 +96,68 @@ const UserList = ({
             <img
               src={getUserAvatarUrl(props.value)}
               style={{ width: 50, height: 50, borderRadius: '50%' }}
-              alt="User Profile"
-            />
+              alt={props.value.user_name} /> <br/>
+            <Link to={`/app/user/edit/${props.value.user_id}`}>
+              {props.value.user_name}
+            </Link> <br/>
+            
+            <div><label>Email:</label>{' '}{props.value.email}</div>
+            <div><label>Card Number:</label>{' '}{props.value.card_number}</div>
+            {props.value.card_img_url && <img src={props.value.card_img_url}
+              style={{maxWidth: 200}} 
+              alt="ID Card" />}
           </div>
         </>
       ),
     },
     // {
-    //     Header: 'Email',
-    //     accessor: 'email',
-    //     cellClass: 'text-muted  w-5',
-    //     Cell: (props) => <>{props.value}</>,
+    //   Header: 'Active',
+    //   accessor: 'active',
+    //   cellClass: 'text-muted  w-5',
+    //   Cell: (props) => (
+    //     <>
+    //       <Badge
+    //         color={props.value === 1 ? 'success' : 'danger'}
+    //         pill
+    //         className="mb-1"
+    //       >
+    //         {props.value === 1 ? 'Active' : 'Disabled'}
+    //       </Badge>
+    //     </>
+    //   ),
     // },
-    {
-      Header: 'Gender',
-      accessor: 'sex',
-      cellClass: 'text-muted  w-5',
-      Cell: (props) => (
-        <>
-          {props.value === '1' && (
-            <div className="text-center">
-              <span
-                className="glyph-icon iconsminds-female"
-                style={{ fontSize: 18, color: '#16c5bd' }}
-              />
-            </div>
-          )}
-          {props.value !== '1' && (
-            <div className="text-center">
-              <span
-                className="glyph-icon iconsminds-male"
-                style={{ fontSize: 18, color: '#1675c5' }}
-              />
-            </div>
-          )}
-        </>
-      ),
-    },
-    {
-      Header: 'Card Number',
-      accessor: 'card_number',
-      cellClass: 'text-muted  w-5',
-      Cell: (props) => <>{props.value}</>,
-    },
-    {
-      Header: 'Card Image',
-      accessor: 'card_img',
-      cellClass: 'text-muted  w-5',
-      Cell: (props) => (
-        <>
-          {!props.value.url && (
-            <Badge color="dark" pill className="mb-1">
-              No Image
-            </Badge>
-          )}
-          {props.value.url && (
-            <img
-              src={props.value.url}
-              alt="Card"
-              onClick={() => showCardImage(props.value.user_id)}
-              style={{ width: 100, height: 'auto', cursor: 'pointer' }}
-            />
-          )}
-        </>
-      ),
-    },
     // {
-    //     Header: 'Location',
-    //     accessor: 'location_address',
-    //     cellClass: 'text-muted  w-5',
-    //     Cell: (props) => <>{props.value}</>,
+    //   Header: 'Verified',
+    //   accessor: 'verified',
+    //   cellClass: 'text-muted  w-5',
+    //   Cell: (props) => (
+    //     <>
+    //       <Badge
+    //         color={props.value === 1 ? 'outline-success' : 'outline-danger'}
+    //         pill
+    //         className="mb-1"
+    //       >
+    //         {props.value === 1 ? 'Verified' : 'Unverified'}
+    //       </Badge>
+    //     </>
+    //   ),
     // },
-    {
-      Header: 'Active',
-      accessor: 'active',
-      cellClass: 'text-muted  w-5',
-      Cell: (props) => (
-        <>
-          <Badge
-            color={props.value === 1 ? 'success' : 'danger'}
-            pill
-            className="mb-1"
-          >
-            {props.value === 1 ? 'Active' : 'Disabled'}
-          </Badge>
-        </>
-      ),
-    },
-    {
-      Header: 'Verified',
-      accessor: 'verified',
-      cellClass: 'text-muted  w-5',
-      Cell: (props) => (
-        <>
-          <Badge
-            color={props.value === 1 ? 'outline-success' : 'outline-danger'}
-            pill
-            className="mb-1"
-          >
-            {props.value === 1 ? 'Verified' : 'Unverified'}
-          </Badge>
-        </>
-      ),
-    },
     {
       Header: 'Actions',
-      accessor: 'action',
+      accessor: 'noti_id',
       cellClass: 'text-muted  w-10',
       Cell: (props) => (
         <>
           <div className="tbl-actions">
-            {!props.value.verified && (
+             {(
               <i
-                className="iconsminds-security-check success"
-                title="Verify Now"
+                className="iconsminds-mail-forward success"
+                title="Consent Email"
                 style={{ fontSize: 18 }}
                 onClick={() => verifyUserById(props.value.user_id)}
               />
             )}
-            {props.value.verified && (
+            {/*{props.value.verified && (
               <i
                 className="iconsminds-turn-right-3 info"
                 title="Tarnsfer Verification"
@@ -220,7 +172,7 @@ const UserList = ({
                 style={{ fontSize: 18 }}
                 onClick={() => UnverifyUserById(props.value.user_id)}
               />
-            )}
+            )} */}
           </div>
         </>
       ),
@@ -228,33 +180,40 @@ const UserList = ({
   ];
 
   useEffect(() => {
-    recomposeUsers();
+    recomposeIDTransfer();
     return () => {
       return true;
     };
-  }, [match, users, posts, friends, recomposeUsers]);
+  }, [match, users, notifications, recomposeIDTransfer]);
 
   useEffect(() => {
-    const usersWithImg = users.filter((user) => user.card_img_url);
 
-    const imgObjects = usersWithImg.map((user) => ({
-      src: user.card_img_url,
-      srcSet: [user.card_img_url],
-      alt: user.user_id,
-      caption: user.user_name,
-    }));
-
-    setCardImgs(imgObjects);
   }, [users]);
 
+  useEffect(() => {
+    console.log('[noti]', notifications);
+  }, [notifications]);
+
+  const recomposeIDTransfer = () => {
+    let idTransfers = notifications.filter(noti => noti.type === '12');
+    let format_data = [];
+    for (let transfer of idTransfers) {
+      let newItem = {};
+      // copy all fields to new object
+      Object.keys(transfer).forEach((key, i) => newItem[key] = transfer[key]);
+      newItem.fromUser = getUserById(transfer.old_user_id);
+      newItem.toUser = getUserById(transfer.user_id);
+      format_data.push(newItem);
+    }
+    setData(format_data);
+  };
   const getUserAvatarUrl = ({ photo, sex, avatarIndex }) => {
     if (photo) {
       return photo;
     }
     if (avatarIndex !== undefined && avatarIndex !== '') {
-      return `/assets/avatar/${
-        sex === '1' ? 'girl' : 'boy'
-      }/${avatarIndex}.png`;
+      return `/assets/avatar/${sex === '1' ? 'girl' : 'boy'
+        }/${avatarIndex}.png`;
     }
     return `/assets/avatar/avatar_${sex === '1' ? 'girl2' : 'boy1'}.png`;
   };
@@ -268,46 +227,6 @@ const UserList = ({
         <p>Y: {arr[1]}</p>
       </>
     );
-  };
-  const recomposeUsers = () => {
-    const new_users = [];
-
-    const verifyUsers = users.filter(
-      (user) => user.card_img_url || user.card_number
-    );
-    for (const user of verifyUsers) {
-      const user_item = {};
-      // copy all key-values
-      for (const key in user) {
-        if (user[key] !== undefined) {
-          user_item[key] = user[key];
-        }
-      }
-      // new key - image
-      user_item.image = {
-        photo: user.photo,
-        sex: user.sex,
-        avatarIndex: user.avatarIndex,
-      };
-      user_item.card_img = {
-        url: user.card_img_url,
-        user_id: user.user_id,
-      };
-      user_item.action = {
-        user_id: user.user_id,
-        active: user.active,
-        verified: user.verified || false,
-      };
-      user_item.verified = user.verified || false;
-      user_item.user = {
-        id: user.user_id,
-        name: user.user_name,
-      };
-
-      // put item to array
-      new_users.push(user_item);
-    }
-    setData(new_users);
   };
 
   const openAddModal = () => {
@@ -421,41 +340,17 @@ const UserList = ({
       chat: st,
     });
   };
+  const getUserById = (id) => {
+    const filtered = users.filter(user => user.user_id === id);
+    return filtered.length > 0 ? filtered[0] : {};
+  }
 
-  // Image Viewer
-  const gotoPreviousImage = () => {
-    const prevIndex = (cardImgs.length + currentImage - 1) % cardImgs.length;
-    setCurrentImg(prevIndex);
-  };
-  const gotoNextImage = () => {
-    setCurrentImg((cardImgs.length + currentImage + 1) % cardImgs.length);
-  };
-  const closeViewer = () => {
-    setViewerOpen(false);
-  };
-  const showCardImage = (user_id) => {
-    // get index
-    setCurrentImg(getIndexInImgViewer(user_id));
-    setViewerOpen(true);
-  };
-  const getIndexInImgViewer = (user_id) => {
-    let index = 0;
-
-    for (const [i, cardImg] of cardImgs.entries()) {
-      if (cardImg.alt === user_id) {
-        index = i;
-        break;
-      }
-    }
-
-    return index;
-  };
 
   return (
     <>
       <Row>
         <Colxx xxs="12">
-          <Breadcrumb heading="menu.verification" match={match} />
+          <Breadcrumb heading="menu.id-transfer" match={match} />
           <Separator className="mb-5" />
         </Colxx>
       </Row>
@@ -463,7 +358,7 @@ const UserList = ({
       <Row>
         <Colxx xxs="12">
           <h3 className="mb-4">
-            <IntlMessages id="pages.verification" />
+            <IntlMessages id="pages.id-transfer" />
           </h3>
         </Colxx>
 
@@ -478,15 +373,6 @@ const UserList = ({
           <ReactTableWithPaginationCard cols={cols} data={data} />
         </Colxx>
       </Row>
-
-      <ImgsViewer
-        imgs={cardImgs}
-        currImg={currentImage}
-        isOpen={viewerOpen}
-        onClickPrev={gotoPreviousImage}
-        onClickNext={gotoNextImage}
-        onClose={closeViewer}
-      />
 
       {/* Delete Modal */}
       <Modal
@@ -582,9 +468,8 @@ const UserList = ({
               <Button
                 type="submit"
                 color="primary"
-                className={`btn-shadow btn-multiple-state mr-2 ${
-                  loading ? 'show-spinner' : ''
-                }`}
+                className={`btn-shadow btn-multiple-state mr-2 ${loading ? 'show-spinner' : ''
+                  }`}
                 size="lg"
               >
                 <span className="spinner d-inline-block">
@@ -637,9 +522,8 @@ const UserList = ({
               <Button
                 type="submit"
                 color="primary"
-                className={`btn-shadow btn-multiple-state mr-2 ${
-                  loading ? 'show-spinner' : ''
-                }`}
+                className={`btn-shadow btn-multiple-state mr-2 ${loading ? 'show-spinner' : ''
+                  }`}
                 size="lg"
               >
                 <span className="spinner d-inline-block">
@@ -666,6 +550,7 @@ const mapStateToProps = ({
   friends: friendApp,
   posts: postApp,
   users: userApp,
+  adminNotifications: { list: notifications }
 }) => {
   const { list: posts } = postApp;
   const { list: users } = userApp;
@@ -673,6 +558,7 @@ const mapStateToProps = ({
 
   return {
     friends,
+    notifications,
     users,
     posts,
   };
@@ -680,4 +566,4 @@ const mapStateToProps = ({
 
 export default connect(mapStateToProps, {
   loadAllUsersAction: loadAllUsers,
-})(UserList);
+})(VerificationList);

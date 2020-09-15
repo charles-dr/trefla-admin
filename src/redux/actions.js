@@ -35,8 +35,14 @@ export const AUTH_INFO_LOADED = 'AUTH_INFO_LOADED';
 export const AUTH_AVATAR = 'AUTH_AVATAR';
 export const AUTH_AVATAR_UPDATE = 'AUTH_AVATAR_UPDATE';
 
+export const ADMIN_NOTI_GET = 'ADMIN_NOTI.GET';
+export const ADMIN_NOTI_ARRIVED = 'ADMIN_NOTI.ARRIVED';
+
 export const COMMENTS_GET = 'COMMENT.GET';
 export const COMMENTS_ARRIVED = 'COMMENT.ARRIVED';
+
+export const EMAIL_TEMPLATE_GET = 'EMAIL_TEMPLATE.GET';
+export const EMAIL_TEMPLATE_ARRIVED = 'EMAIL_TEMPLATE.ARRIVED';
 
 export const FRIEND_GET = 'FRIEND_GET';
 export const FRIEND_ARRIVED = 'FRIEND_ARRIVED';
@@ -56,8 +62,10 @@ export const USERS_ARRIVED = 'USERS_ARRIVED';
 export * from './menu/actions';
 export * from './settings/actions';
 
+export * from './admin-notification/actions';
 export * from './auth/actions';
 export * from './comment/actions';
+export * from './email-template/actions';
 export * from './friend/actions';
 export * from './lang/actions';
 export * from './posts/actions';

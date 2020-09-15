@@ -73,9 +73,13 @@ module.exports = {
   'menu.comment': 'Comment',
   'menu.dashboard': 'Dashboard',
   'menu.edit': 'Edit',
+  'menu.email-templates': 'Email Templates',
+  'menu.email-template': 'Email Template',
+  'menu.id-transfer': 'ID Transfer',
   'menu.languages': 'Languages',
   'menu.lang': 'Languages',
   'menu.list': 'List',
+  'menu.national-ids': 'National IDs',
   'menu.password': 'Password',
   'menu.post': 'Post',
   'menu.posts': 'Posts',
@@ -88,6 +92,7 @@ module.exports = {
   'menu.users': 'Users',
   'menu.user': 'User',
   'menu.verification': 'Verification',
+  'menu.verification-transfer': 'Verification Transfer',
   'menu.verifications': 'Verifications',
 
   /* 04.Error Page */
@@ -100,8 +105,12 @@ module.exports = {
   'pages.config': 'Config',
   'pages.dashboard': 'Dashboard',
   'pages.delete-user': 'Delete User',
+  'pages.email-templates': 'Email Templates',
+  'pages.email-template': 'Email Template',
+  'pages.id-transfer': "ID Transfer",
   'pages.languages': 'Languages',
   'pages.language': 'Language',
+  'pages.national-ids': 'National IDs',
   'pages.password': 'Password',
   'pages.post': 'Post',
   'pages.posts': 'Posts',
@@ -114,6 +123,7 @@ module.exports = {
   'pages.users': 'Users',
   'pages.user': 'User',
   'pages.verification': 'Verification',
+  'pages.verifications': 'Verifications',
 
   'table.react-pagination': 'React Pagination',
 };

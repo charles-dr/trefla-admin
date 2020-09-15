@@ -18,9 +18,14 @@ const data = [
       },
       {
         icon: 'iconsminds-id-card',
-        label: 'menu.verification',
-        to: '/app/user/verification',
+        label: 'menu.national-ids',
+        to: '/app/user/national-ids',
       },
+      {
+        icon: 'iconsminds-shield',
+        label: 'menu.id-transfer',
+        to: '/app/user/id-transfer',
+      }
     ],
   },
   {
@@ -67,6 +72,11 @@ const data = [
         icon: 'iconsminds-key-lock',
         label: 'menu.password',
         to: '/app/settings/password',
+      },
+      {
+        icon: 'iconsminds-inbox-full',
+        label: 'menu.email-templates',
+        to: '/app/settings/email-templates',
       },
     ],
   },
