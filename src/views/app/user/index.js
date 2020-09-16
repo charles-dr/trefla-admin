@@ -5,6 +5,7 @@ const UserAdd = React.lazy(() => import('./add'));
 const UserEdit = React.lazy(() => import('./edit'));
 const UserList = React.lazy(() => import('./list'));
 const NationalIDList = React.lazy(() => import('./national-ids'));
+const IDChangeList = React.lazy(() => import('./id-changes'));
 const IDTransfer = React.lazy(() => import('./id-transfer'));
 
 const UserModule = ({ match }) => (
@@ -29,6 +30,11 @@ const UserModule = ({ match }) => (
         render={(props) => <NationalIDList {...props} />}
       />
       
+      <Route
+        path={`${match.url}/id-changes`}
+        render={(props) => <IDChangeList {...props} />}
+      />
+
       <Route
         path={`${match.url}/id-transfer`}
         render={(props) => <IDTransfer {...props} /> }

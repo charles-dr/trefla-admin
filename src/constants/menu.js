@@ -22,6 +22,11 @@ const data = [
         to: '/app/user/national-ids',
       },
       {
+        icon: 'iconsminds-quill-3',
+        label: 'menu.id-changes',
+        to: '/app/user/id-changes',
+      },
+      {
         icon: 'iconsminds-shield',
         label: 'menu.id-transfer',
         to: '/app/user/id-transfer',

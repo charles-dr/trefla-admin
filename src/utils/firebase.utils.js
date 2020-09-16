@@ -511,13 +511,14 @@ export const updateUserProfile = async (
   // console.log(avatarFile, cardFile, profile);
   const { user_id } = profile;
 
+  const currentTime = new Date().getTime();
   // update card photo
   if (cardFile) {
     const ext = getExtensionFromFileName(cardFile.name);
     const cardRef = _firebase
       .storage()
       .ref()
-      .child(`card/${user_id.toString()}.${ext}`);
+      .child(`card/${currentTime.toString()}.${ext}`);
     try {
       console.log('[Uploading card]');
       await cardRef.put(cardFile);

@@ -304,6 +304,7 @@ const IDTransferList = ({
         if (res.status === true) {
           NotificationManager.success('ID transfer request deleted!', 'Delete ID Transfer Request');
           setAddVTModal(false);
+          loadAllAdminNotiAction$();
         } else {
           NotificationManager.error('Failed to delete ID transfer request!', 'Delete ID Transfer Request')
         }
@@ -418,7 +419,7 @@ const IDTransferList = ({
           <AvForm
             className="av-tooltip tooltip-label-right"
           >
-            <h5>Delete together user's:</h5>
+            <h5>Are you sure to delete it?</h5>
 
             <Separator className="mb-5 mt-5" />
             <div className="d-flex justify-content-end">

@@ -93,37 +93,6 @@ const NationalIDList = ({
         </>
       ),
     },
-    // {
-    //     Header: 'Email',
-    //     accessor: 'email',
-    //     cellClass: 'text-muted  w-5',
-    //     Cell: (props) => <>{props.value}</>,
-    // },
-    // {
-    //   Header: 'Gender',
-    //   accessor: 'sex',
-    //   cellClass: 'text-muted  w-5',
-    //   Cell: (props) => (
-    //     <>
-    //       {props.value === '1' && (
-    //         <div className="text-center">
-    //           <span
-    //             className="glyph-icon iconsminds-female"
-    //             style={{ fontSize: 18, color: '#16c5bd' }}
-    //           />
-    //         </div>
-    //       )}
-    //       {props.value !== '1' && (
-    //         <div className="text-center">
-    //           <span
-    //             className="glyph-icon iconsminds-male"
-    //             style={{ fontSize: 18, color: '#1675c5' }}
-    //           />
-    //         </div>
-    //       )}
-    //     </>
-    //   ),
-    // },
     {
       Header: 'Card Number',
       accessor: 'card_number',

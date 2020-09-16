@@ -418,6 +418,8 @@ exports.createNotification = functions.firestore
           `${toUserDoc.data().user_name} (${toUserDoc.data().email})`
         )
         .replace(new RegExp('%time%', 'g'), time);
+    } else {
+      return false;
     }
 
     const mailSent = await sendMail({
@@ -486,10 +488,14 @@ exports.updateID = functions.firestore
     if (oldData.card_img_url) {
       const oldImg = `<a href="${oldData.card_img_url}" target="_blank"><img src="${oldData.card_img_url}" style="width: 250px;" alt="Old ID Photo" /><a>`;
       template = template.replace(new RegExp('%oldCardImg%', 'g'), oldImg);
+    } else {
+      template = template.replace(new RegExp('%oldCardImg%', 'g'), '');
     }
     if (newData.card_img_url) {
       const newImg = `<a href="${newData.card_img_url}" target="_blank"><img src="${newData.card_img_url}" style="width: 250px;" alt="New ID Photo" /><a>`;
       template = template.replace(new RegExp('%newCardImg%', 'g'), newImg);
+    } else {
+      template = template.replace(new RegExp('%newCardImg%', 'g'), '');
     }
 
     const mailSent = await sendMail({
