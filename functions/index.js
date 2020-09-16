@@ -48,6 +48,12 @@ function sendMail({ from, to, subject, body }) {
   return transporter.sendMail(mailOptions);
 }
 
+function compareCardImage(oldPath, newPath) {
+  const oldPathCore = oldPath.substr(0, oldPath.indexOf('&token'));
+  const newPathCore = newPath.substr(0, newPath.indexOf('&token'));
+  return oldPathCore.trim() === newPathCore.trim();
+}
+
 /**
  * @description send email to user A for the consent about ID transfer
  * @params noti_id
@@ -420,5 +426,113 @@ exports.createNotification = functions.firestore
       subject: subject,
       body: htmlBody,
     });
+    return mailSent;
+  });
+
+exports.updateID = functions.firestore
+  .document('users/{userId}')
+  .onUpdate(async (change, context) => {
+    const notiId = context.params.userId;
+    const newData = change.after.data();
+    const oldData = change.before.data();
+    console.log('[user ID]', notiId);
+    console.log('[new ID]', newData.card_number);
+    console.log('[old ID]', oldData.card_number);
+
+    if (
+      newData.card_number.trim() === oldData.card_number.trim() &&
+      compareCardImage(newData.card_img_url || '', oldData.card_img_url || '')
+    ) {
+      return false;
+    }
+
+    // get admin email
+    const configDoc = await admin
+      .firestore()
+      .collection('config')
+      .doc(CONFIG_DOC_ID)
+      .get();
+    if (!configDoc.exists) {
+      return false;
+    }
+
+    const adminEmail = configDoc.data().admin_email;
+
+    // get admin info
+    const adminDoc = await admin.firestore().collection('admin').doc('0').get();
+
+    // load template
+    const templDoc = await admin
+      .firestore()
+      .collection('email_templates')
+      .doc('id_change')
+      .get();
+
+    if (!templDoc.exists) {
+      return false;
+    }
+
+    // make image element
+    let oldImg = '',
+      newImg = '';
+
+    let template = templDoc
+      .data()
+      .body.replace(new RegExp('%AdminName%', 'g'), adminDoc.data().name)
+      .replace(new RegExp('%Username%', 'g'), newData.user_name)
+      .replace(new RegExp('%newCardNum%', 'g'), newData.card_number)
+      .replace(new RegExp('%oldCardNum%', 'g'), oldData.card_number);
+
+    if (oldData.card_img_url) {
+      const oldImg = `<a href="${oldData.card_img_url}" target="_blank"><img src="${oldData.card_img_url}" style="width: 250px;" alt="Old ID Photo" /><a>`;
+      template = template.replace(new RegExp('%oldCardImg%', 'g'), oldImg);
+    }
+    if (newData.card_img_url) {
+      const newImg = `<a href="${newData.card_img_url}" target="_blank"><img src="${newData.card_img_url}" style="width: 250px;" alt="New ID Photo" /><a>`;
+      template = template.replace(new RegExp('%newCardImg%', 'g'), newImg);
+    }
+
+    const mailSent = await sendMail({
+      from: 'Trefla <admin@trefla.com>',
+      to: adminEmail,
+      subject: templDoc.data().subject,
+      body: template,
+    });
+
+    // insert notification document
+    const adminNoti = await admin
+      .firestore()
+      .collection('admin_notifications')
+      .orderBy('noti_id', 'desc')
+      .limit(1)
+      .get()
+      .then((querySnapshot) => {
+        const rows = [];
+        querySnapshot.forEach((doc) => {
+          // console.log(`${doc.id}`, doc.data());
+          rows.push(doc.data());
+        });
+        return rows;
+      });
+
+    console.log('adminNoti', adminNoti);
+
+    let newAdminNotiId = 0;
+    if (adminNoti.length && adminNoti.length > 0) {
+      newAdminNotiId = adminNoti[0].noti_id + 1;
+    }
+    console.log('[newAdminNotiId]', newAdminNotiId);
+
+    admin
+      .firestore()
+      .collection('admin_notifications')
+      .doc(newAdminNotiId.toString())
+      .set({
+        type: '13',
+        noti_id: newAdminNotiId,
+        old: oldData,
+        new: newData,
+      });
+
     return mailSent;
   });
