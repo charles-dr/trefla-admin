@@ -7,9 +7,14 @@ const nodemailer = require('nodemailer');
 
 const serviceAccount = require('./trefla-firebase-adminsdk-ic030-de756cf0e9.json');
 const { CONFIG_DOC_ID } = require('./constants');
+const {
+  sendMultiNotifications,
+  sendSingleNotification,
+} = require('./libs/common');
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
+  // credential: admin.credential.applicationDefault(),
   databaseURL: 'https://trefla.firebaseio.com',
   storageBucket: 'trefla.appspot.com',
 });
@@ -30,11 +35,6 @@ const transporter = nodemailer.createTransport({
     pass: 'blizanac1',
   },
 });
-
-// functions.firestore.document('admin_notifications/{notiId}')
-// .onWrite((change, context) => {
-//   console.log(context.params, change.after.data());
-// });
 
 function sendMail({ from, to, subject, body }) {
   const mailOptions = {
@@ -277,6 +277,106 @@ app.get('/lang/download', async (req, res) => {
       message: e.message,
     });
   }
+});
+
+app.post('/notification/single', async (req, res) => {
+  const { user_id, title, body } = req.body;
+
+  const userDoc = await admin
+    .firestore()
+    .collection('users')
+    .doc(user_id.toString())
+    .get();
+  // error when user does not exist
+  if (!userDoc.exists) {
+    res.json({ status: false, message: 'User does not exist!' });
+  }
+
+  const user = userDoc.data();
+  // error when user doesn't have user token
+  if (!user.device_token) {
+    res.json({ status: false, message: 'Not found the device token!' });
+  }
+
+  const token = user.device_token;
+
+  sendSingleNotification({ token, body, title })
+    .then((response) => {
+      return res.json({ status: true, message: 'Notification has been sent!' });
+    })
+    .catch((error) => {
+      return res.json({
+        status: false,
+        message: 'Failed to send notification',
+        details: error,
+      });
+    });
+});
+
+app.post('/notification/bulk', async (req, res) => {
+  const { user_ids, title, body } = req.body;
+  console.log('[user ids]', user_ids);
+  // get user list
+  let users = [];
+  try {
+    const querySnapshot = await admin
+      .firestore()
+      .collection('users')
+      .where('user_id', 'in', user_ids)
+      .get();
+    querySnapshot.forEach((doc) => {
+      if (doc.exists) {
+        users.push(doc.data());
+      }
+    });
+  } catch (error) {
+    return res.json({ status: false, message: 'Error while getting users' });
+  }
+  // console.log('[users]', users);
+
+  let tokens = users
+    .filter((user) => !!user.device_token)
+    .map((user) => user.device_token);
+  console.log('[tokens]', tokens);
+
+  return sendMultiNotifications({ tokens, body, title })
+    .then((response) => {
+      return res.json({
+        status: true,
+        message: 'Notifications have been sent!',
+      });
+    })
+    .catch((error) => {
+      return res.json({
+        status: false,
+        message: 'Error while sending notifications!',
+      });
+    });
+});
+
+app.get('/noti-test', async (req, res) => {
+  const regToken =
+    'f84sBPLGQyCmBM4oCbqdCZ:APA91bFQ2STlhY3qime63poqVumRTuIEr2eolSoxGLklVLE8djSQ2KPKaSmIbs_wFfEgg9Xj8MQJk2TfscVZl_3gGydkCLnYNAtEvCtSfqYEDwQdr19ML2X8LzuRMDGXcQ6oxBL-Pnwf';
+  const message = {
+    // data: { score: '850', time: '2:45' },
+    token: regToken,
+    notification: {
+      title: 'Noti Test',
+      body: 'Hello Crash Tester xD!',
+    },
+  };
+
+  admin
+    .messaging()
+    .send(message)
+    .then((response) => {
+      console.log('Successfully sent message', response);
+      return res.json({ status: true, data: response });
+    })
+    .catch((error) => {
+      console.log('Error send message:', error);
+      return res.json({ status: false, error: error });
+    });
 });
 
 app.get('/email-test', async (req, res) => {
