@@ -92,7 +92,7 @@ const DashboardPage = ({ match, history, comments, posts, reports, users }) => {
     setRecentPosts(refactored);
 
     return () => {};
-  }, [getUserById, match, posts, users]);
+  }, [getUserById, posts, users]);
 
   const getUserById = (id) => {
     const userR = users.filter((user) => Number(user.user_id) === Number(id));

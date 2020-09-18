@@ -11,6 +11,10 @@ const deg2rad = function (deg) {
   return deg * (Math.PI / 180);
 };
 
+const formatTwoDigits = (num) => {
+  return num > 9 ? num : `0${num}`;
+};
+
 const getDistanceFromLatLonInMeter = function (location1, location2) {
   const lat1 = location1.lat;
   const lon1 = location1.lng;
@@ -42,8 +46,29 @@ const getUserLastLocation = function (user) {
   }
 };
 
+const isPostNotificationAllowed = function (user) {
+  return (
+    user.isNotiFromNewPost === undefined || user.isNotiFromNewPost === true
+  );
+};
+
+const convertTimeToString = (dt) => {
+  if (!dt) {
+    dt = new Date();
+  }
+
+  const y = dt.getFullYear();
+  const m = formatTwoDigits(dt.getMonth() + 1);
+  const d = formatTwoDigits(dt.getDate());
+  const H = formatTwoDigits(dt.getHours());
+  const i = formatTwoDigits(dt.getMinutes());
+  const s = formatTwoDigits(dt.getSeconds());
+  const tz = -dt.getTimezoneOffset();
+  return `${y}-${m}-${d}-${H}-${i}-${s}:${tz}`;
+};
+
+exports.convertTimeToString = convertTimeToString;
 exports.deg2rad = deg2rad;
 exports.string2Coordinate = string2Coordinate;
 exports.getDistanceFromLatLonInMeter = getDistanceFromLatLonInMeter;
 exports.getUserLastLocation = getUserLastLocation;
-

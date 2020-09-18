@@ -24,6 +24,7 @@ import {
 
 const CommentModule = React.lazy(() => import('./comment'));
 const LangModule = React.lazy(() => import('./lang'));
+const NotificationModule = React.lazy(() => import('./notification'));
 const PostModule = React.lazy(() => import('./post'));
 const ReportModule = React.lazy(() => import('./report'));
 const SettingModule = React.lazy(() => import('./settings'));
@@ -94,6 +95,11 @@ const App = ({
             <Route
               path={`${match.url}/lang`}
               render={(props) => <LangModule {...props} />}
+            />
+
+            <Route 
+              path={`${match.url}/notification`}
+              render={(props) => <NotificationModule {...props} />}
             />
 
             <Route

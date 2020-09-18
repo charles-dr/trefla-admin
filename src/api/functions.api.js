@@ -25,8 +25,31 @@ export const judgeIDTransferRequest = async (data) => {
       status: false,
       message: e.message
     };
+  }  
+}
+
+export const sendSingleNotificationRequest = async (data) => {
+  try {
+    const {data: res, status} = await axios.post('/notification/single', data);
+    return res;
+  } catch (e) {
+    return {
+      status: false,
+      message: e.message
+    };
   }
-  
+}
+
+export const sendMultiNotificationsRequest = async (data) => {
+  try {
+    const {data: res, status} = await axios.post('/notification/bulk', data);
+    return res;
+  } catch (e) {
+    return {
+      status: false,
+      message: e.message
+    };
+  } 
 }
 
 

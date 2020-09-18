@@ -12,26 +12,45 @@ const data = [
     to: '/app/user',
     subs: [
       {
-        icon: 'simple-icon-list',
-        label: 'menu.list',
-        to: '/app/user/list',
-      },
-      {
-        icon: 'iconsminds-id-card',
-        label: 'menu.national-ids',
-        to: '/app/user/national-ids',
-      },
-      {
-        icon: 'iconsminds-quill-3',
-        label: 'menu.id-changes',
-        to: '/app/user/id-changes',
-      },
-      {
-        icon: 'iconsminds-shield',
-        label: 'menu.id-transfer',
-        to: '/app/user/id-transfer',
+        id: 'users-ID',
+        label: 'menu.users-ID',
+        to: '/app/user',
+        subs: [
+          {
+            icon: 'simple-icon-list',
+            label: 'menu.list',
+            to: '/app/user/list',
+          },
+          {
+            icon: 'iconsminds-id-card',
+            label: 'menu.national-ids',
+            to: '/app/user/national-ids',
+          },
+          {
+            icon: 'iconsminds-quill-3',
+            label: 'menu.id-changes',
+            to: '/app/user/id-changes',
+          },
+          {
+            icon: 'iconsminds-shield',
+            label: 'menu.id-transfer',
+            to: '/app/user/id-transfer',
+          }
+        ],
+      },{
+        id: 'notification',
+        label: 'menu.notification',
+        to: '/app/notification',
+        subs: [
+          {
+            icon: 'simple-icon-bell',
+            label: 'menu.send-notification',
+            to: '/app/notification/send',
+          },
+        ]
       }
     ],
+
   },
   {
     id: 'postmenu',

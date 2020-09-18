@@ -9,14 +9,19 @@ const serviceAccount = require('./trefla-firebase-adminsdk-ic030-de756cf0e9.json
 const { CONFIG_DOC_ID } = require('./constants');
 
 const {
+  convertTimeToString,
   getDistanceFromLatLonInMeter,
   getUserLastLocation,
   string2Coordinate,
 } = require('./libs/utils');
 const {
+  addPostNotificationToUser,
   getAllUsers,
+  getNewNotificationIdOfUser,
+  SendAllMultiNotifications,
   sendMultiNotifications,
   sendSingleNotification,
+  setNotificationToUser,
 } = require('./libs/common');
 
 admin.initializeApp({
@@ -375,7 +380,7 @@ app.get('/noti-test', async (req, res) => {
 
   admin
     .messaging()
-    .send(message)
+    .sendAll([message])
     .then((response) => {
       console.log('Successfully sent message', response);
       return res.json({ status: true, data: response });
@@ -650,12 +655,100 @@ exports.updateID = functions.firestore
     return mailSent;
   });
 
+exports.createPost = functions.firestore
+  .document('posts/{postId}')
+  .onCreate(async (snap, context) => {
+    const postId = context.params.postId;
+    const newData = snap.data();
+
+    console.log('============== post created ===:', postId);
+
+    // post user
+    const postUserDoc = await admin
+      .firestore()
+      .collection('users')
+      .doc(newData.post_user_id.toString())
+      .get();
+
+    const postLocation = string2Coordinate(newData.location_coordinate);
+
+    // get all users
+    const allUsers = await getAllUsers();
+
+    // const distances = allUsers.map((user) =>
+    //   getDistanceFromLatLonInMeter(postLocation, getUserLastLocation(user))
+    // );
+    // console.log('[distances]', distances);
+
+    let messages = [];
+    let nearByUsers = [];
+
+    for (let user of allUsers) {
+      if (user.user_id === newData.post_user_id) continue;
+
+      const distance = getDistanceFromLatLonInMeter(
+        postLocation,
+        getUserLastLocation(user)
+      );
+      const radius = user.raidusAround || 100;
+      if (radius < distance) {
+        continue;
+      }
+
+      nearByUsers.push(user);
+      const userName = postUserDoc.data().user_name;
+      const notiContent =
+        user.language !== undefined && user.language === 'Romanian'
+          ? `${userName} a creat o nouă postare.`
+          : `${userName} created a new post.`;
+      messages.push({
+        token: user.device_token,
+        notification: {
+          title: 'Trefla',
+          body: notiContent,
+        },
+      });
+
+      addPostNotificationToUser({
+        user_id: user.user_id,
+        sender_id: newData.post_user_id,
+        time: convertTimeToString(),
+        type: 0,
+        optional_val: Number(postId),
+      })
+        .then((inserted) => {
+          return console.log('[add noti]', user.user_id, inserted);
+        })
+        .catch((error) => {
+          return console.log('[add noti]', error);
+        });
+    }
+
+    console.log(
+      '[user_ids]',
+      nearByUsers.map((user) => ({
+        id: user.user_id,
+        radius: user.raidusAround || 100,
+        r: getDistanceFromLatLonInMeter(
+          postLocation,
+          getUserLastLocation(user)
+        ),
+      }))
+    );
+    // console.log('[messages]', messages);
+
+    const notiSent = await SendAllMultiNotifications(
+      messages.filter((msg) => !!msg.token)
+    );
+    return true;
+  });
+
 exports.updatePost = functions.firestore
   .document('posts/{postId}')
   .onUpdate(async (change, context) => {
     const postId = context.params.postId;
     const newData = change.after.data();
-    const oldData = change.before.data();
+    // const oldData = change.before.data();
 
     console.log('============== post updated ===:', postId);
 
@@ -676,13 +769,65 @@ exports.updatePost = functions.firestore
     );
     // console.log('[distances]', distances);
 
-    const nearByUsers = allUsers.filter(
-      (user) =>
-        getDistanceFromLatLonInMeter(postLocation, getUserLastLocation(user)) <=
-        user.raidusAround || 100
-    );
+    let messages = [];
+    let nearByUsers = [];
 
-    const filter_users = nearByUsers.map((user) => user.user_id);
-    console.log('[user_ids]', filter_users);
+    for (let user of allUsers) {
+      if (user.user_id === newData.post_user_id) continue;
+
+      const distance = getDistanceFromLatLonInMeter(
+        postLocation,
+        getUserLastLocation(user)
+      );
+      const radius = user.raidusAround || 100;
+      if (radius < distance) {
+        continue;
+      }
+
+      nearByUsers.push(user);
+      const userName = postUserDoc.data().user_name;
+      const notiContent =
+        user.language !== undefined && user.language === 'Romanian'
+          ? `${userName} și-a actualizat postarea.`
+          : `${userName} updated his post.`;
+      messages.push({
+        token: user.device_token,
+        notification: {
+          title: 'Trefla',
+          body: notiContent,
+        },
+      });
+
+      addPostNotificationToUser({
+        user_id: user.user_id,
+        sender_id: newData.post_user_id,
+        time: convertTimeToString(),
+        type: 1,
+        optional_val: Number(postId),
+      })
+        .then((inserted) => {
+          return console.log('[add noti]', user.user_id, inserted);
+        })
+        .catch((error) => {
+          return console.log('[add noti]', error);
+        });
+    }
+
+    console.log(
+      '[user_ids]',
+      nearByUsers.map((user) => ({
+        id: user.user_id,
+        radius: user.raidusAround || 100,
+        r: getDistanceFromLatLonInMeter(
+          postLocation,
+          getUserLastLocation(user)
+        ),
+      }))
+    );
+    // console.log('[messages]', messages);
+
+    const notiSent = await SendAllMultiNotifications(
+      messages.filter((msg) => !!msg.token)
+    );
     return true;
   });

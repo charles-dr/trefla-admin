@@ -38,6 +38,26 @@ refered from
 - hosting emulator: 5000
 
 
+## Data Structure
+
+### notification type
+
+
+
+ - optional val
+    30, 35, 36, 50, 51, 
+ - type
+    0:create, 1: update, 41, 42, 43
+ - sender_id
+
+ - time
+
+ -noti_id
+
+(51, 43) comment <br/>
+(50, 43) comment
+
+ 
 ## Project Structure
 
 - menu: constants/menu.js

@@ -31,6 +31,10 @@ exports.sendMultiNotifications = async function ({ title, body, tokens }) {
   return admin.messaging().sendMulticast(message);
 };
 
+exports.SendAllMultiNotifications = async function (messages) {
+  return admin.messaging().sendAll(messages);
+};
+
 exports.getAllUsers = async function () {
   return admin
     .firestore()
@@ -46,3 +50,56 @@ exports.getAllUsers = async function () {
       return users;
     });
 };
+
+const getNewNotificationIdOfUser = async function (user_id) {
+  const querySnapshot = await admin
+    .firestore()
+    .collection('users')
+    .doc(user_id.toString())
+    .collection('notifications')
+    .orderBy('noti_id', 'desc')
+    .get();
+  let notifications = [];
+  querySnapshot.forEach((doc) => {
+    if (doc.exists) {
+      notifications.push(doc.data());
+    }
+  });
+  return notifications.length === 0 ? 0 : notifications[0].noti_id + 1;
+};
+
+const setNotificationToUser = async function (user_id, noti_id, notification) {
+  return admin
+    .firestore()
+    .collection('users')
+    .doc(user_id.toString())
+    .collection('notifications')
+    .doc(noti_id.toString())
+    .set(notification);
+};
+
+exports.addPostNotificationToUser = async function ({
+  user_id,
+  sender_id,
+  time,
+  type,
+  optional_val,
+}) {
+  try {
+    const newId = await getNewNotificationIdOfUser(user_id);
+    await setNotificationToUser(user_id, newId, {
+      noti_id: newId,
+      optional_val,
+      sender_id,
+      time,
+      type,
+    });
+    return true;
+  } catch (error) {
+    console.log('[Add Notification]', error);
+    return false;
+  }
+};
+
+exports.getNewNotificationIdOfUser = getNewNotificationIdOfUser;
+exports.setNotificationToUser = setNotificationToUser;

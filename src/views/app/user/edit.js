@@ -118,7 +118,8 @@ const EditUserPage = ({
         } else {
           setProfile(res);
           if (res.birthday) {
-            setDob(new Date(res.birthday));
+            const str_arr = res.birthday.split('/');
+            setDob(new Date(Number(str_arr[2]), Number(str_arr[1]) - 1, Number(str_arr[0])));
           }
 
           // active
