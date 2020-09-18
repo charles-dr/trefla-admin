@@ -30,3 +30,19 @@ exports.sendMultiNotifications = async function ({ title, body, tokens }) {
 
   return admin.messaging().sendMulticast(message);
 };
+
+exports.getAllUsers = async function () {
+  return admin
+    .firestore()
+    .collection('users')
+    .get()
+    .then((querySnapshot) => {
+      let users = [];
+      querySnapshot.forEach((doc) => {
+        if (doc.exists) {
+          users.push(doc.data());
+        }
+      });
+      return users;
+    });
+};

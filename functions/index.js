@@ -7,7 +7,14 @@ const nodemailer = require('nodemailer');
 
 const serviceAccount = require('./trefla-firebase-adminsdk-ic030-de756cf0e9.json');
 const { CONFIG_DOC_ID } = require('./constants');
+
 const {
+  getDistanceFromLatLonInMeter,
+  getUserLastLocation,
+  string2Coordinate,
+} = require('./libs/utils');
+const {
+  getAllUsers,
   sendMultiNotifications,
   sendSingleNotification,
 } = require('./libs/common');
@@ -641,4 +648,41 @@ exports.updateID = functions.firestore
       });
 
     return mailSent;
+  });
+
+exports.updatePost = functions.firestore
+  .document('posts/{postId}')
+  .onUpdate(async (change, context) => {
+    const postId = context.params.postId;
+    const newData = change.after.data();
+    const oldData = change.before.data();
+
+    console.log('============== post updated ===:', postId);
+
+    // post user
+    const postUserDoc = await admin
+      .firestore()
+      .collection('users')
+      .doc(newData.post_user_id.toString())
+      .get();
+
+    const postLocation = string2Coordinate(newData.location_coordinate);
+
+    // get all users
+    const allUsers = await getAllUsers();
+
+    const distances = allUsers.map((user) =>
+      getDistanceFromLatLonInMeter(postLocation, getUserLastLocation(user))
+    );
+    // console.log('[distances]', distances);
+
+    const nearByUsers = allUsers.filter(
+      (user) =>
+        getDistanceFromLatLonInMeter(postLocation, getUserLastLocation(user)) <=
+        user.raidusAround || 100
+    );
+
+    const filter_users = nearByUsers.map((user) => user.user_id);
+    console.log('[user_ids]', filter_users);
+    return true;
   });
