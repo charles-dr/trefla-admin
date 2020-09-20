@@ -3,13 +3,8 @@ import {
   Card,
   CardBody,
   CardTitle,
-  UncontrolledDropdown,
-  DropdownItem,
-  DropdownToggle,
-  DropdownMenu,
 } from 'reactstrap';
 
-import IntlMessages from '../../helpers/IntlMessages';
 import { LineChart } from '../../components/charts';
 import { ThemeColors } from '../../helpers/ThemeColors';
 

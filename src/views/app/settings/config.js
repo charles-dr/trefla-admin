@@ -20,13 +20,11 @@ const PasswordPage = ({
 }) => {
   const [config, setConfig] = useState({ lang_version: '', admin_email: '' });
   const [loading, setLoading] = useState(false);
-
   useEffect(() => {
     loadConfigData();
 
     return () => {};
   }, [match]);
-
   const onUpdateProfile = async (values) => {
     // set loading
     setLoading(true);
@@ -41,7 +39,6 @@ const PasswordPage = ({
       NotificationManager.warning(res.message, 'Config');
     }
   };
-
   const loadConfigData = () => {
     getConfigRequest()
       .then((res) => {
@@ -56,7 +53,6 @@ const PasswordPage = ({
         NotificationManager.warning('Failed to get config info', 'Config');
       });
   };
-
   const validateLangVersion = () => {
     const value = config.lang_version;
     let error;
@@ -65,22 +61,11 @@ const PasswordPage = ({
     }
     return error;
   };
-
-  const validateAdminEmail = () => {
-    const value = config.admin_email;
-    let error;
-    if (!value) {
-      error = 'Admin Email is required!';
-    }
-    return error;
-  };
-
   const handleOnChange = (e) => {
     setConfig({ ...config, [e.target.name]: e.target.value });
   };
 
   const initialValues = config;
-
   return (
     <>
       <Row>
@@ -177,7 +162,6 @@ const PasswordPage = ({
 const mapStateToProps = (state) => {
   return {};
 };
-
 export default connect(mapStateToProps, {
   loginUserAction: login,
   updateLoginAction: updateLogin,

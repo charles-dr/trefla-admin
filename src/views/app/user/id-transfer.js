@@ -8,7 +8,6 @@ import {
   Modal,
   ModalHeader,
   ModalBody,
-  NavLink,
   Row,
 } from 'reactstrap';
 
@@ -16,13 +15,9 @@ import Switch from 'rc-switch';
 import 'rc-switch/assets/index.css';
 import {
   AvForm,
-  AvGroup,
-  AvInput,
-  AvFeedback,
 } from 'availity-reactstrap-validation';
-import ImgsViewer from 'react-images-viewer';
 import Select from 'react-select';
-import { Lines, Circle, Zoom, Circle2, Cube, Dots, Ripple, Planets, Sugar, CustomPreloader } from 'react-preloaders';
+import { Lines } from 'react-preloaders';
 
 
 import IntlMessages from '../../../helpers/IntlMessages';
@@ -37,8 +32,6 @@ import {
   addVerificationRequest,
   addIDTransferRequest,
   deleteAdminNotiByIdRequest,
-  toggleBanStatus,
-  updateUserProfile,
 } from '../../../utils';
 import { loadAllUsers, loadAllAdminNotiAction } from '../../../redux/actions';
 

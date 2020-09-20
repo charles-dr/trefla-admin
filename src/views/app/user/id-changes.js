@@ -4,25 +4,16 @@ import { Link } from 'react-router-dom';
 import {
   Badge,
   Button,
-  Label,
   Modal,
   ModalHeader,
   ModalBody,
-  NavLink,
   Row,
 } from 'reactstrap';
 
-import Switch from 'rc-switch';
-import 'rc-switch/assets/index.css';
 import {
   AvForm,
-  AvGroup,
-  AvInput,
-  AvFeedback,
 } from 'availity-reactstrap-validation';
-import ImgsViewer from 'react-images-viewer';
-import Select from 'react-select';
-import { Lines, Circle, Zoom, Circle2, Cube, Dots, Ripple, Planets, Sugar, CustomPreloader } from 'react-preloaders';
+import { Lines } from 'react-preloaders';
 
 
 import IntlMessages from '../../../helpers/IntlMessages';
@@ -30,14 +21,9 @@ import { NotificationManager } from '../../../components/common/react-notificati
 import { Colxx, Separator } from '../../../components/common/CustomBootstrap';
 import Breadcrumb from '../../../containers/navs/Breadcrumb';
 import { ReactTableWithPaginationCard } from '../../../containers/ui/ReactTableCards';
-import CustomSelectInput from '../../../components/common/CustomSelectInput';
 
-import { judgeIDTransferRequest, sendConsentEmail } from '../../../api/functions.api';
 import {
-  addVerificationRequest,
-  addIDTransferRequest,
   deleteAdminNotiByIdRequest,
-  toggleBanStatus,
   updateUserProfile,
 } from '../../../utils';
 import { loadAllUsers, loadAllAdminNotiAction } from '../../../redux/actions';
@@ -62,13 +48,6 @@ const IDTransferList = ({
   // for Delete Modal
   const [delId, setDeleteId] = useState(-1);
   const [delModal, setDelModal] = useState(false);
-
-  // for Judge Modal
-  const [judgeModal, setJudgeModal] = useState(false);
-  const [judgeInfo, setJudgeInfo] = useState({ from: false, to: false, noti_id: 0 });
-  const [verified, setVerified] = useState({ from: false, to: false });
-
-
 
   const cols = [
     {
