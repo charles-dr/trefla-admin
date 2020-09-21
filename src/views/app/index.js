@@ -62,6 +62,7 @@ const App = ({
     getAllReportsAction();
     loadAllAdminNotiAction$();
   }, [
+    // match,
     getAllUsersAction,
     getAllPostsAction,
     login,

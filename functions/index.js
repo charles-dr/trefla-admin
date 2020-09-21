@@ -4,6 +4,7 @@ const admin = require('firebase-admin');
 const express = require('express');
 const cors = require('cors');
 const nodemailer = require('nodemailer');
+// const firestoreService = require('firestore-export-import'); // export
 
 const serviceAccount = require('./trefla-firebase-adminsdk-ic030-de756cf0e9.json');
 const { CONFIG_DOC_ID } = require('./constants');
@@ -23,13 +24,34 @@ const {
   sendSingleNotification,
   setNotificationToUser,
 } = require('./libs/common');
+// const { exportCollection } = require('./libs/backup');
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
   // credential: admin.credential.applicationDefault(),
+  authDomain: 'https://trefla.firebaseapp.com',
   databaseURL: 'https://trefla.firebaseio.com',
   storageBucket: 'trefla.appspot.com',
 });
+
+///////////////////// export/import
+// const appName = 'trefla';
+// const databaseURL = 'https://trefla.firebaseio.com';
+// firestoreService.initializeApp(serviceAccount, databaseURL, appName);
+
+// const exportCollection = function (collection_name) {
+//   return firestoreService
+//     .backup(collection_name)
+//     .then((data) => {
+//       console.log('[export success]', data);
+//       return data;
+//     })
+//     .catch((error) => {
+//       console.log('[export error]', error);
+//       return false;
+//     });
+// };
+///////////////////// #export/import
 
 const bucket = admin.storage().bucket();
 
@@ -363,6 +385,18 @@ app.post('/notification/bulk', async (req, res) => {
         status: false,
         message: 'Error while sending notifications!',
       });
+    });
+});
+
+app.post('/export/test', async (req, res) => {
+  return exportCollection
+    .then((resp) => {
+      console.log('[export success]');
+      return res.json({ status: true, data: resp });
+    })
+    .catch((error) => {
+      console.log('[export error]');
+      return res.json({ status: false });
     });
 });
 

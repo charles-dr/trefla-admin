@@ -87,7 +87,7 @@ const UserList = ({ history, match, langs, loadAllLangsAction }) => {
             />
             <i
               className="simple-icon-refresh refresh"
-              title="Download"
+              title="Synchronize"
               style={{ fontSize: 18 }}
               onClick={() => refreshLangKeys(props.value)}
             />

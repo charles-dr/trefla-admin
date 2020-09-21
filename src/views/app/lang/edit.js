@@ -72,7 +72,7 @@ const EditLangPage = ({
       // setLang([]);
       return true;
     };
-  }, [lang, match]);
+  }, [match]);
 
   const handleOnSubmit = async (value) => {
     // console.log(value, keys, values);
@@ -171,6 +171,7 @@ const EditLangPage = ({
   };
 
   const initKeyValues = (json) => {
+    // console.log('[init values]', json);
     const t_keys = [];
     const t_values = [];
     Object.keys(json).map((key, i) => {
