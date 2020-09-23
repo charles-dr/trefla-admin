@@ -101,5 +101,6 @@ exports.addPostNotificationToUser = async function ({
   }
 };
 
+
 exports.getNewNotificationIdOfUser = getNewNotificationIdOfUser;
 exports.setNotificationToUser = setNotificationToUser;

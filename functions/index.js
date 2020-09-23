@@ -4,7 +4,11 @@ const admin = require('firebase-admin');
 const express = require('express');
 const cors = require('cors');
 const nodemailer = require('nodemailer');
+
+admin.initializeApp();
+
 // const firestoreService = require('firestore-export-import'); // export
+const { firestoreExport } = require('node-firestore-import-export');
 
 const serviceAccount = require('./trefla-firebase-adminsdk-ic030-de756cf0e9.json');
 const { CONFIG_DOC_ID } = require('./constants');
@@ -24,33 +28,41 @@ const {
   sendSingleNotification,
   setNotificationToUser,
 } = require('./libs/common');
-// const { exportCollection } = require('./libs/backup');
+const {
+  downloadBackupFile,
+  exportCollections,
+  getAllRootCollections,
+  getBackupDataById,
+  getNewBackupId,
+  importFirestoreFromFiles,
+  uploadAndZipData,
+} = require('./libs/backup');
 
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  // credential: admin.credential.applicationDefault(),
-  authDomain: 'https://trefla.firebaseapp.com',
-  databaseURL: 'https://trefla.firebaseio.com',
-  storageBucket: 'trefla.appspot.com',
-});
+// admin.initializeApp({
+//   credential: admin.credential.cert(serviceAccount),
+//   // credential: admin.credential.applicationDefault(),
+//   authDomain: 'https://trefla.firebaseapp.com',
+//   databaseURL: 'https://trefla.firebaseio.com',
+//   storageBucket: 'trefla.appspot.com',
+// });
 
 ///////////////////// export/import
-// const appName = 'trefla';
-// const databaseURL = 'https://trefla.firebaseio.com';
+const appName = 'trefla';
+const databaseURL = 'https://trefla.firebaseio.com';
+
 // firestoreService.initializeApp(serviceAccount, databaseURL, appName);
 
-// const exportCollection = function (collection_name) {
-//   return firestoreService
-//     .backup(collection_name)
-//     .then((data) => {
-//       console.log('[export success]', data);
-//       return data;
-//     })
-//     .catch((error) => {
-//       console.log('[export error]', error);
-//       return false;
-//     });
-// };
+const exportCollection = function (collection_name) {
+  return true; //firestoreService.backup(collection_name);
+  // .then((data) => {
+  //   console.log('[export success]', data);
+  //   return data;
+  // })
+  // .catch((error) => {
+  //   console.log('[export error]', error);
+  //   return false;
+  // });
+};
 ///////////////////// #export/import
 
 const bucket = admin.storage().bucket();
@@ -389,15 +401,83 @@ app.post('/notification/bulk', async (req, res) => {
 });
 
 app.post('/export/test', async (req, res) => {
-  return exportCollection
-    .then((resp) => {
+  console.log('[collections]', req.body.collection);
+  return res.json(req.body);
+  // return firestoreExport(admin.firestore().collection(req.body.collection))
+  //   .then((data) => {
+  //     console.log('[export success]');
+  //     return res.json({ data: data });
+  //   })
+  //   .catch((err) => {
+  //     console.log('[export error]', err);
+  //     return res.json({ status: false, error: err });
+  //   });
+  // return res.send(true);
+  // console.log('[collection]', req.body.collection);
+  // return exportCollection(req.body.collection)
+  //   .then((resp) => {
+  //     console.log('[export success]');
+  //     return res.json({ status: true, data: resp });
+  //   })
+  //   .catch((error) => {
+  //     console.log('[export error]', error);
+  //     return res.json({ status: false });
+  //   });
+});
+
+app.post('/export/test1', async (req, res) => {
+  return firestoreExport(admin.firestore().collection(req.body.collection))
+    .then((data) => {
       console.log('[export success]');
-      return res.json({ status: true, data: resp });
+      return res.json({ data: data });
     })
-    .catch((error) => {
-      console.log('[export error]');
-      return res.json({ status: false });
+    .catch((err) => {
+      console.log('[export error]', err);
+      return res.json({ status: false, error: err });
     });
+});
+
+app.post('/collection-names', async (req, res) => {
+  const collectionIds = await getAllRootCollections();
+
+  const exported = await exportCollections(collectionIds);
+  const zipped = await uploadAndZipData(exported);
+  return res.json({
+    stauts: true,
+    data: collectionIds,
+    exported: exported,
+    zip: zipped,
+  });
+});
+
+app.post('/import/rtdb', async (req, res) => {
+  // get RTDB data
+  const row = await getBackupDataById(req.body.id);
+  const downloadURL = row.url;
+
+  const fileNames = await downloadBackupFile({downloadURL: row.url, fileName: row.file});
+
+  const imported = await importFirestoreFromFiles(fileNames);
+
+
+  res.json({row, imported});
+});
+
+app.get('/rtdb-test/set', async (req, res) => {
+  console.log(admin.database().ref().child('backups').push().key);
+  const $now = new Date().toDateString();
+  const $time = new Date().getTime();
+  await admin.database().ref('backups/0').set({
+    time: $time,
+    file: 'backup-' + $now + '.zip',
+  });
+
+  return res.json({ status: true});
+});
+
+app.get('/rtdb/new-id', async (req, res) => {
+  const newId = await getNewBackupId();
+  res.json({newId});
 });
 
 app.get('/noti-test', async (req, res) => {

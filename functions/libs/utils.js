@@ -67,8 +67,20 @@ const convertTimeToString = (dt) => {
   return `${y}-${m}-${d}-${H}-${i}-${s}:${tz}`;
 };
 
+const getDateSeed = (dt = null) => {
+  if (!dt) {
+    dt = new Date();
+  }
+  const y = dt.getFullYear();
+  const m = formatTwoDigits(dt.getMonth() + 1);
+  const d = formatTwoDigits(dt.getDate());
+  const rand = Math.floor(Math.random() * 1000);
+  return `${y}-${m}-${d}-${rand}`;
+}
+
 exports.convertTimeToString = convertTimeToString;
 exports.deg2rad = deg2rad;
+exports.getDateSeed = getDateSeed;
 exports.string2Coordinate = string2Coordinate;
 exports.getDistanceFromLatLonInMeter = getDistanceFromLatLonInMeter;
 exports.getUserLastLocation = getUserLastLocation;
