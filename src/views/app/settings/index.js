@@ -2,6 +2,7 @@ import React, { Suspense } from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
 
 const ConfigPage = React.lazy(() => import('./config'));
+const DBBackupList = React.lazy(() => import('./db-backups'));
 const EmailTemplateList = React.lazy(() => import('./email-templates'));
 const EmailTemplatePage = React.lazy(() => import('./email-template'));
 const ProfilePage = React.lazy(() => import('./profile'));
@@ -14,6 +15,10 @@ const UserModule = ({ match }) => (
       <Route
         path={`${match.url}/config`}
         render={(props) => <ConfigPage {...props} />}
+      />
+      <Route 
+        path={`${match.url}/db-backups`}
+        render={(props) => <DBBackupList {...props} /> }
       />
       <Route
         path={`${match.url}/email-templates`}

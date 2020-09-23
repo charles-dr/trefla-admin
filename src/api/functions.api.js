@@ -2,16 +2,14 @@ import axios from './index';
 
 import { serialize } from '../utils';
 
-export const sendConsentEmail = async (data) => {
+export const backupDBRequest = async () => {
   try {
-    const {data: res, status} = await axios.post('/id-transfer/consent-email', data);
-    console.log(res, status);
+    const {data: res, status} = await axios.post('/firestore/export', {});
     return res;
   } catch (e) {
     return {
-      status: false,
-      message: e.message
-    };
+      status: false, message: e.message
+    }
   }
 }
 
@@ -28,9 +26,21 @@ export const judgeIDTransferRequest = async (data) => {
   }  
 }
 
-export const sendSingleNotificationRequest = async (data) => {
+export const restoreBackupReqeust = async (id) => {
   try {
-    const {data: res, status} = await axios.post('/notification/single', data);
+    const {data: res, status} = await axios.post('/firestore/import', {id});
+    return res;
+  } catch (e) {
+    return {
+      status: false, message: e.message
+    };
+  }
+}
+
+export const sendConsentEmail = async (data) => {
+  try {
+    const {data: res, status} = await axios.post('/id-transfer/consent-email', data);
+    console.log(res, status);
     return res;
   } catch (e) {
     return {
@@ -50,6 +60,18 @@ export const sendMultiNotificationsRequest = async (data) => {
       message: e.message
     };
   } 
+}
+
+export const sendSingleNotificationRequest = async (data) => {
+  try {
+    const {data: res, status} = await axios.post('/notification/single', data);
+    return res;
+  } catch (e) {
+    return {
+      status: false,
+      message: e.message
+    };
+  }
 }
 
 

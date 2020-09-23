@@ -9,6 +9,7 @@ import { NotificationManager } from '../../components/common/react-notifications
 import { login, updateLogin } from '../../redux/actions';
 import { Colxx } from '../../components/common/CustomBootstrap';
 import IntlMessages from '../../helpers/IntlMessages';
+import { anonymousLogin } from '../../utils';
 
 const validatePassword = (value) => {
   let error;
@@ -56,6 +57,12 @@ const Login = ({
         ''
       );
     }
+    anonymousLogin().then(resp => {
+      // console.log('[Firebase login] success', resp);
+    })
+    .catch(error => {
+      console.log('[Firebase login] Error', error);
+    })
     updateLoginAction({ status: login, message: '' });
     if (login) {
       history.push('/app');

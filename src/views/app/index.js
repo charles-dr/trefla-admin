@@ -21,6 +21,7 @@ import {
   loadAllUsers,
   loadAuthInfo,
 } from '../../redux/actions';
+import { anonymousLogin } from '../../utils';
 
 const CommentModule = React.lazy(() => import('./comment'));
 const LangModule = React.lazy(() => import('./lang'));
@@ -50,17 +51,23 @@ const App = ({
       console.log('[->] Login');
       history.push('/auth/login');
     }
-
-    // load all data
-    getAllCommentsAction();
-    getAllFriendsAction();
-    getAllLangsAction();
-    getAllPostsAction();
-    getAllUsersAction();
-    loadAuthInfoAction();
-    downloadAvatarAction();
-    getAllReportsAction();
-    loadAllAdminNotiAction$();
+    anonymousLogin()
+      .then(result => {
+        console.log('[firebase] =>');
+        // load all data
+        getAllCommentsAction();
+        getAllFriendsAction();
+        getAllLangsAction();
+        getAllPostsAction();
+        getAllUsersAction();
+        loadAuthInfoAction();
+        downloadAvatarAction();
+        getAllReportsAction();
+        loadAllAdminNotiAction$();
+      })
+      .catch(error => {
+        console.log('[Firebase login] failed');
+      })
   }, [
     // match,
     getAllUsersAction,
@@ -98,7 +105,7 @@ const App = ({
               render={(props) => <LangModule {...props} />}
             />
 
-            <Route 
+            <Route
               path={`${match.url}/notification`}
               render={(props) => <NotificationModule {...props} />}
             />

@@ -1,14 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
-import {
-  // Badge,
-  // Button,
-  // Modal,
-  // ModalHeader,
-  // ModalBody,
-  // ModalFooter,
-  Row,
-} from 'reactstrap';
+import { Row } from 'reactstrap';
 
 import IntlMessages from '../../../helpers/IntlMessages';
 import { NotificationManager } from '../../../components/common/react-notifications';
@@ -17,23 +9,10 @@ import Breadcrumb from '../../../containers/navs/Breadcrumb';
 import { ReactTableWithPaginationCard } from '../../../containers/ui/ReactTableCards';
 
 import { loadAllLangs, loadAllEmailTemplateAction } from '../../../redux/actions';
-import { moderateString } from '../../../utils';
-
-
-import {
-  // deleteLangByIdRequest,
-  // getLangInfoByIdRequest,
-  // getLangFileContentRequest,
-  // refreshLanguage,
-  transformTime,
-} from '../../../utils';
+import { moderateString, transformTime } from '../../../utils';
 
 const EmailTemplateList = ({ history, match, langs, templates, loadAllLangsAction, loadAllEmailTemplateAction$ }) => {
   const [data, setData] = useState([]);
-  // const [confirm, setConfirm] = useState(false);
-  // const [delId, setDelId] = useState(-1);
-  // const [processing, setProcessing] = useState(false);
-
   const cols = [
     {
       Header: 'Subject',
@@ -71,17 +50,14 @@ const EmailTemplateList = ({ history, match, langs, templates, loadAllLangsActio
       ),
     },
   ];
-
   useEffect(() => {
     recomposeList();
     return () => {};
   }, [match, templates]);
-
   useEffect(() => {
     loadAllEmailTemplateAction$();
     return () => {}
   }, []);
-
   const recomposeList = () => {
     setData(templates);
   };
@@ -92,7 +68,6 @@ const EmailTemplateList = ({ history, match, langs, templates, loadAllLangsActio
   const toAddPage = () => {
     history.push('/app/lang/add');
   };
-
   const handleOnEdit = (id) => {
     history.push(`/app/settings/email-template/${id}`);
   };
@@ -123,13 +98,11 @@ const EmailTemplateList = ({ history, match, langs, templates, loadAllLangsActio
 
 const mapStateToProps = ({ langs: langApp, emailTemplates: {list: templates} }) => {
   const { list: langs } = langApp;
-
   return {
     langs,
     templates
   };
 };
-
 export default connect(mapStateToProps, {
   loadAllLangsAction: loadAllLangs,
   loadAllEmailTemplateAction$: loadAllEmailTemplateAction

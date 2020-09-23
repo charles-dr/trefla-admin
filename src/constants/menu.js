@@ -83,6 +83,16 @@ const data = [
     to: '/app/settings',
     subs: [
       {
+        icon: 'iconsminds-data-center',
+        label: 'menu.db-backups',
+        to: '/app/settings/db-backups',
+      },
+      {
+        icon: 'iconsminds-inbox-full',
+        label: 'menu.email-templates',
+        to: '/app/settings/email-templates',
+      },
+      {
         icon: 'iconsminds-gears',
         label: 'menu.config',
         to: '/app/settings/config',
@@ -96,11 +106,6 @@ const data = [
         icon: 'iconsminds-key-lock',
         label: 'menu.password',
         to: '/app/settings/password',
-      },
-      {
-        icon: 'iconsminds-inbox-full',
-        label: 'menu.email-templates',
-        to: '/app/settings/email-templates',
       },
     ],
   },

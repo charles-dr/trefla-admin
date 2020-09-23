@@ -1,6 +1,8 @@
 import firebase from 'firebase/app';
 import 'firebase/firestore';
+import 'firebase/database';
 import 'firebase/storage';
+import 'firebase/auth';
 
 import {
   convertTimeToString,
@@ -27,6 +29,10 @@ if (!firebase.apps.length) {
 }
 
 export const _firebase = firebase;
+
+export const anonymousLogin = () => {
+  return _firebase.auth().signInAnonymously();
+}
 
 export const loginAdmin = (data) => {
   // console.log(data);
@@ -179,6 +185,7 @@ export const updateAdminPassword = async ({ old_pass, password }) => {
   }
   return { status: false, message: 'Something went wrong!' };
 };
+
 
 // //////////////////////////////////////////////////////////////
 //                                                            //
@@ -399,6 +406,7 @@ export const refreshLanguage = async (lang_target, lang_default) => {
     return { status: false, message: err.message };
   }
 };
+
 
 // //////////////////////////////////////////////////////////////
 //                                                            //
@@ -886,6 +894,7 @@ export const deleteFriendsOfUser = async (user_id) => {
     });
 };
 
+
 // //////////////////////////////////////////////////////////////
 //                                                            //
 //                         P   O   S   T                      //
@@ -985,6 +994,7 @@ export const deletePostByIdRequest = async (post_id) => {
   }
 };
 
+
 // //////////////////////////////////////////////////////////////
 //                                                            //
 //                  C   O   M   M   E   N   T                 //
@@ -1073,6 +1083,7 @@ export const deleteCommentByIdRequest = async (comment_id) => {
   }
 };
 
+
 // //////////////////////////////////////////////////////////////
 //                                                            //
 //                         P   O   S   T                      //
@@ -1118,6 +1129,7 @@ export const deleteReportByIdRequest = async (report_id) => {
     };
   }
 };
+
 
 // //////////////////////////////////////////////////////////////
 //                                                            //
@@ -1170,13 +1182,11 @@ export const statIn7Days = (data, time_key) => {
 };
 
 
-
 ////////////////////////////////////////////////////////////////
 //                                                            //
 //                        EMAIL TEMPLATES                     //
 //                                                            //
 ////////////////////////////////////////////////////////////////
-
 
 export const loadEmailTemplatesRequest = async () => {
   return _firebase
@@ -1226,14 +1236,11 @@ export const updateEmailTemplateRequest = async (templ) => {
 }
 
 
-
-
 ////////////////////////////////////////////////////////////////
 //                                                            //
 //                      ADMIN NOTIFICATION                    //
 //                                                            //
 ////////////////////////////////////////////////////////////////
-
 
 export const loadAdminNotificationRequest = async () => {
   return _firebase
@@ -1293,3 +1300,39 @@ export const deleteAdminNotiByIdRequest = async (id) => {
     };
   }
 };
+
+
+////////////////////////////////////////////////////////////////
+//                                                            //
+//                     D B    B A C K U P                     //
+//                                                            //
+////////////////////////////////////////////////////////////////
+
+export const getDBBackupRequest = async () => {
+  return new Promise(resolve => {
+    _firebase
+      .database()
+      .ref(`backups`)
+      .on('value', function(snapshot) {
+        let list = [];
+        snapshot.forEach(item => {
+          list.push(item.val());
+        });
+        resolve(list);
+      });
+  })
+}
+
+export const deleteBackupRequest = async (id) => {
+  const strId = id.toString();
+  return _firebase.database().ref(`backups/${strId}`).remove();
+}
+
+export const updateBackupNoteById = async (id, note) => {
+  let updates = {};
+  
+  updates[`backups/${id.toString()}/note`] = note;
+  return _firebase.database().ref().update(updates);
+}
+
+

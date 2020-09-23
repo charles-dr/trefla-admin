@@ -68,6 +68,7 @@ module.exports = {
   'menu.blank-page': 'Blank Page',
 
   'menu.add': 'Add',
+  'menu.db-backups': 'Database Backups',
   'menu.config': 'Config',
   'menu.comments': 'Comments',
   'menu.comment': 'Comment',
@@ -95,6 +96,7 @@ module.exports = {
   'menu.send-notification': 'Send Notification',
   'menu.settings': 'Settings',
   'menu.setting': 'Setting',
+  'menu.system': 'System',
   'menu.users': 'Users',
   'menu.user': 'User',
   'menu.users-ID': 'Users & ID',
@@ -111,6 +113,7 @@ module.exports = {
   'pages.comments': 'Comments',
   'pages.config': 'Config',
   'pages.dashboard': 'Dashboard',
+  'pages.db-backups': 'DB Backups',
   'pages.delete-user': 'Delete User',
   'pages.email-templates': 'Email Templates',
   'pages.email-template': 'Email Template',
