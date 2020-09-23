@@ -400,6 +400,31 @@ app.post('/notification/bulk', async (req, res) => {
     });
 });
 
+app.post('/firestore/export', async (req, res) => {
+  const collectionIds = await getAllRootCollections();
+
+  const exported = await exportCollections(collectionIds);
+  const zipped = await uploadAndZipData(exported);
+  return res.json({
+    status: true,
+    data: collectionIds,
+    // exported: exported,
+    zip: zipped,
+  });
+});
+
+app.post('/firestore/import', async (req, res) => {
+  // get RTDB data
+  const row = await getBackupDataById(req.body.id);
+  const downloadURL = row.url;
+  const fileNames = await downloadBackupFile({
+    downloadURL: row.url,
+    fileName: row.file,
+  });
+  const imported = await importFirestoreFromFiles(fileNames);
+  res.json({ status: true, row, imported: Object.keys(imported) });
+});
+
 app.post('/export/test', async (req, res) => {
   console.log('[collections]', req.body.collection);
   return res.json(req.body);
@@ -437,47 +462,24 @@ app.post('/export/test1', async (req, res) => {
     });
 });
 
-app.post('/collection-names', async (req, res) => {
-  const collectionIds = await getAllRootCollections();
-
-  const exported = await exportCollections(collectionIds);
-  const zipped = await uploadAndZipData(exported);
-  return res.json({
-    stauts: true,
-    data: collectionIds,
-    exported: exported,
-    zip: zipped,
-  });
-});
-
-app.post('/import/rtdb', async (req, res) => {
-  // get RTDB data
-  const row = await getBackupDataById(req.body.id);
-  const downloadURL = row.url;
-
-  const fileNames = await downloadBackupFile({downloadURL: row.url, fileName: row.file});
-
-  const imported = await importFirestoreFromFiles(fileNames);
-
-
-  res.json({row, imported});
-});
-
 app.get('/rtdb-test/set', async (req, res) => {
   console.log(admin.database().ref().child('backups').push().key);
   const $now = new Date().toDateString();
   const $time = new Date().getTime();
-  await admin.database().ref('backups/0').set({
-    time: $time,
-    file: 'backup-' + $now + '.zip',
-  });
+  await admin
+    .database()
+    .ref('backups/0')
+    .set({
+      time: $time,
+      file: 'backup-' + $now + '.zip',
+    });
 
-  return res.json({ status: true});
+  return res.json({ status: true });
 });
 
 app.get('/rtdb/new-id', async (req, res) => {
   const newId = await getNewBackupId();
-  res.json({newId});
+  res.json({ newId });
 });
 
 app.get('/noti-test', async (req, res) => {
@@ -850,10 +852,12 @@ exports.createPost = functions.firestore
       }))
     );
     // console.log('[messages]', messages);
-
-    const notiSent = await SendAllMultiNotifications(
-      messages.filter((msg) => !!msg.token)
-    );
+    const msgsWithToken = messages.filter((msg) => !!msg.token);
+    if (msgsWithToken.length > 0) {
+      const notiSent = await SendAllMultiNotifications(
+        messages.filter((msg) => !!msg.token)
+      );
+    }
     return true;
   });
 

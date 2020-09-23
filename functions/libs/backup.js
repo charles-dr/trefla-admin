@@ -1,13 +1,17 @@
 const functions = require('firebase-functions');
 // The Firebase Admin SDK to access Cloud Firestore.
 const admin = require('firebase-admin');
-const { firestoreExport, firestoreImport } = require('node-firestore-import-export');
+const {
+  firestoreExport,
+  firestoreImport,
+} = require('node-firestore-import-export');
 const path = require('path');
 const os = require('os');
 const fs = require('fs');
 const archiver = require('archiver');
 const unzipper = require('unzipper');
-const UUID = require("uuid-v4");
+const UUID = require('uuid-v4');
+
 const fbId = 'trefla';
 const fbKeyFile = '../trefla-firebase-adminsdk-ic030-de756cf0e9.json';
 
@@ -18,21 +22,21 @@ const { getDateSeed } = require('./utils');
 
 const bucket = admin.storage().bucket();
 
-const downloadBackupFile = async ({downloadURL, fileName}) => {
+const downloadBackupFile = async ({ downloadURL, fileName }) => {
   console.log('[download backup file]', fileName);
   return new Promise(async (resolve, reject) => {
     const remoteFile = bucket.file(`backups/${fileName}`);
-    
+
     const fileNames = [];
 
     await remoteFile
       .createReadStream()
       .pipe(unzipper.Parse())
-      .on('entry', entry => {
+      .on('entry', (entry) => {
         // console.log('[Parse]', entry.path);
         const itemName = entry.path;
         const type = entry.type; // 'Directory' or 'File'
-        
+
         if (itemName.includes('.json')) {
           const extractFilePath = path.join(os.tmpdir(), itemName);
           entry.pipe(fs.createWriteStream(extractFilePath));
@@ -44,13 +48,14 @@ const downloadBackupFile = async ({downloadURL, fileName}) => {
       .promise()
       .then(() => {
         console.log('[Extract finished] success');
-        resolve(fileNames);
-      }), e => {
+        return resolve(fileNames);
+      }),
+      (e) => {
         console.log('[Extract finished] error', e);
-        reject(e);
+        return reject(e);
       };
-  })
-}
+  });
+};
 
 const getAllRootCollections = async () => {
   const collections = await admin.firestore().listCollections();
@@ -61,18 +66,21 @@ const getAllRootCollections = async () => {
 const importFirestoreFromFiles = async (fileNames) => {
   let datas = {};
   await Promise.all(
-    fileNames.map(async fileName => {
+    fileNames.map(async (fileName) => {
       const tempFile = path.join(os.tmpdir(), fileName);
       const strData = fs.readFileSync(tempFile);
       //console.log(strData);
       const collectionName = fileName.replace('.json', '');
       datas[collectionName] = JSON.parse(strData);
-      await firestoreImport(JSON.parse(strData), admin.firestore().collection(collectionName));
+      await firestoreImport(
+        JSON.parse(strData),
+        admin.firestore().collection(collectionName)
+      );
       return fs.unlinkSync(tempFile);
     })
   );
   return datas;
-}
+};
 
 const exportCollections = async (collectionNames) => {
   let data = {};
@@ -107,21 +115,31 @@ const uploadAndZipData = async (data) => {
         metadata: {
           contentType: 'application/zip',
           // predefinedAcl: 'publicRead',
-          metadata: {firebaseStorageDownloadTokens: uuid}
+          metadata: { firebaseStorageDownloadTokens: uuid },
         },
       });
-      const downloadURL = "https://firebasestorage.googleapis.com/v0/b/" + bucket.name + "/o/" + encodeURIComponent(uploaded[0].name) + "?alt=media&token=" + uuid;
+      const downloadURL =
+        'https://firebasestorage.googleapis.com/v0/b/' +
+        bucket.name +
+        '/o/' +
+        encodeURIComponent(uploaded[0].name) +
+        '?alt=media&token=' +
+        uuid;
       await fs.unlinkSync(tempZipFilePath);
       // save to RTDB
-      const newBkId = await getNewBackupId(); console.log('[New Id]', newBkId);       
+      const newBkId = await getNewBackupId();
+      console.log('[New Id]', newBkId);
 
-      await admin.database().ref(`backups/${newBkId.toString()}`).set({
-        id: newBkId,
-        note: '',
-        file: zipFileName,
-        url: downloadURL,
-        time: Math.floor((new Date().getTime()) / 1000)
-      });
+      await admin
+        .database()
+        .ref(`backups/${newBkId.toString()}`)
+        .set({
+          id: newBkId,
+          note: '',
+          file: zipFileName,
+          url: downloadURL,
+          time: Math.floor(new Date().getTime() / 1000),
+        });
       resolve({ total: archive.pointer(), name: zipFileName });
     });
 
@@ -142,27 +160,36 @@ const uploadAndZipData = async (data) => {
 
 const getBackupDataById = async (id) => {
   return new Promise((resolve) => {
-    admin.database().ref('backups').child(id.toString()).once('value', function(snapshot) {
-      resolve(snapshot.val());
-    });
-  });
-}
-
-const getNewBackupId = async function() {
-  return new Promise((resolve) => {
-    admin.database().ref('backups').orderByChild('id').limitToLast(1).once('value', function(snapshot) {
-      let bkArray = [];
-      snapshot.forEach(function(data) {
-        bkArray.push(data.val());
+    admin
+      .database()
+      .ref('backups')
+      .child(id.toString())
+      .once('value', (snapshot) => {
+        resolve(snapshot.val());
       });
-      if (bkArray.length === 0) {
-        resolve(0);
-      } else {
-        resolve(Number(bkArray[0].id) + 1);
-      }
-    });
   });
-}
+};
+
+const getNewBackupId = async function () {
+  return new Promise((resolve) => {
+    admin
+      .database()
+      .ref('backups')
+      .orderByChild('id')
+      .limitToLast(1)
+      .once('value', (snapshot) => {
+        let bkArray = [];
+        snapshot.forEach((data) => {
+          bkArray.push(data.val());
+        });
+        if (bkArray.length === 0) {
+          resolve(0);
+        } else {
+          resolve(Number(bkArray[0].id) + 1);
+        }
+      });
+  });
+};
 
 exports.downloadBackupFile = downloadBackupFile;
 exports.exportCollections = exportCollections;

@@ -76,7 +76,7 @@ const getDateSeed = (dt = null) => {
   const d = formatTwoDigits(dt.getDate());
   const rand = Math.floor(Math.random() * 1000);
   return `${y}-${m}-${d}-${rand}`;
-}
+};
 
 exports.convertTimeToString = convertTimeToString;
 exports.deg2rad = deg2rad;
