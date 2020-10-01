@@ -24,7 +24,7 @@ import { ReactTableWithPaginationCard } from '../../../containers/ui/ReactTableC
 
 import { backupDBRequest, restoreBackupReqeust } from '../../../api/functions.api';
 
-import { 
+import {
   deleteBackupRequest,
   getDBBackupRequest,
   moderateString,
@@ -44,11 +44,6 @@ const DBBackupList = ({ history, match }) => {
 
   const [restoreModal, setRestoreModal] = useState(false);
   const [restoreId, setRestoreId] = useState(-1);
-
-
-
-
-  // const [processing, setProcessing] = useState(false);
 
   const cols = [
     {
@@ -261,8 +256,17 @@ const DBBackupList = ({ history, match }) => {
         <ModalFooter>
           <Button
             color="primary"
-            onClick={confirmDelete}>
-            Confirm
+            onClick={confirmDelete}
+            className={`btn-shadow btn-multiple-state mr-2 ${loading ? 'show-spinner' : ''}`}
+            >
+            <span className="spinner d-inline-block">
+              <span className="bounce1" />
+              <span className="bounce2" />
+              <span className="bounce3" />
+            </span>
+            <span className="label">
+              Confirm
+            </span>
           </Button>{' '}
           <Button color="secondary" onClick={() => setConfirm(false)}>
             Cancel
@@ -322,7 +326,7 @@ const DBBackupList = ({ history, match }) => {
         </ModalBody>
       </Modal>
 
-      {/* Confirm Delete */}
+      {/* Confirm Restore Modal */}
       <Modal
         isOpen={restoreModal}
         toggle={() => setRestoreModal(!restoreModal)}
@@ -333,8 +337,16 @@ const DBBackupList = ({ history, match }) => {
         <ModalFooter>
           <Button
             color="primary"
+            className={`btn-shadow btn-multiple-state mr-2 ${loading ? 'show-spinner' : ''}`}
             onClick={confirmRestore}>
-            Confirm
+            <span className="spinner d-inline-block">
+              <span className="bounce1" />
+              <span className="bounce2" />
+              <span className="bounce3" />
+            </span>
+            <span className="label">
+              Confirm
+            </span>
           </Button>{' '}
           <Button color="secondary" onClick={() => setRestoreModal(false)}>
             Cancel

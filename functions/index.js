@@ -7,7 +7,6 @@ const nodemailer = require('nodemailer');
 
 admin.initializeApp();
 
-// const firestoreService = require('firestore-export-import'); // export
 const { firestoreExport } = require('node-firestore-import-export');
 
 const serviceAccount = require('./trefla-firebase-adminsdk-ic030-de756cf0e9.json');
@@ -21,8 +20,13 @@ const {
 } = require('./libs/utils');
 const {
   addPostNotificationToUser,
+  checkUserLikedComment,
   getAllUsers,
   getNewNotificationIdOfUser,
+  getPrimaryCommentsOfPost,
+  getRepliesToComment,
+  loadPastAroundPosts,
+  loadPostPagination,
   SendAllMultiNotifications,
   sendMultiNotifications,
   sendSingleNotification,
@@ -49,8 +53,6 @@ const {
 ///////////////////// export/import
 const appName = 'trefla';
 const databaseURL = 'https://trefla.firebaseio.com';
-
-// firestoreService.initializeApp(serviceAccount, databaseURL, appName);
 
 const exportCollection = function (collection_name) {
   return true; //firestoreService.backup(collection_name);
@@ -278,32 +280,114 @@ app.post('/id-transfer/judge', async (req, res) => {
   }
 });
 
-app.get('/user', (req, res) => {
-  const response = {
-    status: true,
-    data: 'sdf',
-  };
-  res.status(200).json(response);
+app.post('/comments', async (req, res) => {
+  const { post_id, user_id } = req.body;
+  console.log('[Req Params]', post_id, user_id);
+
+  const users = await getAllUsers();
+  let userMap = {};
+  users.map((user) => {
+    const {
+      location_array,
+      device_token,
+      location_address,
+      ...restData
+    } = user;
+    return (userMap[user.user_id.toString()] = restData);
+  });
+  // get primary comments
+  getPrimaryCommentsOfPost({ post_id })
+    .then((comments) => {
+      console.log('primary length', comments.length);
+      // return res.json({comments});
+      return Promise.all(
+        comments.map(async (comment) => {
+          // liked
+          const liked = await checkUserLikedComment({
+            comment_id: comment.comment_id,
+            user_id,
+          });
+          // comments
+          const replies = await getRepliesToComment({
+            comment_id: comment.comment_id,
+            user_id,
+          });
+          return {
+            ...comment,
+            liked,
+            user: userMap[comment.user_id.toString()],
+            comments: replies.map((reply) => ({
+              ...reply,
+              user: userMap[reply.user_id.toString()],
+            })),
+          };
+        })
+      )
+        .then((commentList) => {
+          return res.json({
+            status: true,
+            message: 'success',
+            count: commentList.length,
+            data: commentList,
+          });
+        })
+        .catch((error1) => {
+          console.log('[comments] transform', error1.message);
+          return res.json({ status: false, message: error1.message });
+        });
+    })
+    .catch((error) => {
+      console.log('[primary comments] error ', error.message);
+      return res.json({
+        status: false,
+        message: 'Something went wrong',
+        details: error.message,
+      });
+    });
 });
 
-app.get('/posts', async (req, res) => {
-  const users = await admin
-    .firestore()
-    .collection('users')
-    // .orderBy('name', req.query.dir === 1 ? 'asc' : 'desc')
-    // .startAt(Number(req.query.start))
+app.post('/posts', async (req, res) => {
+  let { user_id, type, last_id, limit, isMine } = req.body;
+  limit = limit || 100;
+  last_id = !last_id ? Math.pow(2, 63) - 1 : last_id;
 
-    // .limit(Number(req.query.length))
-    .get()
-    .then((querySnapshot) => {
-      const rows = [];
-      querySnapshot.forEach((doc) => {
-        // console.log(`${doc.id}`, doc.data());
-        rows.push(doc.data());
+  //const isMine = req.body.isMine !== undefined && req.body.isMine;
+  if (type === 'AROUND') {
+    loadPastAroundPosts({ user_id, isMine })
+      .then((response) => {
+        if (!response.status) {
+          return res.json(response);
+        } else {
+          return res.json({
+            status: true,
+            message: 'success',
+            count: response.data.length,
+            data: response.data,
+          });
+        }
+      })
+      .catch((error) => {
+        console.log(error.message);
+        res.json({ status: false, message: error.message });
       });
-      return rows;
-    });
-  res.json(users);
+  } else {
+    loadPostPagination({ user_id, last_id, limit, isMine })
+      .then((posts) => {
+        const next_last_id =
+          posts.length > 0 ? posts[posts.length - 1].post_id : 0;
+        return res.json({
+          status: true,
+          message: 'success',
+          last_id: posts.length > 0 ? posts[posts.length - 1].post_id : 0,
+          count: posts.length,
+          has_more: next_last_id > 0 && posts.length === limit,
+          data: posts,
+        });
+      })
+      .catch((error) => {
+        return res.json({ status: false, message: error.message });
+      });
+  }
 });
 
 app.get('/lang/download', async (req, res) => {
@@ -423,6 +507,35 @@ app.post('/firestore/import', async (req, res) => {
   });
   const imported = await importFirestoreFromFiles(fileNames);
   res.json({ status: true, row, imported: Object.keys(imported) });
+});
+
+
+app.get('/user', (req, res) => {
+  const response = {
+    status: true,
+    data: 'sdf',
+  };
+  res.status(200).json(response);
+});
+
+app.get('/posts', async (req, res) => {
+  const users = await admin
+    .firestore()
+    .collection('users')
+    // .orderBy('name', req.query.dir === 1 ? 'asc' : 'desc')
+    // .startAt(Number(req.query.start))
+
+    // .limit(Number(req.query.length))
+    .get()
+    .then((querySnapshot) => {
+      const rows = [];
+      querySnapshot.forEach((doc) => {
+        // console.log(`${doc.id}`, doc.data());
+        rows.push(doc.data());
+      });
+      return rows;
+    });
+  res.json(users);
 });
 
 app.post('/export/test', async (req, res) => {
@@ -551,8 +664,8 @@ exports.createNotification = functions.firestore
   .onCreate(async (snap, context) => {
     const notiId = context.params.notiId;
     const data = snap.data();
-    console.log('[New noti detected]', notiId);
-    console.log('[data]', data);
+    // console.log('[New noti detected]', notiId);
+    // console.log('[data]', data);
 
     // get admin email
     const configDoc = await admin
@@ -564,7 +677,7 @@ exports.createNotification = functions.firestore
       return false;
     }
 
-    console.log('[config]', configDoc.data());
+    // console.log('[config]', configDoc.data());
     const admin_email = configDoc.data().admin_email;
 
     // get admin info
@@ -602,8 +715,8 @@ exports.createNotification = functions.firestore
 
       htmlBody = htmlBody
         .replace(new RegExp('%AdminName%', 'g'), adminDoc.data().name)
-        .replace(new RegExp('%username%', 'g'), userDoc.data().user_name)
-        .replace(new RegExp('%email%', 'g'), userDoc.data().email)
+        .replace(new RegExp('%username%', 'g'), userDoc.exists ? userDoc.data().user_name: '<No USER>')
+        .replace(new RegExp('%email%', 'g'), userDoc.exists ? userDoc.data().email : '<No EMAIL>')
         .replace(new RegExp('%time%', 'g'), time);
     } else if (data.type === '12') {
       const templDoc = await admin
@@ -948,4 +1061,76 @@ exports.updatePost = functions.firestore
       messages.filter((msg) => !!msg.token)
     );
     return true;
+  });
+
+exports.forgotPasswordRequests = functions.firestore
+  .document('forgot_password/{fpId}')
+  .onCreate(async (snap, context) => {
+    // .onUpdate(async (change, context) => {
+    console.log('===================== Forgot Password ---->');
+    const fpId = context.params.fpId;
+    const fpRequest = snap.data();
+    // const fpId = context.params.fpId;
+    // const fpRequest = change.after.data();
+
+    // get admin email
+    const configDoc = await admin
+      .firestore()
+      .collection('config')
+      .doc('ZYvvzsj8CMffIcHhY689')
+      .get();
+    if (!configDoc.exists) {
+      console.log('[config doc not found]');
+      return false;
+    }
+    // forgot password record
+    const fpDoc = await admin
+      .firestore()
+      .collection('forgot_password')
+      .doc(fpId.toString())
+      .get();
+    if (!fpDoc.exists) {
+      console.log('[Forgot password request not found!]');
+      return { error: 'Forgot password request not found!' };
+    }
+    const fpData = fpDoc.data();
+    const userDoc = await admin
+      .firestore()
+      .collection('users')
+      .doc(fpData.user_id.toString())
+      .get();
+    if (!userDoc.exists) {
+      console.log('[User info not found!]');
+      return { error: 'User info not found!' };
+    }
+    const userData = userDoc.data();
+
+    if (userData.email !== fpData.email) {
+      console.log('[Email does not match!]', userData.email, fpData.email);
+      return { error: 'Email does not match!' };
+    }
+
+    // load email template
+    const emailTempDoc = await admin
+      .firestore()
+      .collection('email_templates')
+      .doc('forgot_password')
+      .get();
+    if (!emailTempDoc.exists) {
+      console.log('email template not found!');
+      return { error: 'Email template not found!' };
+    }
+    const emailTempData = emailTempDoc.data();
+    const emailContent = emailTempData.body
+      .replace(new RegExp('%Username%'), userData.user_name)
+      .replace(new RegExp('%code%'), fpData.code);
+    console.log(emailTempData.subject, emailContent, fpData.email);
+    const mailSent = await sendMail({
+      from: 'Trefla <admin@trefla.com>',
+      to: fpData.email,
+      subject: emailTempData.subject,
+      body: emailContent,
+    });
+
+    return mailSent;
   });

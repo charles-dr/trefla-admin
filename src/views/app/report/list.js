@@ -146,7 +146,7 @@ const CommentList = ({
 			};
 
 			report_item['action'] = {
-				id: report.id,
+				id: report.report_id,
 				email: getEmailById(report.user_id),
 			};
 
@@ -204,6 +204,7 @@ const CommentList = ({
 	};
 
 	const handleOnDelete = (id) => {
+		console.log(id);
 		setDelId(id);
 		setDelModal(true);
 	};

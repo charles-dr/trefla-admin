@@ -46,6 +46,22 @@ const getUserLastLocation = function (user) {
   }
 };
 
+const getUserLocations = function (user) {
+  try {
+    let locations = [];
+    if (user.location_array) {
+      user.location_array.forEach((locItem) => {
+        locations.push(string2Coordinate(locItem.split('&&')[0]));
+      });
+      return locations;
+    } else {
+      return [];
+    }
+  } catch (error) {
+    return [];
+  }
+};
+
 const isPostNotificationAllowed = function (user) {
   return (
     user.isNotiFromNewPost === undefined || user.isNotiFromNewPost === true
@@ -67,6 +83,25 @@ const convertTimeToString = (dt) => {
   return `${y}-${m}-${d}-${H}-${i}-${s}:${tz}`;
 };
 
+const string2Timestamp = (str_time) => {
+  const arr1 = str_time.split(':');
+  const date_arr = arr1[0].split('-');
+  const dt = new Date(
+    Number(date_arr[0]),
+    Number(date_arr[1]) - 1,
+    Number(date_arr[2]),
+    Number(date_arr[3]),
+    Number(date_arr[4]),
+    Number(date_arr[5])
+  );
+  const my_timezone = -dt.getTimezoneOffset();
+  const time = dt.getTime();
+  const timezoneOffset = Number(arr1[1]);
+  const final_time =
+    Math.floor(time / 1000) - (my_timezone - timezoneOffset) * 60;
+  return final_time;
+};
+
 const getDateSeed = (dt = null) => {
   if (!dt) {
     dt = new Date();
@@ -78,6 +113,40 @@ const getDateSeed = (dt = null) => {
   return `${y}-${m}-${d}-${rand}`;
 };
 
+const checkPostLocationWithUser = (post, user, deltaTime) => {
+  const postLocation = string2Coordinate(post.location_coordinate);
+  const postTime = string2Timestamp(post.post_time);
+  const userAroundRadius = user.raidusAround || 100;
+  // console.log('[Around]', userAroundRadius);
+
+  if (!user.location_array || !user.location_array.length) return true;
+  for (let locationItem of user.location_array) {
+    const itemMembers = locationItem.split('&&');
+    // distance condition
+    let userLocation = string2Coordinate(itemMembers[0]);
+    // console.log(
+    //   'Distance is ',
+    //   getDistanceFromLatLonInMeter(postLocation, userLocation)
+    // );
+    if (
+      getDistanceFromLatLonInMeter(postLocation, userLocation) >
+      userAroundRadius
+    ) {
+      // console.log('[around] distance not match',);
+      return false;
+    }
+    // console.log('[around] distance passed', getDistanceFromLatLonInMeter(postLocation, userLocation), userAroundRadius);
+    // time condition
+    const locationTime = string2Timestamp(itemMembers[1]);
+    if (locationTime > postTime || locationTime < postTime - deltaTime * 86400) {
+      // console.log('[around] time not passed', postTime - locationTime)
+      return false;
+    }
+  }
+  return true;
+};
+
+exports.checkPostLocationWithUser = checkPostLocationWithUser;
 exports.convertTimeToString = convertTimeToString;
 exports.deg2rad = deg2rad;
 exports.getDateSeed = getDateSeed;
