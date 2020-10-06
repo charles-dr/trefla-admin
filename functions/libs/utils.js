@@ -113,37 +113,75 @@ const getDateSeed = (dt = null) => {
   return `${y}-${m}-${d}-${rand}`;
 };
 
-const checkPostLocationWithUser = (post, user, deltaTime) => {
+const checkPostLocationWithUser = (post, user, deltaTime, locationIndex) => {
   const postLocation = string2Coordinate(post.location_coordinate);
   const postTime = string2Timestamp(post.post_time);
   const userAroundRadius = user.raidusAround || 100;
   // console.log('[Around]', userAroundRadius);
 
   if (!user.location_array || !user.location_array.length) return true;
-  for (let locationItem of user.location_array) {
-    const itemMembers = locationItem.split('&&');
-    // distance condition
-    let userLocation = string2Coordinate(itemMembers[0]);
-    // console.log(
-    //   'Distance is ',
-    //   getDistanceFromLatLonInMeter(postLocation, userLocation)
-    // );
-    if (
-      getDistanceFromLatLonInMeter(postLocation, userLocation) >
-      userAroundRadius
-    ) {
-      // console.log('[around] distance not match',);
+
+  // if index is set
+  if (locationIndex !== undefined) {
+    if (locationIndex < 0 || locationIndex > user.location_array.length - 1) {
       return false;
+    } else {
+      const currentArray = user.location_array[locationIndex].split('&&');
+      const currentTime = string2Timestamp(currentArray[1]);
+      let nextLocationTime = Math.floor(new Date().getTime() / 1000);
+      if (locationIndex < user.location_array.length - 1) {
+        const nextArray = user.location_array[locationIndex + 1].split('&&');
+        nextLocationTime = string2Timestamp(nextArray[1]);
+      }
+      return currentTime <= postTime && postTime <= nextLocationTime;
     }
-    // console.log('[around] distance passed', getDistanceFromLatLonInMeter(postLocation, userLocation), userAroundRadius);
-    // time condition
-    const locationTime = string2Timestamp(itemMembers[1]);
-    if (locationTime > postTime || locationTime < postTime - deltaTime * 86400) {
-      // console.log('[around] time not passed', postTime - locationTime)
-      return false;
+  } else {
+    for (let [index, locationItem] of user.location_array.entries()) {
+      const itemMembers = locationItem.split('&&');
+      // distance condition
+      let userLocation = string2Coordinate(itemMembers[0]);
+      // console.log(
+      //   'Distance is ',
+      //   getDistanceFromLatLonInMeter(postLocation, userLocation)
+      // );
+      if (
+        getDistanceFromLatLonInMeter(postLocation, userLocation) >
+        userAroundRadius
+      ) {
+        // console.log('[around] distance not match',);
+        // return false;
+        continue;
+      }
+      // console.log('[around] distance passed', getDistanceFromLatLonInMeter(postLocation, userLocation), userAroundRadius);
+      // time condition
+      const locationTime = string2Timestamp(itemMembers[1]);
+
+      // get next location time
+      let nextLocationTime = Math.floor(new Date().getTime() / 1000);
+      if (index < user.location_array.length - 1) {
+        const nextItemArray = user.location_array[index + 1].split('&&');
+        nextLocationTime = string2Timestamp(nextItemArray[1]);
+      }
+
+      // postTime > locationTime
+      if (locationTime <= postTime && postTime <= nextLocationTime) {
+        return true;
+      } else {
+        continue;
+      }
+      // if (
+      //   locationTime > postTime ||
+      //   locationTime < postTime - deltaTime * 86400
+      // ) {
+      //   // console.log('[around] time not passed', postTime - locationTime)
+      //   // return false;
+      //   continue;
+      // }
+      // return true;
     }
+
+    return false;
   }
-  return true;
 };
 
 exports.checkPostLocationWithUser = checkPostLocationWithUser;

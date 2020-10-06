@@ -194,7 +194,11 @@ exports.loadPostPagination = async function ({
   );
 };
 
-exports.loadPastAroundPosts = async function ({ user_id, isMine }) {
+exports.loadPastAroundPosts = async function ({
+  user_id,
+  isMine,
+  locationIndex,
+}) {
   const doc = await getUserById(user_id);
   if (!doc.exists) {
     return { status: false, message: 'User does not exist!' };
@@ -217,7 +221,7 @@ exports.loadPastAroundPosts = async function ({ user_id, isMine }) {
   }
   console.log('posts', allPosts.length);
   let postsV1 = allPosts.filter((post) =>
-    checkPostLocationWithUser(post, user, aroundSearchPeriod)
+    checkPostLocationWithUser(post, user, aroundSearchPeriod, locationIndex)
   );
   let posts = [];
   await Promise.all(

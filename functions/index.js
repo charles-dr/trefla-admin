@@ -346,14 +346,23 @@ app.post('/comments', async (req, res) => {
     });
 });
 
+/**
+ * @description pagination for posts, filters posts with around radius and location time
+ * @param user_id number
+ * @param type 'AROUND' | 'ALL'
+ * @param last_id number
+ * @param limit number
+ * @param isMine boolean
+ * @param locationIndex number
+ */
 app.post('/posts', async (req, res) => {
-  let { user_id, type, last_id, limit, isMine } = req.body;
+  let { user_id, type, last_id, limit, isMine, locationIndex } = req.body;
   limit = limit || 100;
   last_id = !last_id ? Math.pow(2, 63) - 1 : last_id;
 
   //const isMine = req.body.isMine !== undefined && req.body.isMine;
   if (type === 'AROUND') {
-    loadPastAroundPosts({ user_id, isMine })
+    loadPastAroundPosts({ user_id, isMine, locationIndex })
       .then((response) => {
         if (!response.status) {
           return res.json(response);
@@ -508,7 +517,6 @@ app.post('/firestore/import', async (req, res) => {
   const imported = await importFirestoreFromFiles(fileNames);
   res.json({ status: true, row, imported: Object.keys(imported) });
 });
-
 
 app.get('/user', (req, res) => {
   const response = {
@@ -715,8 +723,14 @@ exports.createNotification = functions.firestore
 
       htmlBody = htmlBody
         .replace(new RegExp('%AdminName%', 'g'), adminDoc.data().name)
-        .replace(new RegExp('%username%', 'g'), userDoc.exists ? userDoc.data().user_name: '<No USER>')
-        .replace(new RegExp('%email%', 'g'), userDoc.exists ? userDoc.data().email : '<No EMAIL>')
+        .replace(
+          new RegExp('%username%', 'g'),
+          userDoc.exists ? userDoc.data().user_name : '<No USER>'
+        )
+        .replace(
+          new RegExp('%email%', 'g'),
+          userDoc.exists ? userDoc.data().email : '<No EMAIL>'
+        )
         .replace(new RegExp('%time%', 'g'), time);
     } else if (data.type === '12') {
       const templDoc = await admin
