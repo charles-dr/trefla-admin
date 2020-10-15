@@ -224,6 +224,7 @@ exports.loadPastAroundPosts = async function ({
     checkPostLocationWithUser(post, user, aroundSearchPeriod, locationIndex)
   );
   let posts = [];
+  // check if user liked each post or not.
   await Promise.all(
     postsV1.map(async (post) => {
       // console.log('[post id]', post.post_id);

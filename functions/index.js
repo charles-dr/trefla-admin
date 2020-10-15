@@ -42,6 +42,8 @@ const {
   uploadAndZipData,
 } = require('./libs/backup');
 
+const idCardRouter = require('./routes/verify.route');
+
 // admin.initializeApp({
 //   credential: admin.credential.cert(serviceAccount),
 //   // credential: admin.credential.applicationDefault(),
@@ -101,6 +103,8 @@ function compareCardImage(oldPath, newPath) {
   const newPathCore = newPath.substr(0, newPath.indexOf('&token'));
   return oldPathCore.trim() === newPathCore.trim();
 }
+
+app.use('/id-card', idCardRouter);
 
 /**
  * @description send email to user A for the consent about ID transfer
@@ -545,6 +549,14 @@ app.get('/posts', async (req, res) => {
     });
   res.json(users);
 });
+
+
+
+////////////////////////////////////////////////////////////////
+//                                                            //
+//                      APIs for Test                         //
+//                                                            //
+////////////////////////////////////////////////////////////////
 
 app.post('/export/test', async (req, res) => {
   console.log('[collections]', req.body.collection);

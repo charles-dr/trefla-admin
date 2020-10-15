@@ -41,7 +41,7 @@ const getUserLastLocation = function (user) {
     const tmp_arr = locationItem.split('&&');
     return string2Coordinate(tmp_arr[0]);
   } catch (error) {
-    console.log('[error while getting user last location]', error);
+    // console.log('[error while getting user last location]', error); // handled well
     return { lat: 0, lng: 0 };
   }
 };
@@ -116,24 +116,37 @@ const getDateSeed = (dt = null) => {
 const checkPostLocationWithUser = (post, user, deltaTime, locationIndex) => {
   const postLocation = string2Coordinate(post.location_coordinate);
   const postTime = string2Timestamp(post.post_time);
-  const userAroundRadius = user.raidusAround || 100;
+  const userAroundRadius = user.radiusAround || 100;
   // console.log('[Around]', userAroundRadius);
 
   if (!user.location_array || !user.location_array.length) return true;
 
   // if index is set
-  if (locationIndex !== undefined) {
+  if (locationIndex || locationIndex === 0) {
     if (locationIndex < 0 || locationIndex > user.location_array.length - 1) {
       return false;
     } else {
       const currentArray = user.location_array[locationIndex].split('&&');
-      const currentTime = string2Timestamp(currentArray[1]);
+      // check around radius
+      let userLocation = string2Coordinate(currentArray[0]);
+      console.log(
+        '[distance comparing]',
+        getDistanceFromLatLonInMeter(postLocation, userLocation),
+        userAroundRadius
+      );
+      if (
+        getDistanceFromLatLonInMeter(postLocation, userLocation) >
+        userAroundRadius
+      ) {
+        return false;
+      }
+      const givenTime = string2Timestamp(currentArray[1]);
       let nextLocationTime = Math.floor(new Date().getTime() / 1000);
       if (locationIndex < user.location_array.length - 1) {
         const nextArray = user.location_array[locationIndex + 1].split('&&');
         nextLocationTime = string2Timestamp(nextArray[1]);
       }
-      return currentTime <= postTime && postTime <= nextLocationTime;
+      return givenTime <= postTime && postTime <= nextLocationTime;
     }
   } else {
     for (let [index, locationItem] of user.location_array.entries()) {
