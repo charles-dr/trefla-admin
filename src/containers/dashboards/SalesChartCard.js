@@ -41,7 +41,7 @@ const SalesChartCard = ({ stat }) => {
     setChartData(formatChartData(stat));
 
     return () => {
-      setChartData({posts: [0,0,0,0,0,0,0]});
+      //setChartData({posts: [0,0,0,0,0,0,0]});
     }
   }, [stat]);
 

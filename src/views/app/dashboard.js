@@ -59,7 +59,7 @@ const DashboardPage = ({ match, history, comments, posts, reports, users }) => {
     ]);
 
     return () => {};
-  }, [posts, users, comments, reports, history]);
+  }, [posts, users, comments, reports]);
 
   useEffect(() => {
     const data = statIn7Days(posts, 'post_time');
@@ -92,7 +92,7 @@ const DashboardPage = ({ match, history, comments, posts, reports, users }) => {
     setRecentPosts(refactored);
 
     return () => {};
-  }, [getUserById, posts, users]);
+  }, [posts, users]);
 
   const getUserById = (id) => {
     const userR = users.filter((user) => Number(user.user_id) === Number(id));

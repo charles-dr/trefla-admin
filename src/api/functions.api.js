@@ -26,6 +26,32 @@ export const judgeIDTransferRequest = async (data) => {
   }  
 }
 
+export const verifyUserByIdRequest = async (user_id) => {
+  try {
+    const { data: res, status } = await axios.post('/id-card/verify-user', {user_id});
+    console.log(res, status);
+    return res;
+  } catch (e) {
+    return {
+      status: false,
+      message: e.message
+    };
+  }
+}
+
+export const unverifyUserByIdRequest = async (user_id) => {
+  try {
+    const { data: res, status } = await axios.post('/id-card/unverify-user', {user_id});
+    console.log(res, status);
+    return res;
+  } catch (e) {
+    return {
+      status: false,
+      message: e.message
+    };
+  }
+}
+
 export const restoreBackupReqeust = async (id) => {
   try {
     const {data: res, status} = await axios.post('/firestore/import', {id});

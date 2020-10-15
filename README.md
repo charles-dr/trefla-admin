@@ -42,6 +42,10 @@ refered from
 
 ### notification type
 
+ - admin_notifications "11": ID verification requests
+ - admin notifications "12": ID Transfer request
+ - admin_notifications "13": id changes
+
 
 
  - optional val

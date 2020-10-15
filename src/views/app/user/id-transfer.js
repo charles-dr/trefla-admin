@@ -253,7 +253,7 @@ const IDTransferList = ({
     const toUser = getUserById(notification.user_id);
 
     setJudgeInfo({ from: fromUser, to: toUser, noti_id: id });
-    setVerified({ from: !!fromUser.verified, to: !!toUser.verified });
+    setVerified({ from: !!fromUser.card_verified, to: !!toUser.card_verified });
 
     setJudgeModal(true);
   }
@@ -388,7 +388,7 @@ const IDTransferList = ({
 
         <Colxx className="d-flex justify-content-end" xxs={12}>
           <Button color="primary" className="mb-2 mr-2" onClick={() => setAddVModal(true)}>
-            <i className="simple-icon-plus mr-1" /> Verification
+            <i className="simple-icon-plus mr-1" /> Verificationsss
           </Button>{' '}
 
           <Button color="primary" className="mb-2" onClick={() => setAddVTModal(true)}>

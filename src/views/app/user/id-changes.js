@@ -23,6 +23,10 @@ import Breadcrumb from '../../../containers/navs/Breadcrumb';
 import { ReactTableWithPaginationCard } from '../../../containers/ui/ReactTableCards';
 
 import {
+  unverifyUserByIdRequest,
+  verifyUserByIdRequest
+} from '../../../api/functions.api';
+import {
   deleteAdminNotiByIdRequest,
   updateUserProfile,
 } from '../../../utils';
@@ -48,6 +52,9 @@ const IDTransferList = ({
   // for Delete Modal
   const [delId, setDeleteId] = useState(-1);
   const [delModal, setDelModal] = useState(false);
+
+  const [verifyModal, setVerifyModal] = useState(false);
+  const [verifyInfo, setVerifyInfo] = useState({ mode: 0, user_id: -1, active: 1 }); // mode 0 - unverify, mode 1 - verify
 
   const cols = [
     {
@@ -136,7 +143,7 @@ const IDTransferList = ({
                 className="iconsminds-security-bug danger"
                 title="Unverify Now"
                 style={{ fontSize: 18 }}
-                onClick={() => UnverifyUserById(props.value.user_id)}
+                onClick={() => unverifyUserById(props.value.user_id)}
               />
             )}
             {(
@@ -179,10 +186,10 @@ const IDTransferList = ({
       newItem.fromUser = transfer.old;
       newItem.toUser = transfer.new;
       newItem.user = transfer.new;
-      newItem.verified = user.verified || 0;
+      newItem.verified = user.card_verified || 0;
       newItem.action = {
         noti_id: transfer.noti_id,
-        verified: user.verified || 0,
+        verified: user.card_verified || 0,
         user_id: transfer.new.user_id,
       };
       format_data.push(newItem);
@@ -199,13 +206,13 @@ const IDTransferList = ({
     }
     return `/assets/avatar/avatar_${sex === '1' ? 'girl2' : 'boy1'}.png`;
   };
-  const verifyUserById = async (user_id) => {
+  const sverifyUserById = async (user_id) => {
     try {
       // history.push(`/app/user/edit/${user_id}`);
       const usersF = users.filter((user) => user.user_id === user_id);
       console.log(usersF[0]);
       const profile = usersF[0];
-      profile.verified = 1;
+      profile.card_verified = 1;
 
       setPreloading(true);
       const res = await updateUserProfile(profile);
@@ -224,11 +231,11 @@ const IDTransferList = ({
       );
     }
   };
-  const UnverifyUserById = async (user_id) => {
+  const sUnverifyUserById = async (user_id) => {
     try {
       const usersF = users.filter((user) => user.user_id === user_id);
       const profile = usersF[0];
-      profile.verified = 0;
+      profile.card_verified = 0;
 
       setPreloading(true);
       const res = await updateUserProfile(profile);
@@ -283,6 +290,66 @@ const IDTransferList = ({
     return newId + 1;
   };
 
+  const verifyUserById = async (user_id) => {
+    setVerifyInfo({...verifyInfo, user_id: user_id, mode: 1});
+    setVerifyModal(true);
+  }
+  const confirmVerification = async () => {
+    const user_id = verifyInfo.user_id;
+    try {
+      // history.push(`/app/user/edit/${user_id}`);
+      // const usersF = users.filter((user) => user.user_id === user_id);
+      // console.log(usersF[0]);
+      // const profile = usersF[0];
+      // profile.card_verified = 1;
+      // const res = await updateUserProfile(profile);
+
+      setLoading(true);
+      const res = await verifyUserByIdRequest(user_id);
+      setLoading(false);
+      setVerifyModal(false);
+      if (res.status === true) {
+        NotificationManager.success('User has been verified', 'Verification');
+        loadAllUsersAction();
+      } else {
+        NotificationManager.error(res.message, 'Verification');
+      }
+    } catch (err) {
+      NotificationManager.error(
+        'Error while updating verification!',
+        'Verification'
+      );
+    }
+  };
+  const unverifyUserById = (user_id) => {
+    setVerifyInfo({...verifyInfo, user_id: user_id, mode: 0});
+    setVerifyModal(true);
+  }
+  const confirmUnverification = async () => {
+    const user_id = verifyInfo.user_id;
+    try {
+      setLoading(true);
+      const res = await unverifyUserByIdRequest(user_id);
+      setLoading(false);
+      setVerifyModal(false);
+
+      if (res.status === true) {
+        NotificationManager.success('User has been unverified', 'Verification');
+        loadAllUsersAction();
+      } else {
+        NotificationManager.error(res.message, 'Verification');
+      }
+    } catch (err) {
+      NotificationManager.error(
+        'Error while updating verification!',
+        'Verification'
+      );
+    }
+  };
+  const onConfirmVerification = async (event, errors, values) => {
+    // console.log(event, errors, values);
+    return verifyInfo.mode === 1 ? confirmVerification() : confirmUnverification();
+  };
 
   return (
     <>
@@ -349,7 +416,53 @@ const IDTransferList = ({
           </AvForm>
         </ModalBody>
       </Modal>
+      {/* Verify/Unverify Modal */}
+      <Modal
+        isOpen={verifyModal}
+        toggle={() => setVerifyModal(!verifyModal)}
+        backdrop="static"
+      >
+        <ModalHeader>
+          {verifyInfo.mode === 1 ? 'Verify User' : 'Unverify User'}
+        </ModalHeader>
+        <ModalBody>
+          <AvForm
+            className="av-tooltip tooltip-label-right"
+            onSubmit={(event, errors, values) =>
+              onConfirmVerification(event, errors, values)
+            }
+          >
 
+          <label>
+            { verifyInfo.mode === 1 ? 'Are you sure to verify this user? Other accounts with same ID will be unverified!' : 'Are you sure to unverify this user?' }
+          </label>
+
+            <Separator className="mb-5 mt-3" />
+            <div className="d-flex justify-content-end">
+              <Button
+                type="submit"
+                color="primary"
+                className={`btn-shadow btn-multiple-state mr-2 ${
+                  loading ? 'show-spinner' : ''
+                }`}
+                size="lg"
+              >
+                <span className="spinner d-inline-block">
+                  <span className="bounce1" />
+                  <span className="bounce2" />
+                  <span className="bounce3" />
+                </span>
+                <span className="label">
+                  {verifyInfo.mode === 1 ? 'Verify' : 'Unverify'}
+                </span>
+              </Button>{' '}
+              <Button color="secondary" onClick={() => setVerifyModal(false)}>
+                <IntlMessages id="actions.cancel" />
+              </Button>
+            </div>
+          </AvForm>
+        </ModalBody>
+      </Modal>
     </>
   );
 };

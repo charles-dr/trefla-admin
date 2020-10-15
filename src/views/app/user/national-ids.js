@@ -28,6 +28,9 @@ import Breadcrumb from '../../../containers/navs/Breadcrumb';
 import { ReactTableWithPaginationCard } from '../../../containers/ui/ReactTableCards';
 
 import {
+  verifyUserByIdRequest
+} from '../../../api/functions.api';
+import {
   deleteUserById,
   toggleBanStatus,
   updateUserProfile,
@@ -59,9 +62,9 @@ const NationalIDList = ({
   const [currentImage, setCurrentImg] = useState(0);
   const [viewerOpen, setViewerOpen] = useState(false);
 
-  const [banModal, setBanModal] = useState(false);
-  const [banInfo, setBanInfo] = useState({ user_id: -1, active: 1 });
-  // const [banReason, setBanReason] = useState('');
+  const [verifyModal, setVerifyModal] = useState(false);
+  const [verifyInfo, setVerifyInfo] = useState({ mode: 0, user_id: -1, active: 1 }); // mode 0 - unverify, mode 1 - verify
+  
 
   const cols = [
     {
@@ -178,7 +181,7 @@ const NationalIDList = ({
                 className="iconsminds-security-bug danger"
                 title="Unverify Now"
                 style={{ fontSize: 18 }}
-                onClick={() => UnverifyUserById(props.value.user_id)}
+                onClick={() => unverifyUserById(props.value.user_id)}
               />
             )}
           </div>
@@ -242,7 +245,7 @@ const NationalIDList = ({
         if (user[key] !== undefined) {
           user_item[key] = user[key];
         }
-      }
+      };
       // new key - image
       user_item.image = {
         photo: user.photo,
@@ -256,9 +259,9 @@ const NationalIDList = ({
       user_item.action = {
         user_id: user.user_id,
         active: user.active,
-        verified: user.verified || false,
+        verified: user.card_verified || false,
       };
-      user_item.verified = user.verified || false;
+      user_item.verified = user.card_verified || false;
       user_item.user = {
         id: user.user_id,
         name: user.user_name,
@@ -273,15 +276,25 @@ const NationalIDList = ({
   const openAddModal = () => {
     history.push('/app/user/add');
   };
+
   const verifyUserById = async (user_id) => {
+    setVerifyInfo({...verifyInfo, user_id: user_id, mode: 1});
+    setVerifyModal(true);
+  }
+  const confirmVerification = async () => {
+    const user_id = verifyInfo.user_id;
     try {
       // history.push(`/app/user/edit/${user_id}`);
-      const usersF = users.filter((user) => user.user_id === user_id);
-      console.log(usersF[0]);
-      const profile = usersF[0];
-      profile.verified = 1;
+      // const usersF = users.filter((user) => user.user_id === user_id);
+      // console.log(usersF[0]);
+      // const profile = usersF[0];
+      // profile.card_verified = 1;
+      // const res = await updateUserProfile(profile);
 
-      const res = await updateUserProfile(profile);
+      setLoading(true);
+      const res = await verifyUserByIdRequest(user_id);
+      setLoading(false);
+      setVerifyModal(false);
       if (res.status === true) {
         NotificationManager.success('User has been verified', 'Verification');
         loadAllUsersAction();
@@ -295,13 +308,20 @@ const NationalIDList = ({
       );
     }
   };
-  const UnverifyUserById = async (user_id) => {
+  const unverifyUserById = (user_id) => {
+    setVerifyInfo({...verifyInfo, user_id: user_id, mode: 0});
+    setVerifyModal(true);
+  }
+  const confirmUnverification = async () => {
+    const user_id = verifyInfo.user_id;
     try {
       const usersF = users.filter((user) => user.user_id === user_id);
       const profile = usersF[0];
-      profile.verified = 0;
+      profile.card_verified = 0;
 
       const res = await updateUserProfile(profile);
+      setVerifyModal(false);
+
       if (res.status === true) {
         NotificationManager.success('User has been unverified', 'Verification');
         loadAllUsersAction();
@@ -315,31 +335,11 @@ const NationalIDList = ({
       );
     }
   };
-  const onConfirmBan = async (event, errors, values) => {
+  const onConfirmVerification = async (event, errors, values) => {
     // console.log(event, errors, values);
-    if ((banInfo.active === 1 && errors.length === 0) || banInfo.active !== 1) {
-      // console.log(values);
-      setLoading(true);
-      const res = await toggleBanStatus(
-        banInfo,
-        banInfo.active === 1 ? values.banReason : ''
-      );
-      setLoading(false);
-      if (res.status === true) {
-        NotificationManager.success(
-          res.message,
-          `${banInfo.active === 1 ? 'Ban' : 'Release'} User`
-        );
-        setBanModal(false);
-        loadAllUsersAction();
-      } else {
-        NotificationManager.error(
-          res.message,
-          `${banInfo.active === 1 ? 'Ban' : 'Release'} User`
-        );
-      }
-    }
+    return verifyInfo.mode === 1 ? confirmVerification() : confirmUnverification();
   };
+
   const onConfirmDelete = async () => {
     console.log(delId, modalOptions);
 
@@ -559,35 +559,26 @@ const NationalIDList = ({
         </ModalBody>
       </Modal>
 
-      {/* Ban Modal */}
+      {/* Verify/Unverify Modal */}
       <Modal
-        isOpen={banModal}
-        toggle={() => setBanModal(!banModal)}
+        isOpen={verifyModal}
+        toggle={() => setVerifyModal(!verifyModal)}
         backdrop="static"
       >
-        <ModalHeader>Ban User</ModalHeader>
+        <ModalHeader>
+          {verifyInfo.mode === 1 ? 'Verify User' : 'Unverify User'}
+        </ModalHeader>
         <ModalBody>
           <AvForm
             className="av-tooltip tooltip-label-right"
             onSubmit={(event, errors, values) =>
-              onConfirmBan(event, errors, values)
+              onConfirmVerification(event, errors, values)
             }
           >
-            {banInfo.active === 1 && (
-              <AvGroup>
-                <Label>Ban Reason:</Label>
-                <AvInput
-                  type="textarea"
-                  name="banReason"
-                  id="banReason"
-                  required
-                />
-                <AvFeedback>Please enter ban reason!</AvFeedback>
-              </AvGroup>
-            )}
-            {banInfo.active !== 1 && (
-              <label>Are you sure to release this user?</label>
-            )}
+
+          <label>
+            { verifyInfo.mode === 1 ? 'Are you sure to verify this user? Other accounts with same ID will be unverified!' : 'Are you sure to unverify this user?' }
+          </label>
 
             <Separator className="mb-5 mt-3" />
             <div className="d-flex justify-content-end">
@@ -605,10 +596,10 @@ const NationalIDList = ({
                   <span className="bounce3" />
                 </span>
                 <span className="label">
-                  {banInfo.active === 1 ? 'Ban' : 'Release'}
+                  {verifyInfo.mode === 1 ? 'Verify' : 'Unverify'}
                 </span>
               </Button>{' '}
-              <Button color="secondary" onClick={() => setBanModal(false)}>
+              <Button color="secondary" onClick={() => setVerifyModal(false)}>
                 <IntlMessages id="actions.cancel" />
               </Button>
             </div>
