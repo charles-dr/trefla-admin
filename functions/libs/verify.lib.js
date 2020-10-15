@@ -204,7 +204,10 @@ const verifyUserById = async (user_id) => {
     .then((doc) => doc.data())
     .then((user) => {
       if (!user.card_number) {
-        throw "User doesn't have a valid card number!";
+        throw Object.assign(
+          new Error("User doesn't have a valid card number!"),
+          { code: 400 }
+        );
       }
       return Promise.all([
         admin

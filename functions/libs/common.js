@@ -350,6 +350,5 @@ module.exports = {
   getPrimaryCommentsOfPost,
   getRepliesToComment,
   getUserById,
-  setNotificationToUser
+  setNotificationToUser,
 };
-

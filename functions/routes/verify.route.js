@@ -1,8 +1,6 @@
 const express = require('express');
 // const bodyParser = require('body-parser');
-const {
-  getUserById
-} = require('../libs/common');
+const { getUserById } = require('../libs/common');
 const {
   checkIDCardVerified,
   getUnreadMsgCountToID,
@@ -86,25 +84,25 @@ app.post('/unverify-user', async (req, res) => {
   if (!req.body.user_id && req.body.user_id !== 0) {
     return res.json({
       status: false,
-      message: `Parameter "user_id" is required!`
+      message: `Parameter "user_id" is required!`,
     });
   }
   getUserById(req.body.user_id)
-  .then(doc => doc.data())
-  .then(user => unverifySingleUser(user))
-  .then(verified => {
-    return res.json({
-      status: true,
-      message: 'User has been unverified!'
+    .then((doc) => doc.data())
+    .then((user) => unverifySingleUser(user))
+    .then((verified) => {
+      return res.json({
+        status: true,
+        message: 'User has been unverified!',
+      });
+    })
+    .catch((error) => {
+      return res.json({
+        status: false,
+        message: 'Failed to unverify a user...',
+        error: error.message,
+      });
     });
-  })
-  .catch(error => {
-    return res.json({
-      status: false,
-      message: 'Failed to unverify a user...',
-      error: error.message
-    });
-  })
 });
 
 module.exports = app;

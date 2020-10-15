@@ -41,7 +41,10 @@ const {
   importFirestoreFromFiles,
   uploadAndZipData,
 } = require('./libs/backup');
-const { unverifyAcountByCardNumber } = require('./libs/verify.lib');
+const {
+  unverifyAcountByCardNumber,
+  verifyUserById,
+} = require('./libs/verify.lib');
 
 const idCardRouter = require('./routes/verify.route');
 
@@ -263,17 +266,22 @@ app.post('/id-transfer/judge', async (req, res) => {
       return res.json({ status, message: "New user doesn't exist!" });
     }
 
+    const new_verified_user =
+      verified.from === 1 ? notification.old_user_id : notification.user_id;
+
+    await verifyUserById(new_verified_user);
+
     // update user verified status
-    await admin
-      .firestore()
-      .collection('users')
-      .doc(notification.old_user_id.toString())
-      .set({ card_verified: verified.from }, { merge: true });
-    await admin
-      .firestore()
-      .collection('users')
-      .doc(notification.user_id.toString())
-      .set({ card_verified: verified.to }, { merge: true });
+    // await admin
+    //   .firestore()
+    //   .collection('users')
+    //   .doc(notification.old_user_id.toString())
+    //   .set({ card_verified: verified.from }, { merge: true });
+    // await admin
+    //   .firestore()
+    //   .collection('users')
+    //   .doc(notification.user_id.toString())
+    //   .set({ card_verified: verified.to }, { merge: true });
 
     return res.json({
       status: true,
