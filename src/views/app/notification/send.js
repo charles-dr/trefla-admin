@@ -141,7 +141,7 @@ const EditUserPage = ({ history, match, user_list, loadAllUsersAction }) => {
 
     filtered = filtered.filter(user => {
       if (am === 'none') return true;
-      
+      if (!user.birthday) return false;
       const dob_arr = user.birthday.split('/');
       const dob_y = Number(dob_arr[2]);
       const dob_m = Number(dob_arr[0]);
