@@ -91,11 +91,11 @@ const IDTransferList = ({
             <div><label><b>Card Number</b>:</label>{' '}{props.value.card_number}</div>
             <div className="mb-1">
               <Badge
-                color={props.value.verified === 1 ? 'outline-success' : 'outline-danger'}
+                color={props.value.card_verified === 1 ? 'outline-success' : 'outline-danger'}
                 pill
                 className="mb-1"
               >
-                {props.value.verified === 1 ? 'Verified' : 'Unverified'}
+                {props.value.card_verified === 1 ? 'Verified' : 'Unverified'}
               </Badge>
             </div>
             {props.value.card_img_url && <img src={props.value.card_img_url}
@@ -124,11 +124,11 @@ const IDTransferList = ({
             <div><label>Card Number:</label>{' '}{props.value.card_number}</div>
             <div className="mb-1">
               <Badge
-                color={props.value.verified === 1 ? 'outline-success' : 'outline-danger'}
+                color={props.value.card_verified === 1 ? 'outline-success' : 'outline-danger'}
                 pill
                 className="mb-1"
               >
-                {props.value.verified === 1 ? 'Verified' : 'Unverified'}
+                {props.value.card_verified === 1 ? 'Verified' : 'Unverified'}
               </Badge>
             </div>
             {props.value.card_img_url && <img src={props.value.card_img_url}
@@ -260,6 +260,8 @@ const IDTransferList = ({
   const confirmJudgeIDTransfer = () => {
     if (verified.from && verified.to) {
       NotificationManager.warning("Both user can't be verified at a time!", 'ID Transfer'); return;
+    } else if (!verified.from && !verified.to) {
+      NotificationManager.warning("Please select a user to be verified!", "ID Transfer"); return;
     }
     setLoading(true);
     judgeIDTransferRequest({
@@ -388,7 +390,7 @@ const IDTransferList = ({
 
         <Colxx className="d-flex justify-content-end" xxs={12}>
           <Button color="primary" className="mb-2 mr-2" onClick={() => setAddVModal(true)}>
-            <i className="simple-icon-plus mr-1" /> Verificationsss
+            <i className="simple-icon-plus mr-1" /> Verification
           </Button>{' '}
 
           <Button color="primary" className="mb-2" onClick={() => setAddVTModal(true)}>
