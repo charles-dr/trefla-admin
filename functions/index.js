@@ -41,6 +41,7 @@ const {
   importFirestoreFromFiles,
   uploadAndZipData,
 } = require('./libs/backup');
+const { unverifyAcountByCardNumber } = require('./libs/verify.lib');
 
 const idCardRouter = require('./routes/verify.route');
 
@@ -267,12 +268,12 @@ app.post('/id-transfer/judge', async (req, res) => {
       .firestore()
       .collection('users')
       .doc(notification.old_user_id.toString())
-      .set({ verified: verified.from }, { merge: true });
+      .set({ card_verified: verified.from }, { merge: true });
     await admin
       .firestore()
       .collection('users')
       .doc(notification.user_id.toString())
-      .set({ verified: verified.to }, { merge: true });
+      .set({ card_verified: verified.to }, { merge: true });
 
     return res.json({
       status: true,
@@ -550,8 +551,6 @@ app.get('/posts', async (req, res) => {
   res.json(users);
 });
 
-
-
 ////////////////////////////////////////////////////////////////
 //                                                            //
 //                      APIs for Test                         //
@@ -667,6 +666,22 @@ app.get('/email-test', async (req, res) => {
   });
 });
 
+app.get('/test/delete-field', async (req, res) => {
+  return admin
+    .firestore()
+    .collection('users')
+    .doc('0')
+    .update({
+      tests: admin.firestore.FieldValue.delete(),
+    })
+    .then(() => {
+      return res.json({ status: true });
+    })
+    .catch((error) => {
+      return res.json({ status: false, error: error.message });
+    });
+});
+
 app.get('/test', async (req, res) => {
   console.log('Hey');
   // await functions.firestore.collection('admin_notifications').doc('111').set({name: 'hello'});
@@ -707,6 +722,8 @@ exports.createNotification = functions.firestore
     let htmlBody = '';
     const time = new Date().toUTCString();
     // get email templates
+    // 11: verify ID
+    // 12  ID transfer request
     if (data.type === '11') {
       const templDoc = await admin
         .firestore()
@@ -774,6 +791,9 @@ exports.createNotification = functions.firestore
         .doc(data.user_id.toString())
         .get();
 
+      // unverify account with ID numbers
+      await unverifyAcountByCardNumber(fromUserDoc.data().card_number);
+
       htmlBody = htmlBody
         .replace(new RegExp('%AdminName%', 'g'), adminDoc.data().name)
         .replace(
@@ -804,9 +824,12 @@ exports.updateID = functions.firestore
     const notiId = context.params.userId;
     const newData = change.after.data();
     const oldData = change.before.data();
-    console.log('[user ID]', notiId);
-    console.log('[new ID]', newData.card_number);
-    console.log('[old ID]', oldData.card_number);
+    // console.log('[user ID]', notiId);
+    // console.log('[new ID]', newData.card_number);
+    // console.log('[old ID]', oldData.card_number);
+
+    // if both card numbers are null or undefined, return falsel;
+    if (!newData.card_number || !oldData.card_number) return false;
 
     if (
       newData.card_number.trim() === oldData.card_number.trim() &&

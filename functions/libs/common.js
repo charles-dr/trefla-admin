@@ -335,9 +335,21 @@ const getRepliesToComment = async function ({ comment_id, user_id }) {
     });
 };
 
-exports.checkUserLikedComment = checkUserLikedComment;
-exports.getAllUsers = getAllUsers;
-exports.getNewNotificationIdOfUser = getNewNotificationIdOfUser;
-exports.getPrimaryCommentsOfPost = getPrimaryCommentsOfPost;
-exports.getRepliesToComment = getRepliesToComment;
-exports.setNotificationToUser = setNotificationToUser;
+// const getUserById = async (user_id) => {
+//   return admin
+//   .firestore()
+//   .collection('users')
+//   .doc(user_id.toString())
+//   .get(doc => doc.data());
+// }
+
+module.exports = {
+  checkUserLikedComment,
+  getAllUsers,
+  getNewNotificationIdOfUser,
+  getPrimaryCommentsOfPost,
+  getRepliesToComment,
+  getUserById,
+  setNotificationToUser
+};
+
