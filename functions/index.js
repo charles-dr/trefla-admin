@@ -1043,7 +1043,11 @@ exports.updatePost = functions.firestore
     console.log('============== post updated ===:', postId);
 
     //it should work for only 'feed', 'location', 'post_time'
-    if (newData.feed === oldData.feed && newData.location_coordinate == oldData.location_coordinate && newData.post_time == oldData.post_time) {
+    if (
+      newData.feed === oldData.feed &&
+      newData.location_coordinate == oldData.location_coordinate &&
+      newData.post_time == oldData.post_time
+    ) {
       console.log('[No changes on main fields]');
       return false;
     }

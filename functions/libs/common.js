@@ -33,6 +33,7 @@ const sendMultiNotifications = async function ({ title, body, tokens }) {
 };
 
 const SendAllMultiNotifications = async function (messages) {
+  if (!messages || messages.length === 0) return false;
   return admin.messaging().sendAll(messages);
 };
 
