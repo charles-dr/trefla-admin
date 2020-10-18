@@ -4,6 +4,7 @@ const admin = require('firebase-admin');
 const express = require('express');
 const cors = require('cors');
 const nodemailer = require('nodemailer');
+// const bodyParser = require('body-parser');
 
 admin.initializeApp();
 
@@ -78,6 +79,7 @@ const bucket = admin.storage().bucket();
 const app = express();
 
 app.use(cors({ origin: true }));
+// app.use(bodyParser.json());
 
 const transporter = nodemailer.createTransport({
   service: 'gmail',
@@ -976,7 +978,7 @@ exports.createPost = functions.firestore
         postLocation,
         getUserLastLocation(user)
       );
-      const radius = user.raidusAround || 100;
+      const radius = user.radiusAround || 100;
       if (radius < distance) {
         continue;
       }
@@ -1014,7 +1016,7 @@ exports.createPost = functions.firestore
       '[user_ids]',
       nearByUsers.map((user) => ({
         id: user.user_id,
-        radius: user.raidusAround || 100,
+        radius: user.radiusAround || 100,
         r: getDistanceFromLatLonInMeter(
           postLocation,
           getUserLastLocation(user)
@@ -1036,9 +1038,15 @@ exports.updatePost = functions.firestore
   .onUpdate(async (change, context) => {
     const postId = context.params.postId;
     const newData = change.after.data();
-    // const oldData = change.before.data();
+    const oldData = change.before.data();
 
     console.log('============== post updated ===:', postId);
+
+    //it should work for only 'feed', 'location', 'post_time'
+    if (newData.feed === oldData.feed && newData.location_coordinate == oldData.location_coordinate && newData.post_time == oldData.post_time) {
+      console.log('[No changes on main fields]');
+      return false;
+    }
 
     // post user
     const postUserDoc = await admin
@@ -1067,7 +1075,7 @@ exports.updatePost = functions.firestore
         postLocation,
         getUserLastLocation(user)
       );
-      const radius = user.raidusAround || 100;
+      const radius = user.radiusAround || 100;
       if (radius < distance) {
         continue;
       }
@@ -1105,7 +1113,7 @@ exports.updatePost = functions.firestore
       '[user_ids]',
       nearByUsers.map((user) => ({
         id: user.user_id,
-        radius: user.raidusAround || 100,
+        radius: user.radiusAround || 100,
         r: getDistanceFromLatLonInMeter(
           postLocation,
           getUserLastLocation(user)

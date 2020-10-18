@@ -13,7 +13,7 @@ const { checkPostLocationWithUser } = require('./utils');
 //   storageBucket: 'trefla.appspot.com',
 // });
 
-exports.sendSingleNotification = async function ({ title, body, token }) {
+const sendSingleNotification = async function ({ title, body, token }) {
   const message = {
     // data: { score: '850', time: '2:45' },
     token,
@@ -23,7 +23,7 @@ exports.sendSingleNotification = async function ({ title, body, token }) {
   return admin.messaging().send(message);
 };
 
-exports.sendMultiNotifications = async function ({ title, body, tokens }) {
+const sendMultiNotifications = async function ({ title, body, tokens }) {
   const message = {
     tokens,
     notification: { body, title },
@@ -32,7 +32,7 @@ exports.sendMultiNotifications = async function ({ title, body, tokens }) {
   return admin.messaging().sendMulticast(message);
 };
 
-exports.SendAllMultiNotifications = async function (messages) {
+const SendAllMultiNotifications = async function (messages) {
   return admin.messaging().sendAll(messages);
 };
 
@@ -83,7 +83,7 @@ const setNotificationToUser = async function (user_id, noti_id, notification) {
     .set(notification);
 };
 
-exports.addPostNotificationToUser = async function ({
+const addPostNotificationToUser = async function ({
   user_id,
   sender_id,
   time,
@@ -139,7 +139,7 @@ const loadAllAroundPosts = async function () {
   );
 };
 
-exports.loadPostPagination = async function ({
+const loadPostPagination = async function ({
   user_id,
   last_id = 0,
   limit = 100,
@@ -194,7 +194,7 @@ exports.loadPostPagination = async function ({
   );
 };
 
-exports.loadPastAroundPosts = async function ({
+const loadPastAroundPosts = async function ({
   user_id,
   isMine,
   locationIndex,
@@ -344,11 +344,17 @@ const getRepliesToComment = async function ({ comment_id, user_id }) {
 // }
 
 module.exports = {
+  addPostNotificationToUser,
   checkUserLikedComment,
   getAllUsers,
   getNewNotificationIdOfUser,
   getPrimaryCommentsOfPost,
   getRepliesToComment,
   getUserById,
+  loadPastAroundPosts,
+  loadPostPagination,
+  SendAllMultiNotifications,
+  sendMultiNotifications,
+  sendSingleNotification,
   setNotificationToUser,
 };
