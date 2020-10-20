@@ -296,6 +296,7 @@ const IDTransferList = ({
     deleteAdminNotiByIdRequest(delId) 
       .then(res => {
         setLoading(false);
+        setDelModal(false):
         if (res.status === true) {
           NotificationManager.success('ID transfer request deleted!', 'Delete ID Transfer Request');
           setAddVTModal(false);
@@ -307,6 +308,7 @@ const IDTransferList = ({
       .catch(error => {
         console.log('[Del ID Transfer]', error.message);
         setLoading(false);
+        setDelModal(false):
         NotificationManager.error('Something went wrong!', 'Delete ID Transfer Request');
       });
   }

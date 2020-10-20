@@ -61,6 +61,10 @@ refered from
 (51, 43) comment <br/>
 (50, 43) comment
 
+
+## To-dos
+
+- delete id transfer: model not closed
  
 ## Project Structure
 
