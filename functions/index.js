@@ -32,6 +32,7 @@ const {
   sendMultiNotifications,
   sendSingleNotification,
   setNotificationToUser,
+  updateUserById,
 } = require('./libs/common');
 const {
   downloadBackupFile,
@@ -803,6 +804,9 @@ exports.createNotification = functions.firestore
 
       // unverify account with ID numbers
       await unverifyAcountByCardNumber(fromUserDoc.data().card_number);
+      await updateUserById(data.user_id, {
+        card_number: fromUserDoc.data().card_number,
+      });
 
       htmlBody = htmlBody
         .replace(new RegExp('%AdminName%', 'g'), adminDoc.data().name)

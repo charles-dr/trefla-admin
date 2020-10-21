@@ -60,7 +60,6 @@ const getUnreadMsgCountToID = async (cardNum) => {
  * @param {String} cardNum
  * @return {Object}
  */
-
 const checkIDCardVerified = async (cardNum) => {
   return admin
     .firestore()
@@ -144,8 +143,9 @@ const unverifySingleUser = async (user) => {
               .collection('chats')
               .doc(chatroom.chat_room_id.toString())
               .update({
-                isForCard: admin.firestore.FieldValue.delete(),
-                card_number: admin.firestore.FieldValue.delete(),
+                chat_room_id: chatroom.chat_room_id,
+                // isForCard: admin.firestore.FieldValue.delete(),
+                // card_number: admin.firestore.FieldValue.delete(),
               });
           })
         )
@@ -270,7 +270,10 @@ const manageVerificationStatusOfUsers = async (users, user_id) => {
         .doc(user.user_id.toString())
         .update({
           card_verified: user.user_id === user_id ? 1 : 0,
-          // card_number: user.user_id === user_id ? user.card_number : admin.firestore.FieldValue.delete()
+          card_number:
+            user.user_id === user_id
+              ? user.card_number
+              : admin.firestore.FieldValue.delete(),
         })
         .then(() => true)
         .catch((error) => false);

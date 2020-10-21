@@ -336,6 +336,14 @@ const getRepliesToComment = async function ({ comment_id, user_id }) {
     });
 };
 
+const updateUserById = async (user_id, update_data) => {
+  admin
+    .firestore()
+    .collection('users')
+    .doc(user_id.toString())
+    .update(update_data);
+};
+
 // const getUserById = async (user_id) => {
 //   return admin
 //   .firestore()
@@ -358,4 +366,5 @@ module.exports = {
   sendMultiNotifications,
   sendSingleNotification,
   setNotificationToUser,
+  updateUserById,
 };

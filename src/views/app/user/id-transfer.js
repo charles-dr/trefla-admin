@@ -296,7 +296,7 @@ const IDTransferList = ({
     deleteAdminNotiByIdRequest(delId) 
       .then(res => {
         setLoading(false);
-        setDelModal(false):
+        setDelModal(false);
         if (res.status === true) {
           NotificationManager.success('ID transfer request deleted!', 'Delete ID Transfer Request');
           setAddVTModal(false);
@@ -308,7 +308,7 @@ const IDTransferList = ({
       .catch(error => {
         console.log('[Del ID Transfer]', error.message);
         setLoading(false);
-        setDelModal(false):
+        setDelModal(false);
         NotificationManager.error('Something went wrong!', 'Delete ID Transfer Request');
       });
   }
@@ -333,6 +333,9 @@ const IDTransferList = ({
     console.log(VTFromUser, VTToUser);
     if (!VTFromUser || !VTToUser) {
       NotificationManager.warning('Please select both users!', 'Add ID Transfer Request'); return;
+    }
+    if (!VTFromUser.card_number) {
+      NotificationManager.warning('Origin user must have card number!'); return;
     }
 
     setLoading(true);

@@ -64,7 +64,8 @@ refered from
 
 ## To-dos
 
-- delete id transfer: model not closed
+- [done]delete id transfer: model not closed
+- [done]transfer id: origin user must have card number
  
 ## Project Structure
 
