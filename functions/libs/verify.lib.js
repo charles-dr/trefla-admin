@@ -295,11 +295,14 @@ const processChatroomToCard = async (chatrooms, user_id) => {
         updateData = {
           user_ids: [chatroom.user_ids[0], user_id],
         };
+        // copy unread_num to user
+        await increaseUserUnreadNumber(user_id, chatroom.unread_nums[1]);
       } else if (chatroom.user_ids[chatroom.user_ids.length - 1] !== user_id) {
+        console.log('[ID Transfer] acceptable case');
         // user must be different from prev verified user!
         // last message
         const lastMsg = await lastMessageOfChatRoom(chatroom.chat_room_id); // should exist surely on transfer
-        updateData = {
+        updateData = checkDuplicatedOwnership({
           user_ids: [...chatroom.user_ids, user_id],
           isTransfered: true,
           lastMsgIdOnTransfer: chatroom.lastMsgIdOnTransfer
@@ -313,8 +316,9 @@ const processChatroomToCard = async (chatrooms, user_id) => {
             typeof chatroom.last_message === 'string'
               ? [chatroom.last_message, lastMsg.message]
               : [...chatroom.last_message, lastMsg.message],
-        };
+        });
       } else {
+        console.log('[ID Transfer] same id with last owner');
         updateData = {
           card_number: chatroom.card_number,
         };
@@ -347,6 +351,79 @@ const lastMessageOfChatRoom = async (chat_id) => {
       return messages;
     })
     .then((messages) => (messages.length > 0 ? messages[0] : false))
+    .catch((error) => false);
+};
+
+/**
+ * @function checkDuplicatedOwnership
+ * @description check if new user had ever owned the card before.
+ * @param {object} chatroom
+ * @member {array} user_ids
+ * @member {boolean} isTransfered
+ * @member {array} lastMsgIdOnTransfer
+ * @member {array} last_message_time
+ * @member {array} last_message
+ * @return {object}
+ */
+const checkDuplicatedOwnership = (chatroom) => {
+  try {
+    let {
+      isTransfered,
+      user_ids,
+      lastMsgIdOnTransfer,
+      last_message_time,
+      last_message,
+    } = chatroom;
+    if (chatroom.user_ids.length > 3) {
+      let dupId = -1;
+      for (let i = 1; i < user_ids.length - 1; i++) {
+        if (user_ids[i] === user_ids[user_ids.length - 1]) {
+          dupId = i;
+          break;
+        }
+      }
+      console.log('[dupId]', dupId);
+      if (dupId > 0) {
+        user_ids.splice(dupId, 1);
+        lastMsgIdOnTransfer.splice(dupId - 1, 1);
+        last_message_time.splice(dupId - 1, 1);
+        last_message.splice(dupId - 1, 1);
+      }
+    }
+    return {
+      user_ids,
+      lastMsgIdOnTransfer,
+      last_message_time,
+      last_message,
+      isTransfered,
+    };
+  } catch (error) {
+    console.log('[Error in chatroom update]', error.message);
+    return chatroom;
+  }
+};
+
+const increaseUserUnreadNumber = async (user_id, delta) => {
+  return admin
+    .firestore()
+    .collection('users')
+    .doc(user_id.toString())
+    .get()
+    .then((doc) => doc.data())
+    .then((user) =>
+      admin
+        .firestore()
+        .collection('users')
+        .doc(user_id.toString())
+        .set(
+          {
+            unread_msg_num: !user.unread_msg_num
+              ? delta
+              : user.unread_msg_num + delta,
+          },
+          { merge: true }
+        )
+    )
     .catch((error) => false);
 };
 

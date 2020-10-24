@@ -338,28 +338,40 @@ app.post('/comments', async (req, res) => {
             })),
           };
         })
-      )
-        .then((commentList) => {
-          return res.json({
-            status: true,
-            message: 'success',
-            count: commentList.length,
-            data: commentList,
-          });
-        })
-        .catch((error1) => {
-          console.log('[comments] transform', error1.message);
-          return res.json({ status: false, message: error1.message });
-        });
+      );
+      // .then((commentList) => {
+      //   return res.json({
+      //     status: true,
+      //     message: 'success',
+      //     count: commentList.length,
+      //     data: commentList,
+      //   });
+      // })
+      // .catch((error1) => {
+      //   console.log('[comments] transform', error1.message);
+      //   return res.json({ status: false, message: error1.message });
+      // });
     })
-    .catch((error) => {
-      console.log('[primary comments] error ', error.message);
+    .then((commentList) => {
       return res.json({
-        status: false,
-        message: 'Something went wrong',
-        details: error.message,
+        status: true,
+        message: 'success',
+        count: commentList.length,
+        data: commentList,
       });
+    })
+    .catch((error1) => {
+      console.log('[comments] transform', error1.message);
+      return res.json({ status: false, message: error1.message });
     });
+  // .catch((error) => {
+  //   console.log('[primary comments] error ', error.message);
+  //   return res.json({
+  //     status: false,
+  //     message: 'Something went wrong',
+  //     details: error.message,
+  //   });
+  // });
 });
 
 /**
@@ -456,7 +468,19 @@ app.post('/notification/single', async (req, res) => {
   const token = user.device_token;
 
   sendSingleNotification({ token, body, title })
-    .then((response) => {
+    // .then(() =>
+    //   admin
+    //     .firestore()
+    //     .collection('users')
+    //     .doc(user_id.toString())
+    //     .set(
+    //       {
+    //         noti_num: !user.noti_num ? 1 : user.noti_num + 1,
+    //       },
+    //       { merge: true }
+    //     )
+    // )
+    .then(() => {
       return res.json({ status: true, message: 'Notification has been sent!' });
     })
     .catch((error) => {
@@ -494,19 +518,38 @@ app.post('/notification/bulk', async (req, res) => {
     .map((user) => user.device_token);
   console.log('[tokens]', tokens);
 
-  return sendMultiNotifications({ tokens, body, title })
-    .then((response) => {
-      return res.json({
-        status: true,
-        message: 'Notifications have been sent!',
-      });
-    })
-    .catch((error) => {
-      return res.json({
-        status: false,
-        message: 'Error while sending notifications!',
-      });
-    });
+  return (
+    sendMultiNotifications({ tokens, body, title })
+      // .then(() => {
+      //   const userWithTokens = users.filter((user) => !!user.device_token);
+      //   return Promise.all(
+      //     userWithTokens.map((user) =>
+      //       admin
+      //         .firestore()
+      //         .collelction('users')
+      //         .doc(user.user_id.toString())
+      //         .set(
+      //           {
+      //             noti_num: !user.noti_num ? 1 : user.noti_num + 1,
+      //           },
+      //           { merge: true }
+      //         )
+      //     )
+      //   );
+      // })
+      .then(() => {
+        return res.json({
+          status: true,
+          message: 'Notifications have been sent!',
+        });
+      })
+      .catch((error) => {
+        return res.json({
+          status: false,
+          message: 'Error while sending notifications!',
+        });
+      })
+  );
 });
 
 app.post('/firestore/export', async (req, res) => {
@@ -1011,6 +1054,18 @@ exports.createPost = functions.firestore
         .then((inserted) => {
           return console.log('[add noti]', user.user_id, inserted);
         })
+        .then(() =>
+          admin
+            .firestore()
+            .collection('users')
+            .doc(user.user_id.toString())
+            .set(
+              {
+                noti_num: !user.noti_num ? 1 : user.noti_num + 1,
+              },
+              { merge: true }
+            )
+        )
         .catch((error) => {
           return console.log('[add noti]', error);
         });
@@ -1112,6 +1167,18 @@ exports.updatePost = functions.firestore
         .then((inserted) => {
           return console.log('[add noti]', user.user_id, inserted);
         })
+        .then(() =>
+          admin
+            .firestore()
+            .collection('users')
+            .doc(user.user_id.toString())
+            .set(
+              {
+                noti_num: !user.noti_num ? 1 : user.noti_num + 1,
+              },
+              { merge: true }
+            )
+        )
         .catch((error) => {
           return console.log('[add noti]', error);
         });

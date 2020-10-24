@@ -32,7 +32,7 @@ app.post('/unread-msg', async (req, res) => {
     });
   } else {
     const resp = await getUnreadMsgCountToID(req.body.id_card);
-    res.status(resp.status ? 200 : 400).json(resp);
+    return res.status(resp.status ? 200 : 400).json(resp);
   }
 });
 
@@ -49,7 +49,7 @@ app.post('/check-verified', async (req, res) => {
     });
   } else {
     const resp = await checkIDCardVerified(req.body.id_card);
-    res.status(200).json({ status: resp });
+    return res.status(200).json({ status: resp });
   }
 });
 
@@ -71,7 +71,7 @@ app.post('/verify-user', async (req, res) => {
     });
   }
 
-  verifyUserById(req.body.user_id)
+  return verifyUserById(req.body.user_id)
     .then((resp) => {
       return res.json(resp);
     })
@@ -87,7 +87,7 @@ app.post('/unverify-user', async (req, res) => {
       message: `Parameter "user_id" is required!`,
     });
   }
-  getUserById(req.body.user_id)
+  return getUserById(req.body.user_id)
     .then((doc) => doc.data())
     .then((user) => unverifySingleUser(user))
     .then((verified) => {
