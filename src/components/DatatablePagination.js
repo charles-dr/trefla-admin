@@ -54,6 +54,7 @@ const DataTablePagination = ({
   };
 
   const pageClick = (pageIndex) => {
+    console.log('[Page Click]', pageIndex);
     changePage(pageIndex);
   };
 
@@ -137,6 +138,7 @@ const DataTablePagination = ({
           </PaginationItem>
 
           {renderPages()}
+
           <PaginationItem className={`${!canNext && 'disabled'}`}>
             <PaginationLink
               className="next"
@@ -150,6 +152,7 @@ const DataTablePagination = ({
             </PaginationLink>
           </PaginationItem>
         </Pagination>
+        
         {showPageSizeOptions && (
           <div className="float-right pt-2">
             <span className="text-muted text-small mr-1">Items </span>

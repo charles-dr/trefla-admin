@@ -187,7 +187,7 @@ const UserList = ({
     return () => {
       return true;
     };
-  }, [match, users, posts, friends, recomposeUsers]);
+  }, [match, users, posts, friends]);
 
   const getUserAvatarUrl = ({ photo, sex, avatarIndex }) => {
     if (photo) {

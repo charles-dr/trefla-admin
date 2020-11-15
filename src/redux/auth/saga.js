@@ -21,14 +21,12 @@ import {
   deleteAuthToken,
 } from '../../utils';
 
-// fetch users
 function* loginRequest(action) {
   yield put({ type: AUTH_LOADING, payload: true });
   const res = yield call(api.r_loginRequest, action.payload);
   console.log('[Saga] login', res);
   // process session data
   if (res.status === true) {
-    const expire = new Date().getTime() + 3 * 60 * 60 * 1000; // 3 hours of session
     saveAuthToken(res.token);
   } else {
     deleteAuthToken();

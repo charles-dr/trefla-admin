@@ -191,7 +191,7 @@ const IDTransferList = ({
     return () => {
       return true;
     };
-  }, [match, users, notifications, recomposeIDTransfer]);
+  }, [match, users, notifications]);
 
   useEffect(() => {
     const filtered = users.map((user, i) => ({
@@ -464,7 +464,7 @@ const IDTransferList = ({
 
                 <div className="text-center">
                   {judgeInfo.from && <img src={getUserAvatarUrl(judgeInfo.from)} alt="Old User" style={{ width: 50, height: 50, borderRadius: '50%' }} />}
-                  {judgeInfo.from && <div className="mt-1 mb-2"><a href={`/app/user/edit/${judgeInfo.from.user_id}`} target="_blank">{judgeInfo.from.user_name}</a></div>}
+                  {judgeInfo.from && <div className="mt-1 mb-2"><a href={`/app/user/edit/${judgeInfo.from.user_id}`} target="_blank" rel="noopener noreferrer">{judgeInfo.from.user_name}</a></div>}
                 </div>
                 <Label>Verified</Label>
                 <Switch
@@ -488,7 +488,7 @@ const IDTransferList = ({
               <Colxx xxs="6">
                 <div className="text-center">
                   {judgeInfo.to && <img src={getUserAvatarUrl(judgeInfo.to)} alt="Old User" style={{ width: 50, height: 50, borderRadius: '50%' }} />}
-                  {judgeInfo.to && <div className="mt-1 mb-2"><a href={`/app/user/edit/${judgeInfo.to.user_id}`} target="_blank">{judgeInfo.to.user_name}</a></div>}
+                  {judgeInfo.to && <div className="mt-1 mb-2"><a href={`/app/user/edit/${judgeInfo.to.user_id}`} target="_blank" rel="noopener noreferrer">{judgeInfo.to.user_name}</a></div>}
 
                 </div>
                 <Label>Verified</Label>

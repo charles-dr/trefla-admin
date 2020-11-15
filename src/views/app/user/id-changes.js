@@ -165,7 +165,7 @@ const IDTransferList = ({
     return () => {
       return true;
     };
-  }, [match, users, notifications, recomposeIDTransfer]);
+  }, [match, users, notifications]);
 
   useEffect(() => {
     loadAllAdminNotiAction$();
@@ -206,54 +206,54 @@ const IDTransferList = ({
     }
     return `/assets/avatar/avatar_${sex === '1' ? 'girl2' : 'boy1'}.png`;
   };
-  const sverifyUserById = async (user_id) => {
-    try {
-      // history.push(`/app/user/edit/${user_id}`);
-      const usersF = users.filter((user) => user.user_id === user_id);
-      console.log(usersF[0]);
-      const profile = usersF[0];
-      profile.card_verified = 1;
+  // const sverifyUserById = async (user_id) => {
+  //   try {
+  //     // history.push(`/app/user/edit/${user_id}`);
+  //     const usersF = users.filter((user) => user.user_id === user_id);
+  //     console.log(usersF[0]);
+  //     const profile = usersF[0];
+  //     profile.card_verified = 1;
 
-      setPreloading(true);
-      const res = await updateUserProfile(profile);
-      setPreloading(false);
+  //     setPreloading(true);
+  //     const res = await updateUserProfile(profile);
+  //     setPreloading(false);
 
-      if (res.status === true) {
-        NotificationManager.success('User has been verified', 'Verification');
-        loadAllUsersAction();
-      } else {
-        NotificationManager.error(res.message, 'Verification');
-      }
-    } catch (err) {
-      NotificationManager.error(
-        'Error while updating verification!',
-        'Verification'
-      );
-    }
-  };
-  const sUnverifyUserById = async (user_id) => {
-    try {
-      const usersF = users.filter((user) => user.user_id === user_id);
-      const profile = usersF[0];
-      profile.card_verified = 0;
+  //     if (res.status === true) {
+  //       NotificationManager.success('User has been verified', 'Verification');
+  //       loadAllUsersAction();
+  //     } else {
+  //       NotificationManager.error(res.message, 'Verification');
+  //     }
+  //   } catch (err) {
+  //     NotificationManager.error(
+  //       'Error while updating verification!',
+  //       'Verification'
+  //     );
+  //   }
+  // };
+  // const sUnverifyUserById = async (user_id) => {
+  //   try {
+  //     const usersF = users.filter((user) => user.user_id === user_id);
+  //     const profile = usersF[0];
+  //     profile.card_verified = 0;
 
-      setPreloading(true);
-      const res = await updateUserProfile(profile);
-      setPreloading(false);
+  //     setPreloading(true);
+  //     const res = await updateUserProfile(profile);
+  //     setPreloading(false);
 
-      if (res.status === true) {
-        NotificationManager.success('User has been unverified', 'Verification');
-        loadAllUsersAction();
-      } else {
-        NotificationManager.error(res.message, 'Verification');
-      }
-    } catch (err) {
-      NotificationManager.error(
-        'Error while updating verification!',
-        'Verification'
-      );
-    }
-  };
+  //     if (res.status === true) {
+  //       NotificationManager.success('User has been unverified', 'Verification');
+  //       loadAllUsersAction();
+  //     } else {
+  //       NotificationManager.error(res.message, 'Verification');
+  //     }
+  //   } catch (err) {
+  //     NotificationManager.error(
+  //       'Error while updating verification!',
+  //       'Verification'
+  //     );
+  //   }
+  // };
   const deleteIDChange = (id) => {
     setDeleteId(id);
     setDelModal(true);
@@ -282,13 +282,6 @@ const IDTransferList = ({
     const filtered = users.filter(user => user.user_id === id);
     return filtered.length > 0 ? filtered[0] : {};
   }
-  const getNewNotificationId = () => {
-    let newId = -1;
-    for (const noti of notifications) {
-      newId = noti.noti_id > newId ? noti.noti_id : newId;
-    }
-    return newId + 1;
-  };
 
   const verifyUserById = async (user_id) => {
     setVerifyInfo({...verifyInfo, user_id: user_id, mode: 1});

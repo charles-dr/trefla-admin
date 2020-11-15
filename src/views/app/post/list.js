@@ -11,6 +11,7 @@ import { ReactTableWithPaginationCard } from '../../../containers/ui/ReactTableC
 import { deletePostByIdRequest, transformTime } from '../../../utils';
 import { loadAllPosts } from '../../../redux/actions';
 import { reactionImages, typeIcons } from '../../../constants/custom';
+import * as api from '../../../api';
 
 const PostList = ({ match, history, posts, users, loadAllPostsAction }) => {
   const [data, setData] = useState([]);
@@ -27,12 +28,12 @@ const PostList = ({ match, history, posts, users, loadAllPostsAction }) => {
     },
     {
       Header: 'Post Name',
-      accessor: 'post_name_',
+      accessor: 'post_name',
       cellClass: 'text-muted  w-5',
       Cell: (props) => (
         <>
-          {props.value.post_name && props.value.post_name}
-          {!props.value.post_name && (
+          {props.value && <span>{props.value}</span>}
+          {!props.value && (
             <Badge color="warning" pill className="mb-1">
               Not Specified
             </Badge>
@@ -65,12 +66,12 @@ const PostList = ({ match, history, posts, users, loadAllPostsAction }) => {
       cellClass: 'text-muted  w-25',
       Cell: (props) => <>{props.value}</>,
     },
-    {
-      Header: 'Likes',
-      accessor: 'likes',
-      cellClass: 'text-muted  w-25',
-      Cell: (props) => <>{formatLikes(props.value)}</>,
-    },
+    // {
+    //   Header: 'Likes',
+    //   accessor: 'likes',
+    //   cellClass: 'text-muted  w-25',
+    //   Cell: (props) => <>{formatLikes(props.value)}</>,
+    // },
     {
       Header: 'Comments',
       accessor: 'comment_num',
@@ -99,29 +100,29 @@ const PostList = ({ match, history, posts, users, loadAllPostsAction }) => {
         </>
       ),
     },
-    {
-      Header: 'Actions',
-      accessor: 'post_id',
-      cellClass: 'text-muted  w-20',
-      Cell: (props) => (
-        <>
-          <div className="tbl-actions">
-            <i
-              className="iconsminds-file-edit info"
-              title="Edit"
-              style={{ fontSize: 18 }}
-              onClick={() => handleOnEdit(props.value)}
-            />
-            <i
-              className="simple-icon-trash danger"
-              title="Remove"
-              style={{ fontSize: 18 }}
-              onClick={() => handleOnDelete(props.value)}
-            />
-          </div>
-        </>
-      ),
-    },
+    // {
+    //   Header: 'Actions',
+    //   accessor: 'post_id',
+    //   cellClass: 'text-muted  w-20',
+    //   Cell: (props) => (
+    //     <>
+    //       <div className="tbl-actions">
+    //         <i
+    //           className="iconsminds-file-edit info"
+    //           title="Edit"
+    //           style={{ fontSize: 18 }}
+    //           onClick={() => handleOnEdit(props.value)}
+    //         />
+    //         <i
+    //           className="simple-icon-trash danger"
+    //           title="Remove"
+    //           style={{ fontSize: 18 }}
+    //           onClick={() => handleOnDelete(props.value)}
+    //         />
+    //       </div>
+    //     </>
+    //   ),
+    // },
   ];
 
   useEffect(() => {
@@ -131,6 +132,10 @@ const PostList = ({ match, history, posts, users, loadAllPostsAction }) => {
 
     return () => {};
   }, [match, users, posts, recomposePosts]);
+
+  const loadData = ({ limit, page }) => {
+    return api.r_loadPostRequest({ page, limit, type: 'ALL' });
+  }
 
   const formatLikes = (str_likes) => {
         const arr_likes = str_likes.split(',');
@@ -248,7 +253,10 @@ const PostList = ({ match, history, posts, users, loadAllPostsAction }) => {
         </Colxx>
 
         <Colxx xxs="12">
-          <ReactTableWithPaginationCard cols={cols} data={data} />
+          <ReactTableWithPaginationCard 
+            cols={cols} 
+            loadData={loadData}
+            />
         </Colxx>
       </Row>
 

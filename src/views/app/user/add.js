@@ -39,6 +39,7 @@ const genderData = [
 
 const EditUserPage = ({ history, match, user_list, loadAllUsersAction }) => {
   let avatarInput = null;
+  // eslint-disable-next-line
   let cardImgFile = null;
 
   const [profile, setProfile] = useState(INIT_USER_INFO);

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Card, CardBody } from 'reactstrap';
-import { ReactSortable } from 'react-sortablejs';
+import { Row } from 'reactstrap';
+// import { ReactSortable } from 'react-sortablejs';
 import { connect } from 'react-redux';
 
 import IntlMessages from '../../helpers/IntlMessages';

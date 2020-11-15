@@ -10,7 +10,7 @@ import {
 	NavLink,
 	Row,
 } from 'reactstrap';
-import Mailto from 'react-protected-mailto';
+// import Mailto from 'react-protected-mailto';
 
 import IntlMessages from '../../../helpers/IntlMessages';
 import { NotificationManager } from '../../../components/common/react-notifications';
@@ -19,8 +19,8 @@ import Breadcrumb from '../../../containers/navs/Breadcrumb';
 import { ReactTableWithPaginationCard } from '../../../containers/ui/ReactTableCards';
 
 import { deleteReportByIdRequest, transformTime } from '../../../utils';
-import { loadAllComments, loadAllReports } from '../../../redux/actions';
-import { reactionImages } from '../../../constants/custom';
+import { loadAllReports } from '../../../redux/actions';
+// import { reactionImages } from '../../../constants/custom';
 
 const CommentList = ({
 	match,
@@ -120,7 +120,7 @@ const CommentList = ({
 		recomposeReports();
 
 		return () => { };
-	}, [users, posts, comments, reports, recomposeReports]);
+	}, [users, posts, comments, reports]);
 	const recomposeReports = () => {
 		const new_reports = [];
 		for (const report of reports) {

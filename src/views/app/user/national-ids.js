@@ -15,9 +15,9 @@ import Switch from 'rc-switch';
 import 'rc-switch/assets/index.css';
 import {
   AvForm,
-  AvGroup,
-  AvInput,
-  AvFeedback,
+  // AvGroup,
+  // AvInput,
+  // AvFeedback,
 } from 'availity-reactstrap-validation';
 import ImgsViewer from 'react-images-viewer';
 
@@ -32,7 +32,7 @@ import {
 } from '../../../api/functions.api';
 import {
   deleteUserById,
-  toggleBanStatus,
+  // toggleBanStatus,
   updateUserProfile,
 } from '../../../utils';
 import { loadAllUsers } from '../../../redux/actions';
@@ -48,7 +48,7 @@ const NationalIDList = ({
   const [data, setData] = useState([]);
 
   const [loading, setLoading] = useState(false);
-  const [delId, setDeleteId] = useState(-1);
+  const [delId] = useState(-1); //, setDeleteId
   const [modalDetails, setModalDetails] = useState(false);
   const [modalOptions, setModalOptions] = useState({
     comment: true,
@@ -195,7 +195,7 @@ const NationalIDList = ({
     return () => {
       return true;
     };
-  }, [match, users, posts, friends, recomposeUsers]);
+  }, [match, users, posts, friends]);
 
   useEffect(() => {
     const usersWithImg = users.filter((user) => user.card_img_url);

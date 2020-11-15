@@ -52,6 +52,7 @@ export const LANG_ARRIVED = 'LANG_ARRIVED';
 
 export const POSTS_GET = 'POSTS_GET';
 export const POSTS_ARRIVED = 'POSTS_ARRIVED';
+export const POSTS_SET_PAGER = 'posts.set.pager';
 
 export const REPORTS_GET = 'REPORTS_GET';
 export const REPORTS_ARRIVED = 'REPORTS_ARRIVED';
