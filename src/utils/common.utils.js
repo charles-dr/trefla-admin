@@ -1,7 +1,7 @@
 import CryptoJS from 'crypto-js';
 
 const getAuthTokenName = () => {
-  return 'TREFLAADMIN_TOKEN';
+  return 'TREFLAADMIN_TOKENREST';
 };
 
 export const serialize = function (obj) {

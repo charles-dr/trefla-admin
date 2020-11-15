@@ -3,15 +3,26 @@
   "version": "5.0.0",
   "description": "Gogo - React Bootstrap 4 Admin Dashboard Template",
   "private": true,
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "precommit": "lint-staged"
+  },
   "dependencies": {
     "@glidejs/glide": "^3.4.1",
     "availity-reactstrap-validation": "^2.6.1",
     "axios": "^0.19.2",
     "chart.js": "2.9.3",
     "classnames": "2.2.6",
+    "cors": "^2.8.5",
     "crypto-js": "^4.0.0",
     "firebase": "^7.17.1",
     "formik": "^2.1.4",
+    "jwt-decode": "^3.1.1",
     "moment": "2.26.0",
     "mousetrap": "^1.6.5",
     "prop-types": "^15.7.2",
@@ -52,15 +63,6 @@
     "sortablejs": "^1.10.2",
     "video.js": "^7.8.2",
     "yup": "^0.29.1"
-  },
-  "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "precommit": "lint-staged"
   },
   "husky": {
     "hooks": {

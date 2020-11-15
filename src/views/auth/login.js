@@ -74,8 +74,10 @@ const Login = ({
   const onUserLogin = (values) => {
     if (!loading) {
       if (values.email !== '' && values.password !== '') {
-        // setLoading(true);
-        loginUserAction(values);
+        loginUserAction({
+          email_or_name: values.email,
+          password: values.password,
+        });
       }
     }
   };

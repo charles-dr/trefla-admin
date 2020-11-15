@@ -1,4 +1,6 @@
 import { call, put, takeEvery } from 'redux-saga/effects';
+import jwt_decode from "jwt-decode";
+import * as api from '../../api';
 import {
   AUTH_AVATAR,
   AUTH_AVATAR_UPDATE,
@@ -22,12 +24,12 @@ import {
 // fetch users
 function* loginRequest(action) {
   yield put({ type: AUTH_LOADING, payload: true });
-  const res = yield call(loginAdmin, action.payload);
+  const res = yield call(api.r_loginRequest, action.payload);
   console.log('[Saga] login', res);
   // process session data
   if (res.status === true) {
     const expire = new Date().getTime() + 3 * 60 * 60 * 1000; // 3 hours of session
-    saveAuthToken(expire.toString());
+    saveAuthToken(res.token);
   } else {
     deleteAuthToken();
   }
@@ -38,20 +40,25 @@ function* loginRequest(action) {
 
 function* checkLogin(action) {
   const saved = getAuthToken();
-  if (saved) {
-    const now = new Date().getTime();
-    if (now < Number(saved)) {
-      yield put({
-        type: AUTH_LOGIN_SUCCESS,
-        payload: { status: true, message: '' },
-      });
-    } else {
-      yield put({
-        type: AUTH_LOGIN_SUCCESS,
-        payload: { status: false, message: '' },
-      });
-      deleteAuthToken();
+  try {
+    const decoded = jwt_decode(saved);
+    if (saved) {
+      const now = new Date().getTime();
+      if (now < decoded.exp * 1000) {
+        yield put({
+          type: AUTH_LOGIN_SUCCESS,
+          payload: { status: true, message: '' },
+        });
+      } else {
+        throw Object.assign(new Error('Token is expired'), { code: 400 });
+      }
     }
+  } catch (e) {
+    yield put({
+      type: AUTH_LOGIN_SUCCESS,
+      payload: { status: false, message: '' },
+    });
+    deleteAuthToken();    
   }
 }
 

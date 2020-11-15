@@ -134,6 +134,7 @@ const checkPostLocationWithUser = (post, user, deltaTime, locationIndex) => {
         getDistanceFromLatLonInMeter(postLocation, userLocation),
         userAroundRadius
       );
+      
       if (
         getDistanceFromLatLonInMeter(postLocation, userLocation) >
         userAroundRadius

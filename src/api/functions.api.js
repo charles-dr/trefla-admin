@@ -1,4 +1,4 @@
-import axios from './index';
+import { firebaseInstance as axios } from './instance';
 
 import { serialize } from '../utils';
 
