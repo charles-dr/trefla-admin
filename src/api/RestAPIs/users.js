@@ -11,10 +11,10 @@ export const r_addUserRequest = async (user) => {
   }
 }
 
-export const r_loadUserRequest = async ({ page, limit }) => {
+export const r_loadUserRequest = async ({ page, limit, mode }) => {
   try {
     const { data: res } = await axios.get('/api/v1/user', {
-      params: { page, limit }
+      params: { page, limit, mode }
     });
     return res;
   } catch (e) {

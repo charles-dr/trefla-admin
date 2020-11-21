@@ -206,16 +206,16 @@ const CommentList = ({ match, users, posts, history, loadAllCommentsAction }) =>
 
     setLoading(true);
 
-    const res = await deleteCommentByIdRequest(delId);
+    const res = await api.r_deleteCommentByIdRequest(delId);
 
     setLoading(false);
 
+    setDelModal(false);
     setDelId(-1);
 
     if (res.status === true) {
-      setDelModal(false);
       NotificationManager.success(res.message, 'Delete Post');
-      loadAllCommentsAction();
+      reloadTableContent();
     }
     else {
       NotificationManager.error(res.message, 'Delete Post');
