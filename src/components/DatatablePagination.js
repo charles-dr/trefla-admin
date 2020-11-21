@@ -54,7 +54,6 @@ const DataTablePagination = ({
   };
 
   const pageClick = (pageIndex) => {
-    console.log('[Page Click]', pageIndex);
     changePage(pageIndex);
   };
 

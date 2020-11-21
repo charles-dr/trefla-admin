@@ -11,3 +11,13 @@ export const r_loadPostRequest = async ({ page, limit, type = 'ALL' }) => {
     return e.response.data;
   }
 }
+
+export const r_deletePostByIdRequest = async (id) => {
+  try {
+    const { data: res } = await axios.delete(`/api/v1/post/${id}`);
+    return res;
+  } catch (e) {
+    console.log(e, e.response.data);
+    return e.repsonse.data;
+  }
+}

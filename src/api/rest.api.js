@@ -1,5 +1,8 @@
 import { nodeBasicInst as basicInst } from './instance';
 export * from './RestAPIs/posts';
+export * from './RestAPIs/users';
+
+export * from './RestAPIs/others';
 
 
 export const r_loginRequest = async ({ email_or_name, password }) => {

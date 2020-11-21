@@ -25,8 +25,9 @@ import { Colxx, Separator } from '../../../components/common/CustomBootstrap';
 import Breadcrumb from '../../../containers/navs/Breadcrumb';
 import { ReactTableWithPaginationCard } from '../../../containers/ui/ReactTableCards';
 
-import { deleteUserById, toggleBanStatus } from '../../../utils';
+import { deleteUserById, ru_toggleBanStatus } from '../../../utils';
 import { loadAllUsers } from '../../../redux/actions';
+import * as api from '../../../api';
 
 const UserList = ({
   match,
@@ -37,6 +38,7 @@ const UserList = ({
   loadAllUsersAction,
 }) => {
   const [data, setData] = useState([]);
+  const [refreshTable, setRefreshTable] = useState(0);
 
   const [loading, setLoading] = useState(false);
   const [delId, setDeleteId] = useState(-1);
@@ -88,7 +90,7 @@ const UserList = ({
       cellClass: 'text-muted  w-5',
       Cell: (props) => (
         <>
-          {props.value === '1' && (
+          {props.value.toString() === '1' && (
             <div className="text-center">
               <span
                 className="glyph-icon iconsminds-female"
@@ -96,7 +98,7 @@ const UserList = ({
               />
             </div>
           )}
-          {props.value !== '1' && (
+          {props.value.toString() !== '1' && (
             <div className="text-center">
               <span
                 className="glyph-icon iconsminds-male"
@@ -182,14 +184,34 @@ const UserList = ({
     },
   ];
 
-  useEffect(() => {
-    recomposeUsers();
-    return () => {
-      return true;
-    };
-  }, [match, users, posts, friends]);
+  const loadData = ({ limit, page }) => {
+    return api.r_loadUserRequest({ page, limit, type: 'ALL' })
+      .then(res => {
+        const { data, pager, status } = res;
+        if (status) {
+          return {
+            list: data.map(user => ({
+              ...user,
+              image: {
+                photo: user.photo,
+                sex: user.sex,
+                avatarIndex: user.avatarIndex,
+              },
+              action: {
+                user_id: user.id,
+                active: user.active,
+              },
+            })),
+            pager,
+          };
+        } else {
+
+        }
+      });
+  }
 
   const getUserAvatarUrl = ({ photo, sex, avatarIndex }) => {
+    sex = sex.toString();
     if (photo) {
       return photo;
     }
@@ -211,55 +233,34 @@ const UserList = ({
       </>
     );
   };
-  const recomposeUsers = () => {
-    const new_users = [];
-    for (const user of users) {
-      const user_item = {};
-      // copy all key-values
-      for (const key in user) {
-        if (user[key] !== undefined) {
-          user_item[key] = user[key];
-        }
-      }
-      // new key - image
-      user_item.image = {
-        photo: user.photo,
-        sex: user.sex,
-        avatarIndex: user.avatarIndex,
-      };
-      user_item.action = {
-        user_id: user.user_id,
-        active: user.active,
-      };
 
-      // put item to array
-      new_users.push(user_item);
-    }
-    setData(new_users);
-  };
+  const reloadTableContent = () => {
+    setRefreshTable(refreshTable + 1);
+  }
 
   const openAddModal = () => {
     history.push('/app/user/add');
   };
+
   const handleOnEdit = (user_id) => {
     history.push(`/app/user/edit/${user_id}`);
   };
+
   const handleOnBanUser = (ban) => {
     setBanInfo(ban);
-    // setBanReason('');
-    // if (ban.active !== undefined && ban.active === 1) {
     setBanModal(true);
-    // }
   };
+
   const onConfirmBan = async (event, errors, values) => {
     // console.log(event, errors, values);
     if ((banInfo.active === 1 && errors.length === 0) || banInfo.active !== 1) {
       // console.log(values);
       setLoading(true);
-      const res = await toggleBanStatus(
+      const res = await ru_toggleBanStatus(
         banInfo,
         banInfo.active === 1 ? values.banReason : ''
       );
+      console.log(res);
       setLoading(false);
       if (res.status === true) {
         NotificationManager.success(
@@ -267,7 +268,8 @@ const UserList = ({
           `${banInfo.active === 1 ? 'Ban' : 'Release'} User`
         );
         setBanModal(false);
-        loadAllUsersAction();
+        reloadTableContent();
+        // loadAllUsersAction();
       } else {
         NotificationManager.error(
           res.message,
@@ -281,16 +283,17 @@ const UserList = ({
     setModalDetails(true);
     setDeleteId(user_id);
   };
+
   const onConfirmDelete = async () => {
     console.log(delId, modalOptions);
 
     try {
       setLoading(true);
-      const res = await deleteUserById(delId, modalOptions);
+      const res = await api.r_deleteUserByIdRequest(delId, modalOptions); console.log('[res]', res)
       setLoading(false);
       if (res.status === true) {
         NotificationManager.success(res.message, 'Delete User');
-        loadAllUsersAction();
+        reloadTableContent();
         setModalDetails(false);
       } else {
         NotificationManager.error(res.message, 'Delete User');
@@ -301,6 +304,7 @@ const UserList = ({
       NotificationManager.error('Something went wrong', 'Delete User');
     }
   };
+
   const getAllActive = () => {
     return (
       modalOptions.post &&
@@ -310,6 +314,7 @@ const UserList = ({
       modalOptions.friend
     );
   };
+
   const setAllActive = (st) => {
     setModalOptions({
       comment: st,
@@ -344,7 +349,11 @@ const UserList = ({
         </Colxx>
 
         <Colxx xxs="12">
-          <ReactTableWithPaginationCard cols={cols} data={data} />
+          <ReactTableWithPaginationCard 
+            cols={cols} 
+            loadData={loadData}
+            refresh={refreshTable}
+            />
         </Colxx>
       </Row>
 

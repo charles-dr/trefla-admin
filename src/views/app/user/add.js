@@ -15,8 +15,9 @@ import { Colxx, Separator } from '../../../components/common/CustomBootstrap';
 import IntlMessages from '../../../helpers/IntlMessages';
 import Breadcrumb from '../../../containers/navs/Breadcrumb';
 
-import { formatTime, addNewUserRequest } from '../../../utils';
+import { formatTime, ru_addUserProfile } from '../../../utils';
 import { loadAllUsers } from '../../../redux/actions';
+import * as api from '../../../api';
 
 const INIT_USER_INFO = {
   active: 1,
@@ -52,52 +53,23 @@ const EditUserPage = ({ history, match, user_list, loadAllUsersAction }) => {
   );
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    return () => {
-      return true;
-    };
-  }, [match]);
-
   const onUpdateProfile = async (values) => {
-    // console.log(profile, avatar, gender, active, dob, cardImage);
     const avatarFile = avatarInput.files[0];
-
+    const cardFile = cardImgFile.files[0];
     const new_profile = composeSubmitData();
-    // console.log(new_profile, avatar.mode === 1 ? avatarInput.files[0] : null, cardImgFile.files[0]);
-    // return;
 
     // set loading
     setLoading(true);
 
-    // console.log(cardImgFile, !!cardImgFile);
-    const res = await addNewUserRequest(
-      { ...new_profile, user_id: getUserNewId() },
-      avatar.mode === 1 ? avatarFile : null
-    );
+    const res = await ru_addUserProfile(new_profile, avatarFile, cardFile);
+    
     // cancel the loading
     setLoading(false);
     if (res.status === true) {
-      NotificationManager.success(
-        res.message,
-        'Add User',
-        3000,
-        null,
-        null,
-        ''
-      );
-      // init form
-      // setProfile({ old_pass: '', password: '', cpassword: '' });
-      loadAllUsersAction();
+      NotificationManager.success(res.message, 'Add User', 3000, null, null, '');
       history.push('/app/user');
     } else {
-      NotificationManager.warning(
-        res.message,
-        'Add User',
-        3000,
-        null,
-        null,
-        ''
-      );
+      NotificationManager.warning(res.message, 'Add User', 3000, null, null, '');
     }
   };
 
@@ -116,7 +88,7 @@ const EditUserPage = ({ history, match, user_list, loadAllUsersAction }) => {
       submit_profile.avatarIndex = avatar.path;
     }
     // gender
-    submit_profile.sex = gender.value;
+    submit_profile.sex = Number(gender.value);
 
     return submit_profile;
   };
@@ -129,6 +101,7 @@ const EditUserPage = ({ history, match, user_list, loadAllUsersAction }) => {
     }
     return error;
   };
+
   const validateRequired = (name) => {
     const value = profile[name];
     let error;
@@ -137,6 +110,7 @@ const EditUserPage = ({ history, match, user_list, loadAllUsersAction }) => {
     }
     return error;
   };
+
   const validatePassword = (value) => {
     value = profile.password;
     let error;
@@ -147,6 +121,7 @@ const EditUserPage = ({ history, match, user_list, loadAllUsersAction }) => {
     }
     return error;
   };
+
   const validateCPassword = () => {
     let error;
     if (profile.password !== profile.cpassword) {
@@ -154,32 +129,35 @@ const EditUserPage = ({ history, match, user_list, loadAllUsersAction }) => {
     }
     return error;
   };
+
   const handleOnChange = (e) => {
     setProfile({ ...profile, [e.target.name]: e.target.value });
   };
+
   const handleOnCardImgChange = (e) => {
     const file = e.target.files[0];
-
     // check if selected valid file
     if (file) {
       setCardImage(URL.createObjectURL(file));
-      // console.log(cardImgFile.files[0]);
     }
   };
+
   const handleAvatarSelect = (e) => {
     const file = e.target.files[0];
-
     // check if selected valid file
     if (file) {
       setAvatar({ mode: 1, path: URL.createObjectURL(file) });
     }
   };
+
   const handleOnClickAvatar = (num) => {
     setAvatar({ mode: 0, path: num });
   };
+
   const openAvatarSelector = () => {
     avatarInput.click();
   };
+
   const getAvatarPath = () => {
     if (avatar.mode === 0) {
       return `/assets/avatar/${
@@ -188,6 +166,7 @@ const EditUserPage = ({ history, match, user_list, loadAllUsersAction }) => {
     }
     return avatar.path || '/assets/avatar/avatar_boy1.png';
   };
+  
   const getUserNewId = () => {
     let newId = -1;
     for (const user of user_list) {

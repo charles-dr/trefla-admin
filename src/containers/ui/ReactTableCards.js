@@ -35,7 +35,7 @@ function Table({ columns, data, divided = false, defaultPageSize = 10, pageCount
       data, 
       pageCount: controlledPageCount,
       manualPagination: true,
-      // autoResetPage: false,
+      autoResetPage: false,
       initialState: { pageIndex: 0, pageSize: defaultPageSize },
     },
     useSortBy,
@@ -113,21 +113,23 @@ function Table({ columns, data, divided = false, defaultPageSize = 10, pageCount
   );
 }
 
-export const ReactTableWithPaginationCard = ({ cols, loadData }) => {
+export const ReactTableWithPaginationCard = ({ cols, loadData, refresh }, ref) => {
+
   const [data, setData] = React.useState([]);
   const [lastId, setLastId] = React.useState(null);
   const [pageCount, setPageCount] = React.useState(0);
+  const [pager, setPager] = React.useState({ limit: 10, page: 0 });
+
+  React.useEffect(() => {
+    if (refresh > 0) fetchData({ pageSize: pager.limit, pageIndex: pager.page });
+  }, [refresh]);
 
   const fetchData = React.useCallback(async ({ pageSize, pageIndex: pIdx }) => {
-    console.log('[Move Page]', pIdx, pageSize);
     return loadData({ page: pIdx, limit: pageSize })
-      .then(res => {
-        if (res.status) {
-          const { data: list, pager } = res;
-          console.log('[Data List]', list, pager);
-          setPageCount(Math.ceil(pager.total / pager.limit));
-          setData(list);
-        }
+      .then(({ list, pager }) => {
+        setPageCount(Math.ceil(pager.total / pager.limit));
+        setData(list);
+        setPager({ limit: pageSize, page: pIdx });
       })
       .catch(e => {
         console.log(e);
@@ -144,7 +146,6 @@ export const ReactTableWithPaginationCard = ({ cols, loadData }) => {
           data={data} 
           fetchData={fetchData}
           pageCount={pageCount}
-          // initPageIndex={pageIndex}
           />
       </CardBody>
     </Card>

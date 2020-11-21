@@ -55,7 +55,7 @@ const App = ({
 
     anonymousLogin()
       .then(result => {
-        console.log('[firebase] =>');
+        // console.log('[firebase] =>');
         // load all data
         // getAllCommentsAction();
         // getAllFriendsAction();
