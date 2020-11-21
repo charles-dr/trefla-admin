@@ -8,23 +8,23 @@ import { Colxx, Separator } from '../../../components/common/CustomBootstrap';
 import Breadcrumb from '../../../containers/navs/Breadcrumb';
 import { ReactTableWithPaginationCard } from '../../../containers/ui/ReactTableCards';
 
-
 import { deleteCommentByIdRequest, transformTime } from '../../../utils';
 import { loadAllComments } from '../../../redux/actions';
 import { reactionImages } from '../../../constants/custom';
+import * as api from '../../../api';
 
 
-const CommentList = ({ match, history, comments, posts, users, loadAllCommentsAction }) => {
+const CommentList = ({ match, users, posts, history, loadAllCommentsAction }) => {
   const [data, setData] = useState([]);
+  const [refreshTable, setRefreshTable] = useState(0);
   const [delModal, setDelModal] = useState(false);
   const [delId, setDelId] = useState(-1);
   const [loading, setLoading] = useState(false);
 
-
   const cols = [
     {
       Header: 'User',
-      accessor: 'user_name',
+      accessor: 'user.user_name',
       cellClass: 'list-item-heading w-15',
       Cell: (props) => <>{props.value}</>,
     },
@@ -47,7 +47,7 @@ const CommentList = ({ match, history, comments, posts, users, loadAllCommentsAc
     },
     {
       Header: 'Parent',
-      accessor: 'parent',
+      accessor: 'target',
       cellClass: 'text-muted w-25',
       Cell: (props) => <>
         {getParentContent(props.value)}
@@ -58,8 +58,8 @@ const CommentList = ({ match, history, comments, posts, users, loadAllCommentsAc
       accessor: 'isGuest',
       cellClass: 'text-muted  w-5',
       Cell: (props) => <>
-        {props.value && <Badge color="outline-success" pill className="mb-1"> True </Badge>}
-        {!props.value && <Badge color="outline-danger" pill className="mb-1"> False </Badge>}
+        {props.value === 1 && <Badge color="outline-success" pill className="mb-1"> True </Badge>}
+        {props.value === 0 && <Badge color="outline-danger" pill className="mb-1"> False </Badge>}
       </>,
     },
     {
@@ -82,7 +82,7 @@ const CommentList = ({ match, history, comments, posts, users, loadAllCommentsAc
     },
     {
       Header: 'Actions',
-      accessor: 'comment_id',
+      accessor: 'id',
       cellClass: 'text-muted  w-15',
       Cell: (props) => (
         <>
@@ -107,14 +107,32 @@ const CommentList = ({ match, history, comments, posts, users, loadAllCommentsAc
     },
   ];
 
+  const loadData = ({ limit, page }) => {
+    return api.r_loadCommentRequest({ page, limit, type: 'ALL' })
+      .then(res => {
+        const { data, pager, status } = res;
+        if (status) {
+          return {
+            list: data.map(comment => ({
+              ...comment,
+              // add new field 'user_name'
+              user_name: comment.user.user_name,
+              // add new field 'likes'
+              likes: `${comment.like_1_num},${comment.like_2_num},${comment.like_3_num},${comment.like_4_num},${comment.like_5_num},${comment.like_6_num}`,
+              // add new field 'parent';
+              parent: { type: comment.type, target_id: comment.target_id }
+            })),
+            pager,
+          };
+        } else {
 
-  useEffect(() => {
-    // console.log(users, posts);
+        }
+      });
+  }
 
-    recomposeComments();
-
-    return () => { };
-  }, [users, posts, comments]);
+  const reloadTableContent = () => {
+    setRefreshTable(refreshTable + 1);
+  }
 
   const formatLikes = (str_likes) => {
     const arr_likes = str_likes.split(',');
@@ -137,36 +155,7 @@ const CommentList = ({ match, history, comments, posts, users, loadAllCommentsAc
             </Badge>;
     }
   }
-  const recomposeComments = () => {
-    let new_comments = [];
-    for (let comment of comments) {
-      let comment_item = {};
-      // copy all key-values
-      for (let key in comment) {
-        if (comment[key] !== undefined) {
-          comment_item[key] = comment[key];
-        }
-      }
 
-      // for old version: Aug 20
-      if (comment_item['type'] === undefined) {
-        comment_item['type'] = 'POST';
-        comment_item['target_id'] = comment_item['post_id'];
-      }
-
-
-      // add new field 'user_name'
-      comment_item['user_name'] = getUserNameById(comment.user_id);
-      // add new field 'likes'
-      comment_item['likes'] = `${comment.like_1_num},${comment.like_2_num},${comment.like_3_num},${comment.like_4_num},${comment.like_5_num},${comment.like_6_num}`;
-      // add new field 'parent';
-      comment_item['parent'] = { type: comment_item.type, target_id: comment_item.target_id };
-
-      // put item to array
-      new_comments.push(comment_item);
-    }
-    setData(new_comments);
-  }
   const getUserNameById = id => {
     if (users.length > 0) {
       for (let user of users) {
@@ -178,21 +167,24 @@ const CommentList = ({ match, history, comments, posts, users, loadAllCommentsAc
       return '';
     }
   }
-  const getParentContent = ({ type, target_id }) => {
-    if (type === 'POST') {
-      for (let post of posts) {
-        if (post.post_id === target_id) {
-          return <NavLink href={`/app/post/edit/${target_id}`}>{post.feed}</NavLink>;
-        }
+
+  const getParentContent = (parent) => {
+    if (!parent) {
+      return <Badge color="outline-warning" pill className="mb-1"> Deleted </Badge>
+    }
+    const { type, target_id, ...target } = parent;
+
+    if (parent.feed) { // then post
+      if (target) {
+        return <NavLink href={`/app/post/edit/${parent.id}`}>{parent.feed}</NavLink>;
+      } else {
+        return <>
+          <Badge color="outline-warning" pill className="mb-1"> Deleted </Badge>
+        </>
       }
-      return <>
-        <Badge color="outline-warning" pill className="mb-1"> Deleted </Badge>
-      </>
-    } else if (type === 'COMMENT') {
-      for (let comment of comments) {
-        if (comment.comment_id === target_id) {
-          return <NavLink href={`/app/comment/edit/${target_id}`}>{comment.comment}</NavLink>
-        }
+    } else if (parent.comment) { // then comment
+      if (target) {
+        return <NavLink href={`/app/comment/edit/${parent.id}`}>{parent.comment}</NavLink>
       }
       return <>
         <Badge color="outline-warning" pill className="mb-1"> Deleted </Badge>
@@ -208,21 +200,22 @@ const CommentList = ({ match, history, comments, posts, users, loadAllCommentsAc
     setDelId(post_id);
     setDelModal(true);
   };
+
   const proceedDelete = async () => {
     // console.log('[delete now]', delId);
 
     setLoading(true);
 
-    const res = await deleteCommentByIdRequest(delId);
+    const res = await api.r_deleteCommentByIdRequest(delId);
 
     setLoading(false);
 
+    setDelModal(false);
     setDelId(-1);
 
     if (res.status === true) {
-      setDelModal(false);
       NotificationManager.success(res.message, 'Delete Post');
-      loadAllCommentsAction();
+      reloadTableContent();
     }
     else {
       NotificationManager.error(res.message, 'Delete Post');
@@ -248,7 +241,8 @@ const CommentList = ({ match, history, comments, posts, users, loadAllCommentsAc
         <Colxx xxs="12">
           <ReactTableWithPaginationCard
             cols={cols}
-            data={data}
+            loadData={loadData}
+            refresh={refreshTable}
           />
         </Colxx>
       </Row>
@@ -298,13 +292,8 @@ const CommentList = ({ match, history, comments, posts, users, loadAllCommentsAc
   );
 };
 
-const mapStateToProps = ({ comments: commentApp, posts: postApp, users: userApp }) => {
-  const { list: comments } = commentApp;
-  const { list: posts } = postApp;
-  const { list: users } = userApp;
-
+const mapStateToProps = ({  }) => {
   return {
-    comments, posts, users
   };
 };
 

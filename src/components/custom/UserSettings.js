@@ -8,7 +8,7 @@ import 'rc-switch/assets/index.css';
 
 import IntlMessages from '../../helpers/IntlMessages';
 import { NotificationManager } from '../common/react-notifications';
-import { updateUserProfile } from '../../utils';
+import { ru_updateUserProfile } from '../../utils';
 import { loadAllUsers } from '../../redux/actions';
 
 const UserSettings = ({ profile, loadAllUsersAction, ...props }) => {
@@ -18,6 +18,7 @@ const UserSettings = ({ profile, loadAllUsersAction, ...props }) => {
   const [prof, setProf] = useState(profile);
 
   useEffect(() => {
+    console.log('[profile]', profile)
     setProf(profile);
     return () => {};
   }, [profile]);
@@ -26,27 +27,27 @@ const UserSettings = ({ profile, loadAllUsersAction, ...props }) => {
     const fromPost = !(
       prof &&
       prof.isNotiFromNewPost !== undefined &&
-      prof.isNotiFromNewPost === false
+      prof.isNotiFromNewPost === 0
     );
     const fromMessage = !(
       prof &&
       prof.isNotiFromChat !== undefined &&
-      prof.isNotiFromChat === false
+      prof.isNotiFromChat === 0
     );
     const fromComment = !(
       prof &&
       prof.isNotiFromComment !== undefined &&
-      prof.isNotiFromComment === false
+      prof.isNotiFromComment === 0
     );
     const fromReaction = !(
       prof &&
       prof.isNotiFromReaction !== undefined &&
-      prof.isNotiFromReaction === false
+      prof.isNotiFromReaction === 0
     );
     const fromFriend = !(
       prof &&
       prof.isNotiFromFriend !== undefined &&
-      prof.isNotiFromFriend === false
+      prof.isNotiFromFriend === 0
     );
 
     const fromAll =
@@ -62,13 +63,12 @@ const UserSettings = ({ profile, loadAllUsersAction, ...props }) => {
   };
 
   const saveSettings = async () => {
-    // console.log(prof); return;
     setLoading(true);
-    const res = await updateUserProfile(prof);
+    const res = await ru_updateUserProfile(prof);
     if (res.status === true) {
       setLoading(false);
       NotificationManager.success('User has been updated!', 'User Settings');
-      loadAllUsersAction();
+      // loadAllUsersAction();
       history.push('/app/user');
     } else {
       setLoading(false);
@@ -76,7 +76,10 @@ const UserSettings = ({ profile, loadAllUsersAction, ...props }) => {
     }
   };
 
+  const bool2Int = st => (st ? 1 : 0);
+
   const setAllNotification = (st) => {
+    st = bool2Int(st);
     setProf({
       ...prof,
       isNotiFromFriend: st,
@@ -108,35 +111,35 @@ const UserSettings = ({ profile, loadAllUsersAction, ...props }) => {
       <SwitchGroup
         className="mb-3"
         active={fromPost}
-        setActive={(st) => setProf({ ...prof, isNotiFromNewPost: st })}
+        setActive={(st) => setProf({ ...prof, isNotiFromNewPost: bool2Int(st) })}
         label="Post"
       />
 
       <SwitchGroup
         className="mb-3"
         active={fromMessage}
-        setActive={(st) => setProf({ ...prof, isNotiFromChat: st })}
+        setActive={(st) => setProf({ ...prof, isNotiFromChat: bool2Int(st) })}
         label="Message"
       />
 
       <SwitchGroup
         className="mb-3"
         active={fromComment}
-        setActive={(st) => setProf({ ...prof, isNotiFromComment: st })}
+        setActive={(st) => setProf({ ...prof, isNotiFromComment: bool2Int(st) })}
         label="Comment"
       />
 
       <SwitchGroup
         className="mb-3"
         active={fromReaction}
-        setActive={(st) => setProf({ ...prof, isNotiFromReaction: st })}
+        setActive={(st) => setProf({ ...prof, isNotiFromReaction: bool2Int(st) })}
         label="Reaction"
       />
 
       <SwitchGroup
         className="mb-3"
         active={fromFriend}
-        setActive={(st) => setProf({ ...prof, isNotiFromFriend: st })}
+        setActive={(st) => setProf({ ...prof, isNotiFromFriend: bool2Int(st) })}
         label="Friend"
       />
 

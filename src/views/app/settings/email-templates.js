@@ -3,13 +3,13 @@ import { connect } from 'react-redux';
 import { Row } from 'reactstrap';
 
 import IntlMessages from '../../../helpers/IntlMessages';
-import { NotificationManager } from '../../../components/common/react-notifications';
+// import { NotificationManager } from '../../../components/common/react-notifications';
 import { Colxx, Separator } from '../../../components/common/CustomBootstrap';
 import Breadcrumb from '../../../containers/navs/Breadcrumb';
 import { ReactTableWithPaginationCard } from '../../../containers/ui/ReactTableCards';
 
 import { loadAllLangs, loadAllEmailTemplateAction } from '../../../redux/actions';
-import { moderateString, transformTime } from '../../../utils';
+import { moderateString } from '../../../utils';
 
 const EmailTemplateList = ({ history, match, langs, templates, loadAllLangsAction, loadAllEmailTemplateAction$ }) => {
   const [data, setData] = useState([]);
@@ -57,7 +57,7 @@ const EmailTemplateList = ({ history, match, langs, templates, loadAllLangsActio
   useEffect(() => {
     loadAllEmailTemplateAction$();
     return () => {}
-  }, []);
+  }, [loadAllEmailTemplateAction$]);
   const recomposeList = () => {
     setData(templates);
   };
@@ -65,9 +65,9 @@ const EmailTemplateList = ({ history, match, langs, templates, loadAllLangsActio
     const strippedHTML = html.replace(/<[^>]*>?/gm, '');
     return moderateString(strippedHTML, 50);
   }
-  const toAddPage = () => {
-    history.push('/app/lang/add');
-  };
+  // const toAddPage = () => {
+  //   history.push('/app/lang/add');
+  // };
   const handleOnEdit = (id) => {
     history.push(`/app/settings/email-template/${id}`);
   };

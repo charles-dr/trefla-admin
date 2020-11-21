@@ -4,7 +4,7 @@ import { serialize } from '../utils';
 
 export const backupDBRequest = async () => {
   try {
-    const {data: res, status} = await axios.post('/firestore/export', {});
+    const {data: res} = await axios.post('/firestore/export', {});
     return res;
   } catch (e) {
     return {
@@ -54,7 +54,7 @@ export const unverifyUserByIdRequest = async (user_id) => {
 
 export const restoreBackupReqeust = async (id) => {
   try {
-    const {data: res, status} = await axios.post('/firestore/import', {id});
+    const { data: res } = await axios.post('/firestore/import', {id});
     return res;
   } catch (e) {
     return {
@@ -78,7 +78,7 @@ export const sendConsentEmail = async (data) => {
 
 export const sendMultiNotificationsRequest = async (data) => {
   try {
-    const {data: res, status} = await axios.post('/notification/bulk', data);
+    const { data: res } = await axios.post('/notification/bulk', data);
     return res;
   } catch (e) {
     return {
@@ -90,7 +90,7 @@ export const sendMultiNotificationsRequest = async (data) => {
 
 export const sendSingleNotificationRequest = async (data) => {
   try {
-    const {data: res, status} = await axios.post('/notification/single', data);
+    const { data: res } = await axios.post('/notification/single', data);
     return res;
   } catch (e) {
     return {

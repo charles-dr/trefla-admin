@@ -6,42 +6,42 @@ import * as Yup from 'yup';
 
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import Switch from 'rc-switch';
-import 'rc-switch/assets/index.css';
+// import Switch from 'rc-switch';
+// import 'rc-switch/assets/index.css';
 import Select from 'react-select';
 
 import { NotificationManager } from '../../../components/common/react-notifications';
 import CustomSelectInput from '../../../components/common/CustomSelectInput';
 import { Colxx, Separator } from '../../../components/common/CustomBootstrap';
-import { FormikReactSelect, FormikCustomRadioGroup } from '../../../containers/form-validations/FormikFields';
+// import { FormikReactSelect, FormikCustomRadioGroup } from '../../../containers/form-validations/FormikFields';
 import IntlMessages from '../../../helpers/IntlMessages';
 import Breadcrumb from '../../../containers/navs/Breadcrumb';
 
 import { sendSingleNotificationRequest, sendMultiNotificationsRequest } from '../../../api/functions.api';
 import { loadAllUsers } from '../../../redux/actions';
 
-const INIT_USER_INFO = {
-  active: 1,
-  birthday: '1/1/1970',
-  card_number: '',
-  city: '',
-  email: '',
-  sex: '1',
-  user_id: -1,
-  user_name: '',
-  bio: '',
-  password: '',
-  cpassword: '',
-};
+// const INIT_USER_INFO = {
+//   active: 1,
+//   birthday: '1/1/1970',
+//   card_number: '',
+//   city: '',
+//   email: '',
+//   sex: '1',
+//   user_id: -1,
+//   user_name: '',
+//   bio: '',
+//   password: '',
+//   cpassword: '',
+// };
 const genderData = [
   { label: 'All', value: '2', key: 1 },
   { label: 'Male', value: '0', key: 0 },
   { label: 'Female', value: '1', key: 1 },
 ];
-const userModeOptions = [
-  { value: 'manual', label: 'Manually' },
-  { value: 'filter', label: 'Using filters' },
-];
+// const userModeOptions = [
+//   { value: 'manual', label: 'Manually' },
+//   { value: 'filter', label: 'Using filters' },
+// ];
 const ageModes = [
   {value: 'none', label: 'None'},
   { value: 'old', label: 'Older than' },
@@ -53,12 +53,12 @@ const ageModes = [
 
 const EditUserPage = ({ history, match, user_list, loadAllUsersAction }) => {
 
-  const [profile, setProfile] = useState(INIT_USER_INFO);
+  // const [profile, setProfile] = useState(INIT_USER_INFO);
 
   const [singleNoti, setSingleNoti] = useState({ title: 'Trefla', body: '' });
-  const [multiNoti, setMultiNoti] = useState({ title: 'Trefla', body: '' });
+  const [multiNoti] = useState({ title: 'Trefla', body: '' });
 
-  const [active, setActive] = useState(false);
+  // const [active, setActive] = useState(false);
   const [gender, setGender] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -66,7 +66,7 @@ const EditUserPage = ({ history, match, user_list, loadAllUsersAction }) => {
   const [singleUser, setSingleUser] = useState(null);
   const [multiUser, setMultiUser] = useState(null);
 
-  const [userMode, setUserMode] = useState(userModeOptions[0]);
+  // const [userMode, setUserMode] = useState(userModeOptions[0]);
   const [birthday, setBirthday] = useState(new Date());
   const [ageMode, setAgeMode] = useState('none')
 
@@ -78,32 +78,32 @@ const EditUserPage = ({ history, match, user_list, loadAllUsersAction }) => {
     };
   }, [match, user_list]);
 
-  const onUpdateProfile = async (values) => {
+  // const onUpdateProfile = async (values) => {
 
-  };
+  // };
 
-  const composeSubmitData = () => {
+  // const composeSubmitData = () => {
 
-  };
+  // };
 
-  const validateRequired = (name) => {
-    const value = profile[name];
-    let error;
-    if (!value) {
-      error = 'This field is required!';
-    }
-    return error;
-  };
-  const handleOnChange = (e) => {
-    setProfile({ ...profile, [e.target.name]: e.target.value });
-  };
+  // const validateRequired = (name) => {
+  //   const value = profile[name];
+  //   let error;
+  //   if (!value) {
+  //     error = 'This field is required!';
+  //   }
+  //   return error;
+  // };
+  // const handleOnChange = (e) => {
+  //   setProfile({ ...profile, [e.target.name]: e.target.value });
+  // };
 
   const handleOnChangeSingleNoti = (e) => {
     setSingleNoti({ ...singleNoti, [e.target.name]: e.target.value });
   }
-  const handleOnChangeMultiNoti = (e) => {
-    setMultiNoti({ ...multiNoti, [e.target.name]: e.target.value });
-  }
+  // const handleOnChangeMultiNoti = (e) => {
+  //   setMultiNoti({ ...multiNoti, [e.target.name]: e.target.value });
+  // }
   const handleOnGenderChange = (val) => {
     // console.log('[gender]', val);
     setGender(val);
@@ -174,14 +174,14 @@ const EditUserPage = ({ history, match, user_list, loadAllUsersAction }) => {
     }
     return error;
   }
-  const validateRequiredM = (fld) => {
-    const value = multiNoti[fld];
-    let error;
-    if (!value) {
-      error = 'This field is required!';
-    }
-    return error;
-  }
+  // const validateRequiredM = (fld) => {
+  //   const value = multiNoti[fld];
+  //   let error;
+  //   if (!value) {
+  //     error = 'This field is required!';
+  //   }
+  //   return error;
+  // }
 
   const sendSingleNotification = async (values) => {
     if (!singleUser) {

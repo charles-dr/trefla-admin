@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import {
-  Badge,
+  // Badge,
   Button,
   Modal,
   ModalHeader,
@@ -13,7 +13,7 @@ import {
   AvForm,
   AvGroup,
   AvInput,
-  AvFeedback,
+  // AvFeedback,
 } from 'availity-reactstrap-validation';
 
 import IntlMessages from '../../../helpers/IntlMessages';
@@ -27,8 +27,8 @@ import { backupDBRequest, restoreBackupReqeust } from '../../../api/functions.ap
 import {
   deleteBackupRequest,
   getDBBackupRequest,
-  moderateString,
-  transformTime,
+  // moderateString,
+  // transformTime,
   updateBackupNoteById,
 } from '../../../utils';
 
@@ -51,7 +51,7 @@ const DBBackupList = ({ history, match }) => {
       accessor: 'file',
       cellClass: 'list-item-heading w-30',
       Cell: (props) => <>
-        <a href={props.value.url} target="_blank">{props.value.name}</a>
+        <a href={props.value.url} target="_blank" rel="noopener noreferrer">{props.value.name}</a>
       </>,
     },
     {
@@ -79,7 +79,7 @@ const DBBackupList = ({ history, match }) => {
               style={{ fontSize: 18 }}
               onClick={() => handleOnEdit(props.value.id)}
             />
-            <a href={props.value.url} target="_blank">
+            <a href={props.value.url} target="_blank" rel="noopener noreferrer">
               <i
                 className="simple-icon-cloud-download success"
                 title="Download"
@@ -176,7 +176,7 @@ const DBBackupList = ({ history, match }) => {
   const handleSaveNote = async (event, errors, values) => {
     setLoading(true);
     try {
-      const res = await updateBackupNoteById(noteId, values.note);
+      await updateBackupNoteById(noteId, values.note);
       setNoteModal(false);
       setNoteId(-1);
       loadBackupList();
@@ -201,7 +201,7 @@ const DBBackupList = ({ history, match }) => {
   const confirmRestore = async () => {
     setLoading(true);
     try {
-      const res = await restoreBackupReqeust(restoreId);
+      await restoreBackupReqeust(restoreId);
       NotificationManager.success('Restored backup successfully!', 'Restore Backup');
       setRestoreModal(false);
     } catch (e) {

@@ -13,14 +13,14 @@ import DatatablePagination from '../../components/DatatablePagination';
 
 import products from '../../data/products';
 
-function Table({ columns, data, divided = false, defaultPageSize = 10, pageCount: controlledPageCount = 10, fetchData }) {
+function Table({ columns, data, divided = false, defaultPageSize = 10 }) {
   const {
     getTableProps,
     getTableBodyProps,
     prepareRow,
     headerGroups,
 
-    // toggleSortBy,
+    toggleSortBy,
 
     page,
     canPreviousPage,
@@ -32,19 +32,12 @@ function Table({ columns, data, divided = false, defaultPageSize = 10, pageCount
   } = useTable(
     {
       columns,
-      data, 
-      pageCount: controlledPageCount,
-      manualPagination: true,
-      autoResetPage: false,
+      data,
       initialState: { pageIndex: 0, pageSize: defaultPageSize },
     },
     useSortBy,
     usePagination
   );
-
-  React.useEffect(() => {
-    fetchData({ pageIndex, pageSize })
-  }, [fetchData, pageIndex, pageSize])
 
   return (
     <>
@@ -113,40 +106,28 @@ function Table({ columns, data, divided = false, defaultPageSize = 10, pageCount
   );
 }
 
-export const ReactTableWithPaginationCard = ({ cols, loadData, refresh }, ref) => {
-
-  const [data, setData] = React.useState([]);
-  const [lastId, setLastId] = React.useState(null);
-  const [pageCount, setPageCount] = React.useState(0);
-  const [pager, setPager] = React.useState({ limit: 10, page: 0 });
-
-  React.useEffect(() => {
-    if (refresh > 0) fetchData({ pageSize: pager.limit, pageIndex: pager.page });
-  }, [refresh]);
-
-  const fetchData = React.useCallback(async ({ pageSize, pageIndex: pIdx }) => {
-    return loadData({ page: pIdx, limit: pageSize })
-      .then(({ list, pager }) => {
-        setPageCount(Math.ceil(pager.total / pager.limit));
-        setData(list);
-        setPager({ limit: pageSize, page: pIdx });
-      })
-      .catch(e => {
-        console.log(e);
-      })
-  }, []);
-
+export const ReactTableWithPaginationCard = ({ cols, data }) => {
   return (
     <Card className="mb-4">
       <CardBody>
         <CardTitle>
+          {/* <IntlMessages id="table.react-pagination" /> */}
         </CardTitle>
-        <Table 
-          columns={cols} 
-          data={data} 
-          fetchData={fetchData}
-          pageCount={pageCount}
-          />
+        <Table columns={cols} data={data} />
+
+        {/* <DatatablePagination
+          page={0}
+          pages={10}
+          canPrevious
+          canNext
+          pageSizeOptions={[10, 20, 30, 40, 50]}
+          showPageSizeOptions
+          showPageJump
+          defaultPageSize={10}
+          onPageChange={(p) => console.log('page changed', p)}
+          onPageSizeChange={(s) => console.log('page size changed', s)}
+          paginationMaxSize={5}
+        /> */}
       </CardBody>
     </Card>
   );

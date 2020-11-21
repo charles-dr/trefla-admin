@@ -32,13 +32,14 @@ import { Colxx, Separator } from '../../../components/common/CustomBootstrap';
 import IntlMessages from '../../../helpers/IntlMessages';
 import Breadcrumb from '../../../containers/navs/Breadcrumb';
 import { LocationItem, UserSettings } from '../../../components/custom';
+import * as api from '../../../api';
 
 import {
   formatTime,
   getMapPositionFromString,
   getUserByIdRequest,
   transformTime,
-  updateUserProfile,
+  ru_updateUserProfile,
 } from '../../../utils';
 import { loadAllUsers } from '../../../redux/actions';
 
@@ -107,8 +108,8 @@ const EditUserPage = ({
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    getUserByIdRequest(match.params.id)
-      .then((res) => {
+    api.r_getUserByIdRequest(match.params.id)
+      .then(({ data: res }) => {
         // console.log(res);
         if (!res) {
           NotificationManager.warning(
@@ -116,6 +117,7 @@ const EditUserPage = ({
             'Edit User'
           );
         } else {
+          res.sex = res.sex.toString();
           setProfile(res);
           if (res.birthday) {
             const str_arr = res.birthday.split('/');
@@ -165,14 +167,11 @@ const EditUserPage = ({
     const avatarFile = avatarInput.files[0];
 
     const new_profile = composeSubmitData();
-    // console.log(new_profile, avatar.mode === 1 ? avatarInput.files[0] : null, cardImgFile.files[0]);
-    // return;
 
     // set loading
     setLoading(true);
 
-    console.log(cardImgFile, !!cardImgFile);
-    const res = await updateUserProfile(
+    const res = await ru_updateUserProfile(
       new_profile,
       avatar.mode === 1 ? avatarFile : null,
       cardFile
@@ -181,27 +180,10 @@ const EditUserPage = ({
     // cancel the loading
     setLoading(false);
     if (res.status === true) {
-      NotificationManager.success(
-        res.message,
-        'User Update',
-        3000,
-        null,
-        null,
-        ''
-      );
-      // init form
-      // setProfile({ old_pass: '', password: '', cpassword: '' });
-      loadAllUsersAction();
+      NotificationManager.success(res.message, 'User Update', 3000, null, null, '');
       history.push('/app/user');
     } else {
-      NotificationManager.warning(
-        res.message,
-        'User Update',
-        3000,
-        null,
-        null,
-        ''
-      );
+      NotificationManager.warning(res.message, 'User Update', 3000, null, null, '');
     }
   };
 
@@ -221,7 +203,7 @@ const EditUserPage = ({
       submit_profile.photo = '';
     }
     // gender
-    submit_profile.sex = gender.value;
+    submit_profile.sex = Number(gender.value);
 
     return submit_profile;
   };

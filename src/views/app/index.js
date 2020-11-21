@@ -44,6 +44,7 @@ const App = ({
   loadAllAdminNotiAction$,
   loadAuthInfoAction,
   login,
+  posts,
 }) => {
   const history = useHistory();
   useEffect(() => {
@@ -51,19 +52,20 @@ const App = ({
       console.log('[->] Login');
       history.push('/auth/login');
     }
+
     anonymousLogin()
       .then(result => {
-        console.log('[firebase] =>');
+        // console.log('[firebase] =>');
         // load all data
-        getAllCommentsAction();
-        getAllFriendsAction();
-        getAllLangsAction();
-        getAllPostsAction();
-        getAllUsersAction();
-        loadAuthInfoAction();
-        downloadAvatarAction();
-        getAllReportsAction();
-        loadAllAdminNotiAction$();
+        // getAllCommentsAction();
+        // getAllFriendsAction();
+        // getAllLangsAction();
+        // getAllPostsAction(posts.pager);
+        // getAllUsersAction();
+        // loadAuthInfoAction();
+        // downloadAvatarAction();
+        // getAllReportsAction();
+        // loadAllAdminNotiAction$();
       })
       .catch(error => {
         console.log('[Firebase login] failed');
@@ -135,10 +137,10 @@ const App = ({
   );
 };
 
-const mapStateToProps = ({ menu, auth }) => {
+const mapStateToProps = ({ menu, auth, posts }) => {
   const { containerClassnames } = menu;
   const { login } = auth;
-  return { containerClassnames, login };
+  return { containerClassnames, login, posts };
 };
 
 export default withRouter(

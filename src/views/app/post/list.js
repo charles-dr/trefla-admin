@@ -8,31 +8,37 @@ import { Colxx, Separator } from '../../../components/common/CustomBootstrap';
 import Breadcrumb from '../../../containers/navs/Breadcrumb';
 import { ReactTableWithPaginationCard } from '../../../containers/ui/ReactTableCards';
 
-import { deletePostByIdRequest, transformTime } from '../../../utils';
-import { loadAllPosts } from '../../../redux/actions';
+import { transformTime } from '../../../utils';
 import { reactionImages, typeIcons } from '../../../constants/custom';
+import * as api from '../../../api';
 
-const PostList = ({ match, history, posts, users, loadAllPostsAction }) => {
+const PostList = ({ match, history, posts, users }) => {
+  // const tableRef = React.useRef();
   const [data, setData] = useState([]);
   const [delModal, setDelModal] = useState(false);
   const [delId, setDelId] = useState(-1);
   const [loading, setLoading] = useState(false);
+  const [refreshTable, setRefreshTable] = useState(0);
 
   const cols = [
     {
       Header: 'User',
-      accessor: 'user_name',
+      accessor: 'user',
       cellClass: 'list-item-heading w-15',
-      Cell: (props) => <>{props.value}</>,
+      Cell: (props) => <>{props.value ? 
+        props.value.user_name || "" :
+        <Badge color="danger" pill className="mb-1">
+          Deleted
+        </Badge>}</>,
     },
     {
       Header: 'Post Name',
-      accessor: 'post_name_',
+      accessor: 'post_name',
       cellClass: 'text-muted  w-5',
       Cell: (props) => (
         <>
-          {props.value.post_name && props.value.post_name}
-          {!props.value.post_name && (
+          {props.value && <span>{props.value}</span>}
+          {!props.value && (
             <Badge color="warning" pill className="mb-1">
               Not Specified
             </Badge>
@@ -101,7 +107,7 @@ const PostList = ({ match, history, posts, users, loadAllPostsAction }) => {
     },
     {
       Header: 'Actions',
-      accessor: 'post_id',
+      accessor: 'id',
       cellClass: 'text-muted  w-20',
       Cell: (props) => (
         <>
@@ -124,13 +130,23 @@ const PostList = ({ match, history, posts, users, loadAllPostsAction }) => {
     },
   ];
 
-  useEffect(() => {
-    // console.log(users, posts);
+  const loadData = ({ limit, page }) => {
+    return api.r_loadPostRequest({ page, limit, type: 'ALL' })
+      .then(res => {
+        const { data, pager, status } = res;
+        if (status) {
+          return {
+            list: data.map(post => ({
+              ...post,
+              likes: `${post.like_1_num},${post.like_2_num},${post.like_3_num},${post.like_4_num},${post.like_5_num},${post.like_6_num}`,
+            })),
+            pager,
+          };
+        } else {
 
-    recomposePosts();
-
-    return () => {};
-  }, [match, users, posts, recomposePosts]);
+        }
+      });
+  }
 
   const formatLikes = (str_likes) => {
         const arr_likes = str_likes.split(',');
@@ -153,33 +169,7 @@ const PostList = ({ match, history, posts, users, loadAllPostsAction }) => {
             </Badge>;
         
   };
-  const recomposePosts = () => {
-    let new_posts = [];
-    for (const post of posts) {
-      let post_item = {};
-      // copy all key-values
-      for (const key in post) {
-        if (post[key] !== undefined) {
-          post_item[key] = post[key];
-        }
-      }
-      // add new field 'user_name'
-      post_item.user_name = getUserNameById(post.post_user_id);
-      // add new field 'likes'
-      post_item[
-        'likes'
-      ] = `${post.like_1_num},${post.like_2_num},${post.like_3_num},${post.like_4_num},${post.like_5_num},${post.like_6_num}`;
-      // add new field 'post_name_';
-      post_item['post_name_'] = {
-        user_name: getUserNameById(post.post_user_id),
-        post_name: post.post_name,
-      };
 
-      // put item to array
-      new_posts.push(post_item);
-    }
-    setData(new_posts);
-  };
   const getUserNameById = (id) => {
     if (users.length > 0) {
       for (const user of users) {
@@ -195,10 +185,15 @@ const PostList = ({ match, history, posts, users, loadAllPostsAction }) => {
   const handleOnEdit = (post_id) => {
     history.push(`/app/post/edit/${post_id}`);
   };
-  const handleOnDelete = (post_id) => {
+
+  const handleOnDelete = (post_id) => {    
     setDelId(post_id);
     setDelModal(true);
   };
+
+  const reloadTableContent = () => {
+    setRefreshTable(refreshTable + 1);
+  }
 
   const navigateToAddPage = () => {
     history.push('/app/post/add');
@@ -209,7 +204,7 @@ const PostList = ({ match, history, posts, users, loadAllPostsAction }) => {
 
     setLoading(true);
 
-    const res = await deletePostByIdRequest(delId);
+    const res = await api.r_deletePostByIdRequest(delId);
 
     setLoading(false);
 
@@ -218,7 +213,7 @@ const PostList = ({ match, history, posts, users, loadAllPostsAction }) => {
     if (res.status === true) {
       setDelModal(false);
       NotificationManager.success(res.message, 'Delete Post');
-      loadAllPostsAction();
+      reloadTableContent();
     } else {
       NotificationManager.error(res.message, 'Delete Post');
     }
@@ -248,7 +243,11 @@ const PostList = ({ match, history, posts, users, loadAllPostsAction }) => {
         </Colxx>
 
         <Colxx xxs="12">
-          <ReactTableWithPaginationCard cols={cols} data={data} />
+          <ReactTableWithPaginationCard 
+            cols={cols} 
+            loadData={loadData}
+            refresh={refreshTable}
+            />
         </Colxx>
       </Row>
 
@@ -301,5 +300,5 @@ const mapStateToProps = ({ posts: postApp, users: userApp }) => {
 };
 
 export default connect(mapStateToProps, {
-  loadAllPostsAction: loadAllPosts,
+
 })(PostList);

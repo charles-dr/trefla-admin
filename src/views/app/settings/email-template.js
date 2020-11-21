@@ -8,7 +8,6 @@ import ReactQuill from 'react-quill';
 
 import { NotificationManager } from '../../../components/common/react-notifications';
 
-import { login, updateLogin } from '../../../redux/actions';
 import { Colxx, Separator } from '../../../components/common/CustomBootstrap';
 import IntlMessages from '../../../helpers/IntlMessages';
 import Breadcrumb from '../../../containers/navs/Breadcrumb';
@@ -61,11 +60,6 @@ const EmailTemplatePage = ({
   const [templ, setTempl] = useState({ id: match.params.id, subject: '', body: '', usage: '' });
   const [templBody, setTemplBody] = useState('');
 
-  const [profile, setProfile] = useState({
-    old_pass: '',
-    password: '',
-    cpassword: '',
-  });
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
