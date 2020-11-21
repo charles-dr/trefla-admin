@@ -49,7 +49,7 @@ const EditCommentPage = ({ history, match, loadAllPostsAction }) => {
       api.r_loadUserRequest({ page: 0, limit: 0, type: 'SIMPLE' }),
       api.r_getCommentByIdRequest(match.params.id),
     ])
-      .then(([usersRes, commentRes]) => {        
+      .then(([usersRes, commentRes]) => {
         if (usersRes.status) {
           const userList = usersRes.data.map((user, index) => ({ 
             label: user.user_name,

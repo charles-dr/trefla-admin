@@ -186,7 +186,7 @@ const PostList = ({ match, history, posts, users }) => {
     history.push(`/app/post/edit/${post_id}`);
   };
 
-  const handleOnDelete = (post_id) => {    
+  const handleOnDelete = (post_id) => {
     setDelId(post_id);
     setDelModal(true);
   };

@@ -30,6 +30,7 @@ import {
   updatePostRequest,
 } from '../../../utils';
 import { loadAllPosts } from '../../../redux/actions';
+import * as api from '../../../api';
 
 const typeList = [
   { value: '0', label: 'Card', key: 0 },
@@ -57,7 +58,7 @@ const INIT_POST_INFO = {
   location_address: '',
   location_coordiate: '0,0',
   option_val: '',
-  post_id: '',
+  id: '',
   post_name: '',
   post_time: '',
   post_user_id: -1,
@@ -80,7 +81,7 @@ const MapWithAMarker = withScriptjs(
   ))
 );
 
-const EditPostPage = ({ history, match, user_list, loadAllPostsAction }) => {
+const EditPostPage = ({ history, match, loadAllPostsAction }) => {
   const [post, setPost] = useState(INIT_POST_INFO);
   const [userSelValues, setUserSelValues] = useState([]);
   const [user, setUser] = useState(
@@ -100,77 +101,56 @@ const EditPostPage = ({ history, match, user_list, loadAllPostsAction }) => {
 
   useEffect(() => {
     // compose the user select source
-    const list = [];
+    Promise.all([
+      api.r_loadUserRequest({ page: 0, limit: 0, mode: 'SIMPLE' }),
+      api.r_getPostByIdRequest(match.params.id),
+    ])
+      .then(([usersRes, postRes]) => {
+        if (usersRes.status) {
+          const userList = usersRes.data.map((user, index) => ({ 
+            label: user.user_name,
+            value: user.id.toString(),
+            key: index
+          }));
+          setUserSelValues(userList);
 
-    let index = 0;
-    for (const user of user_list) {
-      list.push({
-        label: user.user_name,
-        value: user.user_id.toString(),
-        key: index,
-      });
-      index++;
-    }
-    setUserSelValues(list);
-
-    // get post value by id
-    getPostByIdRequest(match.params.id)
-      .then((res) => {
-        // console.log(res);
-        setPost(res);
-        // set user (value of select element);
-        for (const selValue of list) {
-          if (selValue.value === res.post_user_id.toString()) {
+          if (postRes.status) {
+            setPost(postRes.data);
+            const [selValue] = userList.filter(user => user.value === postRes.data.user.id.toString());
             setUser(selValue);
-          }
-        }
+            setGuest(postRes.data.isGuest === 1);
+            setActive(postRes.data.active === 1);
 
-        // set  guest
-        setGuest(res.isGuest);
-        // set active
-        setActive(res.active === 1);
+            const tPosition = getMapPositionFromString(postRes.data.location_coordinate);
+            setMapCenter(tPosition);
 
-        const tPosition = getMapPositionFromString(res.location_coordinate);
-        setMapCenter(tPosition);
-
-        const tMarkers = [
-          {
-            position: tPosition,
-            clickable: true,
-            title: transformTime(res.post_time),
-          },
-        ];
-        setMapMarkers(tMarkers);
-
-        // set location string
-        // 37.421998333333335,-122.08400000000002&&2020-08-20-00-00-49:480&&1600, Amphitheatre Parkway, Mountain View, Santa Clara County, 94043, California
-        setStrLocation(
-          `${res.location_coordinate}&&${res.post_time}&&${res.location_address}`
-        );
-
-        // set post type
-        for (const t of typeList) {
-          if (t.value === res.type) {
+            const tMarkers = [
+              {
+                position: tPosition,
+                clickable: true,
+                title: transformTime(postRes.data.post_time),
+              },
+            ];
+            setMapMarkers(tMarkers);
+            setStrLocation(
+              `${postRes.data.location_coordinate}&&${postRes.data.post_time}&&${postRes.data.location_address}`
+            );
+            const [t] = typeList.filter(type => type.value === postRes.data.type);
             setType(t);
+            // set Target Time
+            if (postRes.data.target_date) {
+              setTimeAdded(true);
+              const time = transformTime(postRes.data.target_date);
+              setTargetTime(new Date(time));
+            }
           }
         }
-
-        // set Target Time
-        if (res.target_date) {
-          setTimeAdded(true);
-          const time = transformTime(res.target_date);
-          setTargetTime(new Date(time));
-        }
-      })
-      .catch((err) => {
-        console.error(err);
-        NotificationManager.error('Something went wrong', 'Fetch Post');
       });
 
     return () => {
       return true;
     };
-  }, [match, user_list]);
+  }, [match]);
 
   const onUpdatePost = async (values) => {
     // copy post
@@ -185,19 +165,19 @@ const EditPostPage = ({ history, match, user_list, loadAllPostsAction }) => {
     params.active = active === true ? 1 : 0;
     params.target_date =
       timeAdded === true ? convertTimeToString(targetTime) : '';
-    params.post_user_id = Number(user.value);
+    params.user_id = Number(user.value);
 
     // console.log(params);
 
     setLoading(true);
-
-    const res = await updatePostRequest(params);
+    console.log(post.id, params);
+    const res = await api.r_updatePostRequest(post.id, params);
 
     setLoading(false);
 
     if (res.status === true) {
       NotificationManager.success(res.message, 'Update Post');
-      loadAllPostsAction();
+      // loadAllPostsAction();
       history.push('/app/post');
     } else {
       NotificationManager.error(res.message, 'Update Post');
@@ -406,10 +386,8 @@ const EditPostPage = ({ history, match, user_list, loadAllPostsAction }) => {
   );
 };
 
-const mapStateToProps = ({ posts: postApp, users: userApp }) => {
-  const { list: user_list } = userApp;
-  const { list: post_list } = postApp;
-  return { post_list, user_list };
+const mapStateToProps = ({ }) => {
+  return { };
 };
 
 export default connect(mapStateToProps, {
