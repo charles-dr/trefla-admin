@@ -1,4 +1,5 @@
 import { nodeBasicInst as basicInst } from './instance';
+export * from './RestAPIs/comments';
 export * from './RestAPIs/posts';
 export * from './RestAPIs/users';
 
