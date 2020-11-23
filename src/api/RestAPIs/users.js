@@ -53,3 +53,37 @@ export const r_deleteUserByIdRequest = async (id, option = {}) => {
   }
 }
 
+
+
+////////////////////////////////////////
+//                                    //
+//         Card & Verfication         //
+//                                    //
+////////////////////////////////////////
+
+export const r_loadCardRequest = async ({ page, limit }) => {
+  try {
+    const { data: res } = await axios.get('/api/v1/user/card', { params: { page, limit } });
+    return res;
+  } catch (e) {
+    return e.response.data;
+  }
+}
+
+export const r_verifyUserRequest = async ({ id }) => {
+  try {
+    const { data: res } = await axios.post(`/api/v1/user/verify/${id}`);
+    return res;
+  } catch (e) {
+    return e.response.data;
+  }
+}
+
+export const r_unverifyUserRequest = async ({ id }) => {
+  try {
+    const { data: res } = await axios.post(`/api/v1/user/unverify/${id}`);
+    return res;
+  } catch (e) {
+    return e.response.data;
+  }
+}
