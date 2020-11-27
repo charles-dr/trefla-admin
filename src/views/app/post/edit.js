@@ -25,9 +25,7 @@ import { LocationItem } from '../../../components/custom';
 import {
   convertTimeToString,
   getMapPositionFromString,
-  getPostByIdRequest,
   transformTime,
-  updatePostRequest,
 } from '../../../utils';
 import { loadAllPosts } from '../../../redux/actions';
 import * as api from '../../../api';

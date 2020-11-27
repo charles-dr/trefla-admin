@@ -88,7 +88,7 @@ const CommentList = ({ match, users, posts, history, loadAllCommentsAction }) =>
         <>
           <div className="tbl-actions">
             <NavLink
-              href={`/app/comment/edit/${props.value}`}
+              href={`/#/app/comment/edit/${props.value}`}
               style={{ display: 'inline-block', padding: '0.5rem' }}
             ><i
                 className="iconsminds-file-edit info"
@@ -176,7 +176,7 @@ const CommentList = ({ match, users, posts, history, loadAllCommentsAction }) =>
 
     if (parent.feed) { // then post
       if (target) {
-        return <NavLink href={`/app/post/edit/${parent.id}`}>{parent.feed}</NavLink>;
+        return <NavLink href={`/#/app/post/edit/${parent.id}`}>{parent.feed}</NavLink>;
       } else {
         return <>
           <Badge color="outline-warning" pill className="mb-1"> Deleted </Badge>
@@ -184,7 +184,7 @@ const CommentList = ({ match, users, posts, history, loadAllCommentsAction }) =>
       }
     } else if (parent.comment) { // then comment
       if (target) {
-        return <NavLink href={`/app/comment/edit/${parent.id}`}>{parent.comment}</NavLink>
+        return <NavLink href={`/#/app/comment/edit/${parent.id}`}>{parent.comment}</NavLink>
       }
       return <>
         <Badge color="outline-warning" pill className="mb-1"> Deleted </Badge>

@@ -1,6 +1,7 @@
 import { nodeBasicInst as basicInst } from './instance';
 export * from './RestAPIs/comments';
 export * from './RestAPIs/posts';
+export * from './RestAPIs/reports';
 export * from './RestAPIs/users';
 
 export * from './RestAPIs/others';

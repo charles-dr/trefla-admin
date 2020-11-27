@@ -41,10 +41,6 @@ import { loadAllUsers } from '../../../redux/actions';
 const NationalIDList = ({
   match,
   history,
-  friends,
-  posts,
-  users,
-  loadAllUsersAction,
 }) => {
   const [data, setData] = useState([]);
   const [refreshTable, setRefreshTable] = useState(0);
@@ -65,7 +61,7 @@ const NationalIDList = ({
 
   const [verifyModal, setVerifyModal] = useState(false);
   const [verifyInfo, setVerifyInfo] = useState({ mode: 0, user_id: -1, active: 1 }); // mode 0 - unverify, mode 1 - verify
-  
+
 
   const cols = [
     {
@@ -472,5 +468,5 @@ const mapStateToProps = ({ }) => {
 };
 
 export default connect(mapStateToProps, {
-  loadAllUsersAction: loadAllUsers,
+
 })(NationalIDList);

@@ -26,11 +26,11 @@ const data = [
             label: 'menu.national-ids',
             to: '/app/user/national-ids',
           },
-          {
-            icon: 'iconsminds-quill-3',
-            label: 'menu.id-changes',
-            to: '/app/user/id-changes',
-          },
+          // {
+          //   icon: 'iconsminds-quill-3',
+          //   label: 'menu.id-changes',
+          //   to: '/app/user/id-changes',
+          // },
           {
             icon: 'iconsminds-shield',
             label: 'menu.id-transfer',
@@ -50,7 +50,6 @@ const data = [
         ]
       }
     ],
-
   },
   {
     id: 'postmenu',
