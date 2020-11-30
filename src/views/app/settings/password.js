@@ -11,13 +11,13 @@ import { Colxx, Separator } from '../../../components/common/CustomBootstrap';
 import IntlMessages from '../../../helpers/IntlMessages';
 import Breadcrumb from '../../../containers/navs/Breadcrumb';
 
+import * as api from '../../../api';
+
 import { getAdminInfo, updateAdminPassword } from '../../../utils';
 
 const PasswordPage = ({
   history,
-  match,
-  loginUserAction,
-  updateLoginAction,
+  match
 }) => {
   const [profile, setProfile] = useState({
     old_pass: '',
@@ -26,40 +26,19 @@ const PasswordPage = ({
   });
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    getAdminInfo().then((info) => {
-      // console.log(info);
-    });
-    return () => {};
-  }, [match]);
-
-  const onUpdateProfile = async (values) => {
+  const onUpdatePassword = async (values) => {
+    console.log('admin', profile);
     // set loading
     setLoading(true);
-    const res = await updateAdminPassword(profile);
+    const res = await api.r_updatePasswordRequest(profile);
 
     // cancel the loading
     setLoading(false);
     if (res.status === true) {
-      NotificationManager.success(
-        res.message,
-        'Password Update',
-        3000,
-        null,
-        null,
-        ''
-      );
-      // init form
+      NotificationManager.success(res.message, 'Password Update', 3000);
       setProfile({ old_pass: '', password: '', cpassword: '' });
     } else {
-      NotificationManager.warning(
-        res.message,
-        'Password Update',
-        3000,
-        null,
-        null,
-        ''
-      );
+      NotificationManager.warning(res.message, 'Password Update', 3000);
     }
   };
 
@@ -71,6 +50,7 @@ const PasswordPage = ({
     }
     return error;
   };
+
   const validatePassword = (value) => {
     value = profile.password;
     let error;
@@ -81,6 +61,7 @@ const PasswordPage = ({
     }
     return error;
   };
+
   const validateCPassword = () => {
     let error;
     if (profile.password !== profile.cpassword) {
@@ -88,6 +69,7 @@ const PasswordPage = ({
     }
     return error;
   };
+
   const handleOnChange = (e) => {
     setProfile({ ...profile, [e.target.name]: e.target.value });
   };
@@ -110,7 +92,7 @@ const PasswordPage = ({
           </h3>
         </Colxx>
 
-        <Formik initialValues={initialValues} onSubmit={onUpdateProfile}>
+        <Formik initialValues={initialValues} onSubmit={onUpdatePassword}>
           {({ errors, touched }) => (
             <Form
               className="av-tooltip tooltip-label-bottom mx-auto"

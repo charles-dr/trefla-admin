@@ -73,3 +73,13 @@ export const r_updateProfileRequest = async (profile, file) => {
     return e.response.data;
   }
 }
+
+export const r_updatePasswordRequest = async (data) => {
+  try {
+    const { data: res } = await axios.patch('/api/v1/admin/update-password', data);
+    return res;
+  } catch (e) {
+    console.log(e, e.response.data);
+    return e.response.data;
+  }
+}
