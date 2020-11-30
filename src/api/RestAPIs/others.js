@@ -45,3 +45,31 @@ export const r_updateEmailTemplateRequest = async (id, data) => {
     return e.response.data;
   }
 }
+
+export const r_getProfileRequest = async () => {
+  try {
+    const { data: res } = await axios.get('/api/v1/admin/profile');
+    return res;
+  } catch (e) {
+    console.log(e, e.response.data);
+    return e.response.data;
+  }
+}
+
+export const r_updateProfileRequest = async (profile, file) => {
+  try {
+    let avatar = '';
+    if (file) {
+      const uploadRes = await r_uploadFileRequest(file);
+      if (uploadRes.status) {
+        avatar = uploadRes.url;
+      }
+    }
+
+    const { data: res } = await axios.patch(`/api/v1/admin/profile`, { ...profile, avatar });
+    return res;
+  } catch (e) {
+    console.log(e, e.response.data);
+    return e.response.data;
+  }
+}

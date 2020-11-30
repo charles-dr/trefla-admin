@@ -15,6 +15,7 @@ import {
   updateAdminProfile,
 } from '../../../utils';
 import { downloadAvatar, loadAuthInfo } from '../../../redux/actions';
+import * as api from '../../../api';
 
 const ProfilePage = ({
   history,
@@ -23,45 +24,35 @@ const ProfilePage = ({
   downloadAvatarAction,
 }) => {
   let avatarInput = null;
-  const [profile, setProfile] = useState({ email: '', name: '' });
+  const [profile, setProfile] = useState({ email: '', user_name: '' });
   const [avatar, setAvatar] = useState('/assets/img/no_profile.png');
   const [loading1, setLoading1] = useState(true);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const loadAdminProfile = async () => {
-      const res = await getAdminInfo();
-      if (res) {
-        setProfile(res);
-      }
-      setLoading1(false);
-    };
+    api.r_getProfileRequest()
+      .then(({ data: admin, status }) => {
+        setLoading1(false);
+        if (status) {
+          setProfile(admin);
+          admin.avatar ? setAvatar(admin.avatar): console.log(null);
+        } else {
+          NotificationManager.error('Error while loading data!', 'Admin Profile');
+        }
+      })
 
-    loadAdminProfile();
-    // get profile avatar
-    getAdminAvatarURL().then((url) => setAvatar(url));
     return () => {};
   }, [match]);
 
   const onUpdateProfile = async (values) => {
     const file = avatarInput.files[0];
     setLoading(true);
-    await updateAdminProfile(profile, file);
+    await api.r_updateProfileRequest(profile, file);
+    // await updateAdminProfile(profile, file);
     console.log('done');
 
-    NotificationManager.success(
-      'Profile has been updated.',
-      'Profile Update',
-      3000,
-      null,
-      null,
-      ''
-    );
+    NotificationManager.success('Profile has been updated.', 'Profile Update', 3000);
     setLoading(false);
-
-    // reload admin information
-    loadAuthInfoAction();
-    downloadAvatarAction();
   };
   const openFileSelector = () => {
     avatarInput.click();
@@ -81,7 +72,7 @@ const ProfilePage = ({
     return error;
   };
   const validateName = () => {
-    const value = profile.name;
+    const value = profile.user_name;
     let error;
     if (!value) {
       error = 'Please enter name';
@@ -93,7 +84,7 @@ const ProfilePage = ({
   const handleOnChange = (e) => {
     setProfile({ ...profile, [e.target.name]: e.target.value });
   };
-  const initialValues = { email: profile.email, name: profile.name };
+  const initialValues = { email: profile.email, user_name: profile.user_name };
   return (
     <>
       <Row>
@@ -157,14 +148,15 @@ const ProfilePage = ({
                   </Label>
                   <Field
                     className="form-control"
-                    name="name"
-                    value={profile.name}
+                    name="user_name"
+                    value={profile.user_name}
                     onChange={handleOnChange}
                     validate={validateName}
+                    autoCorrect="false"
                   />
-                  {errors.name && touched.name && (
+                  {errors.user_name && touched.user_name && (
                     <div className="invalid-feedback d-block">
-                      {errors.name}
+                      {errors.user_name}
                     </div>
                   )}
                 </FormGroup>
@@ -201,7 +193,4 @@ const mapStateToProps = (state) => {
   return {};
 };
 
-export default connect(mapStateToProps, {
-  loadAuthInfoAction: loadAuthInfo,
-  downloadAvatarAction: downloadAvatar,
-})(ProfilePage);
+export default connect(mapStateToProps, {})(ProfilePage);

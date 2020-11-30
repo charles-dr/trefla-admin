@@ -81,11 +81,11 @@ const data = [
     label: 'menu.settings',
     to: '/app/settings',
     subs: [
-      {
-        icon: 'iconsminds-data-center',
-        label: 'menu.db-backups',
-        to: '/app/settings/db-backups',
-      },
+      // {
+      //   icon: 'iconsminds-data-center',
+      //   label: 'menu.db-backups',
+      //   to: '/app/settings/db-backups',
+      // },
       {
         icon: 'iconsminds-inbox-full',
         label: 'menu.email-templates',
