@@ -10,6 +10,8 @@ import { Colxx, Separator } from '../../../components/common/CustomBootstrap';
 import IntlMessages from '../../../helpers/IntlMessages';
 import Breadcrumb from '../../../containers/navs/Breadcrumb';
 
+import * as api from '../../../api';
+
 import { getConfigRequest, updateConfigRequest } from '../../../utils';
 
 const PasswordPage = ({
@@ -28,24 +30,24 @@ const PasswordPage = ({
   const onUpdateProfile = async (values) => {
     // set loading
     setLoading(true);
-    const res = await updateConfigRequest(config);
+    const res = await api.r_updateAdminConfigRequest(config);
 
     // unset loading
     setLoading(false);
     if (res.status === true) {
       NotificationManager.success(res.message, 'Config');
-      loadConfigData(); // reload data to confirm operation
     } else {
       NotificationManager.warning(res.message, 'Config');
     }
   };
+
   const loadConfigData = () => {
-    getConfigRequest()
-      .then((res) => {
-        if (!res) {
+    api.r_loadAdminConfigRequest()
+      .then(({ status, data }) => {
+        if (!status) {
           NotificationManager.warning('Data not found on firestore!', 'Config');
         } else {
-          setConfig(res);
+          setConfig(data);
         }
       })
       .catch((err) => {
@@ -53,6 +55,7 @@ const PasswordPage = ({
         NotificationManager.warning('Failed to get config info', 'Config');
       });
   };
+
   const validateLangVersion = () => {
     const value = config.lang_version;
     let error;
@@ -61,6 +64,7 @@ const PasswordPage = ({
     }
     return error;
   };
+
   const handleOnChange = (e) => {
     setConfig({ ...config, [e.target.name]: e.target.value });
   };

@@ -83,3 +83,23 @@ export const r_updatePasswordRequest = async (data) => {
     return e.response.data;
   }
 }
+
+export const r_loadAdminConfigRequest = async () => {
+  try {
+    const { data: res } = await axios.get('/api/v1/admin/config');
+    return res;
+  } catch (e) {
+    console.log(e, e.response.data);
+    return e.response.data;
+  }
+}
+
+export const r_updateAdminConfigRequest = async (data) => {
+  try {
+    const { data: res } = await axios.patch(`api/v1/admin/config`, data);
+    return res;
+  } catch (e) {
+    console.log(e, e.response.data);
+    return e.response.data;
+  }
+}
