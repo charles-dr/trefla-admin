@@ -16,6 +16,8 @@ import { Colxx, Separator } from '../../../components/common/CustomBootstrap';
 import Breadcrumb from '../../../containers/navs/Breadcrumb';
 import { ReactTableWithPaginationCard } from '../../../containers/ui/ReactTableCards';
 
+import * as api from '../../../api';
+
 import { loadAllLangs } from '../../../redux/actions';
 import {
   deleteLangByIdRequest,
@@ -26,7 +28,8 @@ import {
 } from '../../../utils';
 
 const UserList = ({ history, match, langs, loadAllLangsAction }) => {
-  const [data, setData] = useState([]);
+  // const [data, setData] = useState([]);
+  const [refreshTable, setRefreshTable] = useState(0);
   const [confirm, setConfirm] = useState(false);
   const [delId, setDelId] = useState(-1);
   const [processing, setProcessing] = useState(false);
@@ -48,7 +51,7 @@ const UserList = ({ history, match, langs, loadAllLangsAction }) => {
       Header: 'Last Update',
       accessor: 'update_time',
       cellClass: 'text-muted  w-25',
-      Cell: (props) => <>{transformTime(props.value)}</>,
+      Cell: (props) => <>{new Date(props.value * 1000).toLocaleString()}</>,
     },
     {
       Header: 'Active',
@@ -68,7 +71,7 @@ const UserList = ({ history, match, langs, loadAllLangsAction }) => {
     },
     {
       Header: 'Actions',
-      accessor: 'lang_id',
+      accessor: 'id',
       cellClass: 'text-muted  w-15',
       Cell: (props) => (
         <>
@@ -103,31 +106,30 @@ const UserList = ({ history, match, langs, loadAllLangsAction }) => {
     },
   ];
 
-  useEffect(() => {
-    // console.log(friends, users, posts);
-    recomposeLangs();
-    return () => {};
-  }, [match, langs, recomposeLangs]);
+  const loadData = ({ limit, page }) => {
+    return api.r_loadLangRequest({ page, limit })
+      .then(res => {
+        const { data, pager, status } = res;
+        if (status) {
+          return {
+            list: data.map(lang => ({
+              ...lang
+            })),
+            pager,
+          };
+        } else {
 
-  const recomposeLangs = () => {
-    const new_langs = [];
-    for (const lang of langs) {
-      const lang_item = {};
-      // copy all key-values
-      for (const key in lang) {
-        if (lang[key] !== undefined) {
-          lang_item[key] = lang[key];
         }
-      }
+      });
+  }
 
-      // put item to array
-      new_langs.push(lang_item);
-    }
-    setData(new_langs);
-  };
   const toAddPage = () => {
     history.push('/app/lang/add');
   };
+
+  const reloadTableContent = () => {
+    setRefreshTable(refreshTable + 1);
+  }
 
   const handleOnEdit = (lang_id) => {
     history.push(`/app/lang/edit/${lang_id}`);
@@ -274,7 +276,11 @@ const UserList = ({ history, match, langs, loadAllLangsAction }) => {
         </Colxx>
 
         <Colxx xxs="12">
-          <ReactTableWithPaginationCard cols={cols} data={data} />
+          <ReactTableWithPaginationCard 
+            cols={cols}
+            loadData={loadData}
+            refresh={refreshTable}
+            />
         </Colxx>
       </Row>
 

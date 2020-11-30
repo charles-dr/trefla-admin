@@ -13,8 +13,10 @@ import { Colxx, Separator } from '../../../components/common/CustomBootstrap';
 import IntlMessages from '../../../helpers/IntlMessages';
 import Breadcrumb from '../../../containers/navs/Breadcrumb';
 
+import * as api from '../../../api';
 import {
   addNewLangRequest,
+  getJSON,
   getLangInfoByIdRequest,
   getLangFileContentRequest,
 } from '../../../utils';
@@ -39,26 +41,23 @@ const EditLangPage = ({
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    getLangInfoByIdRequest(match.params.id)
-      .then((res) => {
+    api.r_getLangRequest(match.params.id)
+      .then(({ status, data: res }) => {
         // console.log(res);
         setLang({ ...lang, name: res.name, code: res.code });
         setActive(res.active === 1);
         // load file
-        getLangFileContentRequest(res.code)
-          .then((fileRes) => {
-            if (fileRes.status === true) {
-              initKeyValues(fileRes.data);
-            } else {
-              NotificationManager.warning(
-                'Lanague file not found!',
-                'Loading assets...'
-              );
-            }
-          })
-          .catch((err) => {
-            console.error(err);
-          });
+
+        if (res.url) {
+          api.r_getLangFileContentRequest(match.params.id)
+            .then(content => {
+              // console.log('[content]', rest);
+              initKeyValues(content);
+            })
+            .catch(error => {
+              NotificationManager.error('Error while loading language file!', 'Edit Language');
+            })
+        }
       })
       .catch((err) => {
         console.error(err);
@@ -84,32 +83,31 @@ const EditLangPage = ({
       type: 'application/json',
     });
 
-    const params = {
-      lang_id: match.params.id,
+    setLoading(true);
+
+    const updated = await api.r_updateLangRequest(match.params.id, {
       name: lang.name,
       code: lang.code,
       active: active === true ? 1 : 0,
-      blob,
-    };
+    });
 
-    setLoading(true);
-    addNewLangRequest(params)
-      .then((res) => {
-        setLoading(false);
-        console.log(res);
-        if (res.status === true) {
-          NotificationManager.success(res.message, 'Update Language');
-          loadAllLangsAction();
-          history.push('/app/lang');
-        } else {
-          NotificationManager.warning(res.message, 'Update Language');
-        }
-      })
-      .catch((err) => {
-        setLoading(false);
-        console.error(err);
-        NotificationManager.warning('Something went wrong!', 'Update Language');
-      });
+    if (!updated.status) {
+      NotificationManager.error(updated.message, 'Upate Language');
+      setLoading(false);
+      return;
+    }
+
+    const uploaded = await api.r_uploadLangFileRequest(lang.code, blob);
+
+    if (!uploaded.status) {
+      NotificationManager.error(uploaded.message, 'Update Language');
+      setLoading(false);
+      return;
+    }
+
+    setLoading(false);
+    NotificationManager.success('Language has been updated!', 'Update Language');
+    history.push('/app/lang/list');
   };
 
   const validateName = () => {

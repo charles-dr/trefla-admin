@@ -14,6 +14,7 @@ import IntlMessages from '../../../helpers/IntlMessages';
 import Breadcrumb from '../../../containers/navs/Breadcrumb';
 
 import { addNewLangRequest } from '../../../utils';
+import * as api from '../../../api';
 
 const AddLangPage = ({
   history,
@@ -45,45 +46,27 @@ const AddLangPage = ({
       type: 'application/json',
     });
 
-    // compose parameters
-    const params = {
-      lang_id: getNextLangId(),
+    setLoading(true);
+    const created = await api.r_createLangRequest({
       name: value.name,
       code: value.code,
       active: active === true ? 1 : 0,
-      blob,
-    };
+    });
 
-    setLoading(true);
+    if (!created.status) {
+      NotificationManager.error(created.message, 'Add Language');
+      setLoading(false); return;
+    }
 
-    // send request
-    addNewLangRequest(params)
-      .then((res) => {
-        setLoading(false);
-        // console.log(res);
-        if (res.status === true) {
-          NotificationManager.success(res.message, 'Add Language');
-          loadAllLangsAction();
-          history.push('/app/lang');
-        } else {
-          NotificationManager.warning(res.message, 'Add Language');
-        }
-      })
-      .catch((err) => {
-        setLoading(false);
-        console.error(err);
-        NotificationManager.warning('Something went wrong!', 'Add Language');
-      });
-  };
-  const getNextLangId = () => {
-    if (lang_list.length === 0) {
-      return 0;
+    const uploaded = await api.r_uploadLangFileRequest(value.code, blob);
+    if (!uploaded.status) {
+      NotificationManager.error(uploaded.message, 'Add Language');
+      setLoading(false); return;
     }
-    let lang_id = -1;
-    for (const lang_item of lang_list) {
-      lang_id = Math.max(lang_id, lang_item.lang_id);
-    }
-    return lang_id + 1;
+
+    setLoading(false);
+    history.push('/app/lang/list');
+    NotificationManager.success(created.message, 'Add Language');
   };
 
   const validateName = (value) => {
