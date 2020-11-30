@@ -138,25 +138,19 @@ const UserList = ({ history, match, langs, loadAllLangsAction }) => {
     setDelId(lang_id);
     setConfirm(true);
   };
-  const deleteLanguage = () => {
+  const deleteLanguage = async () => {
     if (delId > -1) {
       setConfirm(false);
       setDelId(-1);
 
-      deleteLangByIdRequest(delId)
-        .then((res) => {
-          console.log(res);
-          if (res.status === true) {
-            NotificationManager.success(res.message, 'Delete Language');
-            loadAllLangsAction();
-          } else {
-            NotificationManager.warning(res.message, 'Delete Language');
-          }
-        })
-        .catch((err) => {
-          console.error(err);
-          NotificationManager.warning(err.message, 'Delete Language');
-        });
+      const result = await api.r_deleteLangRequest(delId);
+
+      if (result.status) {
+        NotificationManager.success(result.message, 'Delete Language');
+      } else {
+        NotificationManager.error(result.message, 'Delete Language');
+      }
+      reloadTableContent();
     } else {
       NotificationManager.warning(
         'No found language to delete!',
@@ -165,20 +159,18 @@ const UserList = ({ history, match, langs, loadAllLangsAction }) => {
     }
   };
   const handleOnDownload = async (lang_id) => {
-    const lang = await getLangInfoByIdRequest(lang_id);
-    if (!lang) {
+    const { data: lang, status } = await api.r_getLangRequest(lang_id);
+    if (!status) {
       NotificationManager.warning(
         'Not found language info!',
         'Download Language'
       );
     } else {
-      const json_res = await getLangFileContentRequest(lang.code);
-
-      if (json_res.status === true) {
-        downloadAsFile(json_res.data, `${lang.code}.json`);
-      } else {
-        NotificationManager.warning(json_res.message, 'Download Language');
+      const json_res = await api.r_getLangFileContentRequest(lang_id);
+      if (json_res.status !== undefined) {
+        NotificationManager.error(json_res.message,'Download Content'); return;
       }
+      downloadAsFile(json_res, `${lang.code}.json`);
     }
   };
   const downloadAsFile = (json, download_name) => {
@@ -191,29 +183,12 @@ const UserList = ({ history, match, langs, loadAllLangsAction }) => {
     tempLink.click();
   };
   const refreshLangKeys = async (lang_id) => {
+    
     console.log(lang_id, lang_id == 0, lang_id === 0);
-
-    // no need to refresh English here.
-    if (Number(lang_id) === 0) {
-      NotificationManager.warning(
-        'This is the default language!',
-        'Sync Language'
-      );
-      return;
-    }
-
-    // lang object
-    let lang_target = {};
-    for (const lang of langs) {
-      if (lang.lang_id === lang_id) {
-        lang_target = lang;
-      }
-    }
-    const lang_default = langs[0];
 
     setProcessing(true);
 
-    const res = await refreshLanguage(lang_target, lang_default);
+    const res = await api.r_syncLangRequest(lang_id);
 
     setProcessing(false);
 
@@ -222,9 +197,8 @@ const UserList = ({ history, match, langs, loadAllLangsAction }) => {
     } else {
       NotificationManager.error(res.message);
     }
-
-    // console.log(lang_target);
   };
+
   const refreshAllLangs = async () => {
     setProcessing(true);
     try {
@@ -265,10 +239,10 @@ const UserList = ({ history, match, langs, loadAllLangsAction }) => {
         </Colxx>
 
         <Colxx className="d-flex justify-content-end" xxs={12}>
-          <Button color="info" className="mb-2 mr-2" onClick={refreshAllLangs}>
+          {/* <Button color="info" className="mb-2 mr-2" onClick={refreshAllLangs}>
             <i className="simple-icon-refresh mr-1" />
             Sync All Langs
-          </Button>{' '}
+          </Button>{' '} */}
           <Button color="primary" className="mb-2" onClick={toAddPage}>
             <i className="simple-icon-plus mr-1" />
             <IntlMessages id="actions.add" />

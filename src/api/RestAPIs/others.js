@@ -169,3 +169,23 @@ export const r_createLangRequest = async (data) => {
     return e.response.data;
   }
 }
+
+export const r_syncLangRequest = async (id) => {
+  try {
+    const { data: res } = await axios.post(`/api/v1/admin/langs/${id}/sync`);
+    return res;
+  } catch (e) {
+    console.log(e, e.response.data);
+    return e.response.data;
+  }
+}
+
+export const r_deleteLangRequest = async (id) => {
+  try {
+    const { data: res } = await axios.delete(`/api/v1/admin/langs/${id}`);
+    return res;
+  } catch (e) {
+    console.log(e, e.response.data);
+    return e.response.data;
+  }
+}
