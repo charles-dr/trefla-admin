@@ -1,17 +1,17 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 import {
   Badge,
   Button,
-  Label,
+  // Label,
   Modal,
   ModalHeader,
   ModalBody,
   Row,
 } from 'reactstrap';
 
-import Switch from 'rc-switch';
+// import Switch from 'rc-switch';
 import 'rc-switch/assets/index.css';
 import {
   AvForm,
@@ -27,22 +27,21 @@ import { Colxx, Separator } from '../../../components/common/CustomBootstrap';
 import Breadcrumb from '../../../containers/navs/Breadcrumb';
 import { ReactTableWithPaginationCard } from '../../../containers/ui/ReactTableCards';
 
-import {
-  verifyUserByIdRequest
-} from '../../../api/functions.api';
+// import {
+//   verifyUserByIdRequest
+// } from '../../../api/functions.api';
+// import {
+//   deleteUserById,
+//   // toggleBanStatus,
+//   updateUserProfile,
+// } from '../../../utils';
+// import { loadAllUsers } from '../../../redux/actions';
 import * as api from '../../../api';
-import {
-  deleteUserById,
-  // toggleBanStatus,
-  updateUserProfile,
-} from '../../../utils';
-import { loadAllUsers } from '../../../redux/actions';
 
 const NationalIDList = ({
   match,
   history,
 }) => {
-  const [data, setData] = useState([]);
   const [refreshTable, setRefreshTable] = useState(0);
 
   const [loading, setLoading] = useState(false);

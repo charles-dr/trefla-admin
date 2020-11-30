@@ -3,16 +3,18 @@ import { connect } from 'react-redux';
 import { Row } from 'reactstrap';
 
 import IntlMessages from '../../../helpers/IntlMessages';
-// import { NotificationManager } from '../../../components/common/react-notifications';
+import { NotificationManager } from '../../../components/common/react-notifications';
 import { Colxx, Separator } from '../../../components/common/CustomBootstrap';
 import Breadcrumb from '../../../containers/navs/Breadcrumb';
 import { ReactTableWithPaginationCard } from '../../../containers/ui/ReactTableCards';
 
-import { loadAllLangs, loadAllEmailTemplateAction } from '../../../redux/actions';
 import { moderateString } from '../../../utils';
+import * as api from '../../../api';
 
-const EmailTemplateList = ({ history, match, langs, templates, loadAllLangsAction, loadAllEmailTemplateAction$ }) => {
+const EmailTemplateList = ({ history, match }) => {
   const [data, setData] = useState([]);
+  const [refreshTable, setRefreshTable] = useState(0);
+
   const cols = [
     {
       Header: 'Subject',
@@ -28,7 +30,7 @@ const EmailTemplateList = ({ history, match, langs, templates, loadAllLangsActio
     },
     {
       Header: 'Use Case',
-      accessor: 'usage',
+      accessor: 'use_case',
       cellClass: 'text-muted  w-25',
       Cell: (props) => <>{props.value}</>,
     },
@@ -50,17 +52,28 @@ const EmailTemplateList = ({ history, match, langs, templates, loadAllLangsActio
       ),
     },
   ];
-  useEffect(() => {
-    recomposeList();
-    return () => {};
-  }, [match, templates]);
-  useEffect(() => {
-    loadAllEmailTemplateAction$();
-    return () => {}
-  }, [loadAllEmailTemplateAction$]);
-  const recomposeList = () => {
-    setData(templates);
-  };
+
+  const loadData = ({ limit, page }) => {
+    return api.r_loadEmailTemplateRequest({ page, limit })
+      .then(res => {
+        const { data, pager, status } = res;
+        if (status) {
+          return {
+            list: data.map(row => ({
+              ...row,
+            })),
+            pager,
+          };
+        } else {
+          NotificationManager.error("Error while loading data!", "Email Templates")
+        }
+      });
+  }
+
+  const reloadTableContent = () => {
+    setRefreshTable(refreshTable + 1);
+  }
+
   const shortenHTMLBody = (html) => {
     const strippedHTML = html.replace(/<[^>]*>?/gm, '');
     return moderateString(strippedHTML, 50);
@@ -89,21 +102,18 @@ const EmailTemplateList = ({ history, match, langs, templates, loadAllLangsActio
         </Colxx>
 
         <Colxx xxs="12">
-          <ReactTableWithPaginationCard cols={cols} data={data} />
+          <ReactTableWithPaginationCard 
+            cols={cols} 
+            loadData={loadData}
+            refresh={refreshTable}
+            />
         </Colxx>
       </Row>
     </>
   );
 };
 
-const mapStateToProps = ({ langs: langApp, emailTemplates: {list: templates} }) => {
-  const { list: langs } = langApp;
-  return {
-    langs,
-    templates
-  };
+const mapStateToProps = ({ }) => {
+  return {};
 };
-export default connect(mapStateToProps, {
-  loadAllLangsAction: loadAllLangs,
-  loadAllEmailTemplateAction$: loadAllEmailTemplateAction
-})(EmailTemplateList);
+export default connect(mapStateToProps, {})(EmailTemplateList);

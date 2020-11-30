@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { connect } from 'react-redux';
 import {
   Badge,
@@ -25,7 +25,7 @@ import { Colxx, Separator } from '../../../components/common/CustomBootstrap';
 import Breadcrumb from '../../../containers/navs/Breadcrumb';
 import { ReactTableWithPaginationCard } from '../../../containers/ui/ReactTableCards';
 
-import { deleteUserById, ru_toggleBanStatus } from '../../../utils';
+import { ru_toggleBanStatus } from '../../../utils';
 import { loadAllUsers } from '../../../redux/actions';
 import * as api from '../../../api';
 
@@ -37,7 +37,6 @@ const UserList = ({
   users,
   loadAllUsersAction,
 }) => {
-  const [data, setData] = useState([]);
   const [refreshTable, setRefreshTable] = useState(0);
 
   const [loading, setLoading] = useState(false);

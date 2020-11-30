@@ -188,7 +188,7 @@ const CommentList = ({
   }
 
   const onConfirmEmail = async (event, errors, values) => {
-    console.log('[form values]', event, errors, values);
+    // console.log('[form values]', event, errors, values);
     if (!errors.length) {
       setLoading(true);
       const res = await api.r_sendEmail2Reporter(delId, values);

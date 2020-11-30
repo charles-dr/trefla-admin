@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { connect } from 'react-redux';
 import { Badge, Button, Modal, ModalHeader, ModalBody, Row } from 'reactstrap';
 
@@ -14,7 +14,6 @@ import * as api from '../../../api';
 
 const PostList = ({ match, history, posts, users }) => {
   // const tableRef = React.useRef();
-  const [data, setData] = useState([]);
   const [delModal, setDelModal] = useState(false);
   const [delId, setDelId] = useState(-1);
   const [loading, setLoading] = useState(false);
@@ -168,18 +167,6 @@ const PostList = ({ match, history, posts, users }) => {
                 No reactions
             </Badge>;
         
-  };
-
-  const getUserNameById = (id) => {
-    if (users.length > 0) {
-      for (const user of users) {
-        if (Number(user.user_id) === Number(id)) {
-          return user.user_name;
-        }
-      }
-    } else {
-      return '';
-    }
   };
 
   const handleOnEdit = (post_id) => {

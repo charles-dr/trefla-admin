@@ -17,8 +17,8 @@ import { Colxx, Separator } from '../../../components/common/CustomBootstrap';
 import IntlMessages from '../../../helpers/IntlMessages';
 import Breadcrumb from '../../../containers/navs/Breadcrumb';
 
-import { sendSingleNotificationRequest, sendMultiNotificationsRequest } from '../../../api/functions.api';
 import { loadAllUsers } from '../../../redux/actions';
+import * as api from '../../../api';
 
 // const INIT_USER_INFO = {
 //   active: 1,
@@ -71,32 +71,23 @@ const EditUserPage = ({ history, match, user_list, loadAllUsersAction }) => {
   const [ageMode, setAgeMode] = useState('none')
 
   useEffect(() => {
-    setUserOptions(user_list.map((user, i) => ({ label: user.user_name, value: user.user_id, key: i })));
+    // setUserOptions(user_list.map((user, i) => ({ label: user.user_name, value: user.user_id, key: i })));
+
+    api.r_loadUserRequest({ page: 0, limit: 0, mode: 'SIMPLE' })
+      .then(res => {
+        // console.log('[users]', users.length, users)
+        const { status, message, data } = res;
+        if (status) {
+          setUserOptions(data.map((user, i) => ({ label: user.user_name, value: user.id, key: i })));
+        } else {
+          NotificationManager.error('Error while loading user data!', 'Loading Data');
+        }
+      })
 
     return () => {
       return true;
     };
-  }, [match, user_list]);
-
-  // const onUpdateProfile = async (values) => {
-
-  // };
-
-  // const composeSubmitData = () => {
-
-  // };
-
-  // const validateRequired = (name) => {
-  //   const value = profile[name];
-  //   let error;
-  //   if (!value) {
-  //     error = 'This field is required!';
-  //   }
-  //   return error;
-  // };
-  // const handleOnChange = (e) => {
-  //   setProfile({ ...profile, [e.target.name]: e.target.value });
-  // };
+  }, [match]);
 
   const handleOnChangeSingleNoti = (e) => {
     setSingleNoti({ ...singleNoti, [e.target.name]: e.target.value });
@@ -174,29 +165,19 @@ const EditUserPage = ({ history, match, user_list, loadAllUsersAction }) => {
     }
     return error;
   }
-  // const validateRequiredM = (fld) => {
-  //   const value = multiNoti[fld];
-  //   let error;
-  //   if (!value) {
-  //     error = 'This field is required!';
-  //   }
-  //   return error;
-  // }
 
   const sendSingleNotification = async (values) => {
     if (!singleUser) {
       NotificationManager.warning('Please select a user!');
       return false;
     }
-
-    // console.log(singleUser, singleNoti);
     const params = {
       ...singleNoti, user_id: singleUser.value
     };
 
-    console.log(values);
+    // console.log(values);
     setLoading(true);
-    sendSingleNotificationRequest(params)
+    api.r_sendNotification2User(params)
       .then(res => {
         setLoading(false);
         NotificationManager.success('Notification has been sent!', 'Send Notification');
@@ -220,7 +201,7 @@ const EditUserPage = ({ history, match, user_list, loadAllUsersAction }) => {
     };
 
     setLoading(true);
-    sendMultiNotificationsRequest(params)
+    api.r_sendNotification2Multiple(params)
       .then(res => {
         setLoading(false);
         // init form

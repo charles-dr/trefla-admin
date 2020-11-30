@@ -34,7 +34,7 @@ import {
   deleteAdminNotiByIdRequest,
 } from '../../../utils';
 import { loadAllUsers, loadAllAdminNotiAction } from '../../../redux/actions';
-
+import * as api from '../../../api';
 
 const IDTransferList = ({
   match,
@@ -47,7 +47,7 @@ const IDTransferList = ({
   loadAllAdminNotiAction$,
 }) => {
   // Table Data
-  const [data, setData] = useState([]);
+  const [refreshTable, setRefreshTable] = useState(0);
 
   const [loading, setLoading] = useState(false);
   const [preloading, setPreloading] = useState(false);
@@ -74,7 +74,7 @@ const IDTransferList = ({
   const cols = [
     {
       Header: 'Transfer From',
-      accessor: 'fromUser',
+      accessor: 'from',
       cellClass: 'list-item-heading w-15',
       Cell: (props) => (
         <>
@@ -107,7 +107,7 @@ const IDTransferList = ({
     },
     {
       Header: 'Transfer To',
-      accessor: 'toUser',
+      accessor: 'to',
       cellClass: 'list-item-heading w-10',
       Cell: (props) => (
         <>
@@ -140,7 +140,7 @@ const IDTransferList = ({
     },
     {
       Header: 'Consent Email',
-      accessor: 'consent_emails',
+      accessor: 'emails',
       cellClass: 'list-item-heading w-10',
       Cell: (props) => (
         <>
@@ -151,7 +151,7 @@ const IDTransferList = ({
     },
     {
       Header: 'Actions',
-      accessor: 'noti_id',
+      accessor: 'id',
       cellClass: 'text-muted  w-10',
       Cell: (props) => (
         <>
@@ -186,36 +186,43 @@ const IDTransferList = ({
     },
   ];
 
-  useEffect(() => {
-    recomposeIDTransfer();
-    return () => {
-      return true;
-    };
-  }, [match, users, notifications]);
+  const loadData = ({ limit, page }) => {
+    return api.r_loadIDTrasferRequest({ page, limit })
+      .then(res => {
+        const { data, pager, status } = res;
+        if (status) {
+          return {
+            list: data.map(row => ({
+              ...row,
+              consent_emails: row.from.email,
+            })),
+            pager,
+          };
+        } else {
+
+        }
+      });
+  }
+
+  const reloadTableContent = () => {
+    setRefreshTable(refreshTable + 1);
+  }
 
   useEffect(() => {
-    const filtered = users.map((user, i) => ({
-      label: `${user.user_name} (${user.email})`, value: user.user_id, key: i
-    }));
-    setVerifyUsers(filtered);
-    if (filtered.length > 0) setVerifyUser(filtered[0]);
+    api.r_loadUserRequest({ page: 0, limit: 0, mode: 'SIMPLE'})
+      .then(({data: users, status}) => {
+        if (status) {
+          const filtered = users.map((user, i) => ({
+            label: `${user.user_name} (${user.email})`, value: user.id, key: i
+          }));
+          setVerifyUsers(filtered);
+          if (filtered.length > 0) setVerifyUser(filtered[0]);        
+        }
+      })
+
     return () => { };
-  }, [match, users]);
+  }, [match]);
 
-  const recomposeIDTransfer = () => {
-    let idTransfers = notifications.filter(noti => noti.type === '12');
-    let format_data = [];
-    for (let transfer of idTransfers) {
-      let newItem = {};
-      // copy all fields to new object
-      Object.keys(transfer).forEach((key, i) => newItem[key] = transfer[key]);
-      newItem.fromUser = getUserById(transfer.old_user_id);
-      newItem.toUser = getUserById(transfer.user_id);
-      newItem.consent_emails = transfer.consent_emails || [];
-      format_data.push(newItem);
-    }
-    setData(format_data);
-  };
   const getUserAvatarUrl = ({ photo, sex, avatarIndex }) => {
     if (photo) {
       return photo;
@@ -404,7 +411,11 @@ const IDTransferList = ({
         </Colxx>
 
         <Colxx xxs="12">
-          <ReactTableWithPaginationCard cols={cols} data={data} />
+          <ReactTableWithPaginationCard 
+            cols={cols} 
+            loadData={loadData}
+            refresh={refreshTable}
+            />
         </Colxx>
       </Row>
 

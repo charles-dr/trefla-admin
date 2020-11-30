@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Row, Label, FormGroup, Button } from 'reactstrap';
 import { connect } from 'react-redux';
 
@@ -17,7 +17,7 @@ import Breadcrumb from '../../../containers/navs/Breadcrumb';
 
 import { formatTime, ru_addUserProfile } from '../../../utils';
 import { loadAllUsers } from '../../../redux/actions';
-import * as api from '../../../api';
+// import * as api from '../../../api';
 
 const INIT_USER_INFO = {
   active: 1,
@@ -167,13 +167,6 @@ const EditUserPage = ({ history, match, user_list, loadAllUsersAction }) => {
     return avatar.path || '/assets/avatar/avatar_boy1.png';
   };
   
-  const getUserNewId = () => {
-    let newId = -1;
-    for (const user of user_list) {
-      newId = user.user_id > newId ? user.user_id : newId;
-    }
-    return newId + 1;
-  };
 
   const initialValues = profile;
 
