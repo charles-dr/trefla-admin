@@ -63,6 +63,26 @@ export const r_loadIDTrasferRequest = async ({ page, limit }) => {
   }
 }
 
+export const r_IDTransferByIdRequest = async (id) => {
+  try {
+    const { data: res } = await axios.get(`/api/v1/admin/id-transfers/${id}`);
+    return res;
+  } catch (e) {
+    console.log(e, e.response.data);
+    return e.response.data;
+  }
+}
+
+export const r_deleteIDTransferRequest = async (id) => {
+  try {
+    const { data: res } = await axios.get(`/api/v1/admin/id-transfers/${id}`);
+    return res;
+  } catch (e) {
+    console.log(e, e.response.data);
+    return e.response.data;
+  }
+}
+
 export const r_sendNotification2User = async ({user_id, title, body}) => {
   try {
     const { data: res } = await axios.post(`/api/v1/admin/send-notification`, { user_id, title, body });

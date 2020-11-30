@@ -233,91 +233,69 @@ const IDTransferList = ({
     }
     return `/assets/avatar/avatar_${sex === '1' ? 'girl2' : 'boy1'}.png`;
   };
-  const sendConsentEmailToUserA = (id) => {
+  const sendConsentEmailToUserA = async (id) => {
     setPreloading(true);
-    sendConsentEmail({ noti_id: id })
-      .then(res => {
-        setPreloading(false);
-        NotificationManager.success(res.message, 'ID Transfer');
-        loadAllAdminNotiAction$();
-      })
-      .catch(err => {
-        setPreloading(false);
-        NotificationManager.error(err.message, 'ID Transfer');
-      });
-  }
-  const judgeRequest = (id) => {
-    const tempNotis = notifications.filter(noti => noti.noti_id === id);
 
-    if (tempNotis.length === 0) {
-      // no matches
-      NotificationManager.error('Not found the notification!', 'ID Transfer'); return;
+    const { status, message } = await api.r_sendConsentEmailRequest(id);
+
+    setPreloading(false);
+
+    if (status) {
+      NotificationManager.success(message, 'ID Transfer');
+    } else {
+      NotificationManager.error(message, 'ID Transfer');
     }
-    const notification = tempNotis[0];
+  }
+  const judgeRequest = async (id) => {
+    
+    const { data: noti, status } = await api.r_IDTransferByIdRequest(id);
 
-    // set ban info
-    const fromUser = getUserById(notification.old_user_id);
-    const toUser = getUserById(notification.user_id);
+    if (!status) {
+      NotificationManager.error('Error while loading data!', 'ID Tranfer');
+      return;
+    }
 
-    setJudgeInfo({ from: fromUser, to: toUser, noti_id: id });
-    setVerified({ from: !!fromUser.card_verified, to: !!toUser.card_verified });
+    setJudgeInfo({ from: noti.from, to: noti.to, noti_id: noti.id });
+    setVerified({ from: !!noti.from.card_verified, to: !!noti.to.card_verified });
 
     setJudgeModal(true);
   }
-  const confirmJudgeIDTransfer = () => {
+  const confirmJudgeIDTransfer = async () => {
     if (verified.from && verified.to) {
       NotificationManager.warning("Both user can't be verified at a time!", 'ID Transfer'); return;
     } else if (!verified.from && !verified.to) {
       NotificationManager.warning("Please select a user to be verified!", "ID Transfer"); return;
     }
     setLoading(true);
-    judgeIDTransferRequest({
-      noti_id: judgeInfo.noti_id, verified: {
-        from: verified.from === true ? 1 : 0,
-        to: verified.to === true ? 1 : 0,
-      }
-    })
-      .then(res => {
-        setLoading(false);
-        if (res.status === true) {
-          NotificationManager.success(res.message, 'ID Transfer');
-          setJudgeModal(false);
-          loadAllUsersAction();
-        } else {
-          NotificationManager.error(res.message, 'ID Transfer');
-        }
-      })
-      .catch(error => {
-        setLoading(false);
-        console.log(error.message);
-        NotificationManager.error('Something went wrong!', 'ID Transfer');
-      });
+
+    const newOwnerId = verified.from ? judgeInfo.from.id : (verified.to ? judgeInfo.to.id : 0);
+    const result = await api.r_verifyUserRequest({ id: newOwnerId});
+    setLoading(false);
+
+    if (result.status) {
+      NotificationManager.success(result.message, 'ID Transfer');
+    } else {
+      NotificationManager.error(result.message, 'ID Transfer');
+    }
   }
   const deleteIDTransfer = (id) => {
     setDeleteId(id);
     setDelModal(true);
   }
-  const confirmDeleteIDTransfer = () => {
+  const confirmDeleteIDTransfer = async () => {
     console.log(delId);
     setLoading(true);
-    deleteAdminNotiByIdRequest(delId) 
-      .then(res => {
-        setLoading(false);
-        setDelModal(false);
-        if (res.status === true) {
-          NotificationManager.success('ID transfer request deleted!', 'Delete ID Transfer Request');
-          setAddVTModal(false);
-          loadAllAdminNotiAction$();
-        } else {
-          NotificationManager.error('Failed to delete ID transfer request!', 'Delete ID Transfer Request')
-        }
-      })
-      .catch(error => {
-        console.log('[Del ID Transfer]', error.message);
-        setLoading(false);
-        setDelModal(false);
-        NotificationManager.error('Something went wrong!', 'Delete ID Transfer Request');
-      });
+
+    const { status, message } = await api.r_deleteIDTransferRequest(delId);
+    
+    setLoading(false);
+    setDelModal(false);
+
+    if (status) {
+      NotificationManager.success(message, 'Delete ID Transfer Request');
+    } else {
+      NotificationManager.error(message, 'Delete ID Transfer Request');
+    }
   }
   const confirmAddVerificationReq = () => {
     setLoading(true);
@@ -401,13 +379,13 @@ const IDTransferList = ({
         </Colxx>
 
         <Colxx className="d-flex justify-content-end" xxs={12}>
-          <Button color="primary" className="mb-2 mr-2" onClick={() => setAddVModal(true)}>
+          {/* <Button color="primary" className="mb-2 mr-2" onClick={() => setAddVModal(true)}>
             <i className="simple-icon-plus mr-1" /> Verification
-          </Button>{' '}
+          </Button>{' '} */}
 
-          <Button color="primary" className="mb-2" onClick={() => setAddVTModal(true)}>
+          {/* <Button color="primary" className="mb-2" onClick={() => setAddVTModal(true)}>
             <i className="simple-icon-plus mr-1" /> ID Transfer
-          </Button>{' '}
+          </Button>{' '} */}
         </Colxx>
 
         <Colxx xxs="12">

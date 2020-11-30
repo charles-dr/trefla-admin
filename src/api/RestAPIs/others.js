@@ -189,3 +189,23 @@ export const r_deleteLangRequest = async (id) => {
     return e.response.data;
   }
 }
+
+export const r_getStatsRequest = async () => {
+  try {
+    const { data: res } = await axios.get('/api/v1/admin/stats');
+    return res;
+  } catch (e) {
+    console.log(e, e.response.data);
+    return e.response.data;
+  }
+}
+
+export const r_sendConsentEmailRequest = async (id) => {
+  try {
+    const { data: res } = await axios.post(`/api/v1/admin/consent-email/${id}`);
+    return res;
+  } catch (e) {
+    console.log(e, e.response.data);
+    return e.response.data;
+  }
+}

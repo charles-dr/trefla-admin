@@ -11,6 +11,7 @@ import IconCardsCarousel from '../../containers/dashboards/IconCardsCarousel';
 import RecentPosts from '../../containers/dashboards/RecentPosts';
 import SalesChartCard from '../../containers/dashboards/SalesChartCard';
 
+import * as api from '../../api';
 import {
   formatTime,
   moderateString,
@@ -18,7 +19,7 @@ import {
   transformTime,
 } from '../../utils';
 
-const DashboardPage = ({ match, history, comments, posts, reports, users }) => {
+const DashboardPage = ({ match, history }) => {
   const [iconCarouselData, setIconCarouselData] = useState([
     { title: 'pages.users', icon: 'simple-icon-people', value: 0 },
     { title: 'pages.posts', icon: 'simple-icon-paper-plane', value: 0 },
@@ -31,73 +32,60 @@ const DashboardPage = ({ match, history, comments, posts, reports, users }) => {
   const [recentPosts, setRecentPosts] = useState([]);
 
   useEffect(() => {
-    setIconCarouselData([
-      {
-        title: 'pages.users',
-        icon: 'simple-icon-people',
-        value: users.length,
-        onClick: () => history.push('/app/user'),
-      },
-      {
-        title: 'pages.posts',
-        icon: 'simple-icon-paper-plane',
-        value: posts.length,
-        onClick: () => history.push('/app/post'),
-      },
-      {
-        title: 'pages.comments',
-        icon: 'simple-icon-bubbles',
-        value: comments.length,
-        onClick: () => history.push('/app/comment'),
-      },
-      {
-        title: 'pages.reports',
-        icon: 'simple-icon-shield',
-        value: reports.length,
-        onClick: () => history.push('/app/report'),
-      },
-    ]);
 
+    api.r_getStatsRequest()
+      .then(result => {
+        if (result.status) {
+          const { recentPosts } = result;
+          setRecentPosts(recentPosts.map((post, i) => {
+            return {
+              id: i + 1,
+              title: moderateString(post.feed, 60),
+              img: getUserAvatarUrl(post.user),
+              createDate: formatTime(
+                new Date(post.create_time * 1000),
+                'd.m.Y'
+              ),
+              description: post.user ? post.user.user_name : 'unknown',
+              post_link: `/app/post/edit/${post.post_id}`,
+              user_profile_link: `/app/user/edit/${post.post_user_id}`,
+            };
+          }))
+
+          const { total } = result;
+          setIconCarouselData([
+            {
+              title: 'pages.users',
+              icon: 'simple-icon-people',
+              value: total.users,
+              onClick: () => history.push('/app/user'),
+            },
+            {
+              title: 'pages.posts',
+              icon: 'simple-icon-paper-plane',
+              value: total.posts,
+              onClick: () => history.push('/app/post'),
+            },
+            {
+              title: 'pages.comments',
+              icon: 'simple-icon-bubbles',
+              value: total.comments,
+              onClick: () => history.push('/app/comment'),
+            },
+            {
+              title: 'pages.reports',
+              icon: 'simple-icon-shield',
+              value: total.reports,
+              onClick: () => history.push('/app/report'),
+            },
+          ]);
+      
+          const { stats4Post } = result;
+          setStat({ ...stat, posts: stats4Post });
+        }
+      })
     return () => {};
-  }, [posts, users, comments, reports]);
-
-  useEffect(() => {
-    const data = statIn7Days(posts, 'post_time');
-    setStat({ ...stat, posts: data });
-
-    // set recent posts
-    const posts_num = posts.length;
-    const cut_num = Math.min(posts_num, 7);
-    const rPosts = posts.slice(posts.length - cut_num, posts.length).reverse();
-
-    const refactored = rPosts.map((post, i) => {
-      // console.log(post);
-      const user = getUserById(post.post_user_id);
-      // console.log(user);
-
-      return {
-        id: i + 1,
-        title: moderateString(post.feed, 60),
-        img: getUserAvatarUrl(user),
-        createDate: formatTime(
-          new Date(transformTime(post.post_time)),
-          'd.m.Y'
-        ),
-        description: user ? user.user_name : 'unknown',
-        post_link: `/app/post/edit/${post.post_id}`,
-        user_profile_link: `/app/user/edit/${post.post_user_id}`,
-      };
-    });
-
-    setRecentPosts(refactored);
-
-    return () => {};
-  }, [posts, users]);
-
-  const getUserById = (id) => {
-    const userR = users.filter((user) => Number(user.user_id) === Number(id));
-    return userR.length > 0 ? userR[0] : false;
-  };
+  }, []);
 
   const getUserAvatarUrl = ({ photo, sex, avatarIndex }) => {
     if (photo) {
@@ -146,23 +134,9 @@ const DashboardPage = ({ match, history, comments, posts, reports, users }) => {
   );
 };
 
-const mapStateToProps = ({
-  posts: postApp,
-  users: userApp,
-  comments: commentApp,
-  reports: reportApp,
-}) => {
-  const { list: posts } = postApp;
-  const { list: users } = userApp;
-  const { list: comments } = commentApp;
-  const { list: reports } = reportApp;
+const mapStateToProps = ({}) => {
 
-  return {
-    users,
-    posts,
-    comments,
-    reports,
-  };
+  return {};
 };
 
 export default connect(mapStateToProps, {})(DashboardPage);
