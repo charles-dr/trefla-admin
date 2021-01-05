@@ -70,6 +70,12 @@ const data = [
     to: '/app/report',
   },
   {
+    id: 'bugmenu',
+    icon: 'iconsminds-security-bug',
+    label: 'menu.bugs',
+    to: '/app/bug',
+  },
+  {
     id: 'languages',
     icon: 'simple-icon-globe',
     label: 'menu.languages',

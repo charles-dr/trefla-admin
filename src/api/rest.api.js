@@ -3,7 +3,7 @@ export * from './RestAPIs/comments';
 export * from './RestAPIs/posts';
 export * from './RestAPIs/reports';
 export * from './RestAPIs/users';
-
+export * from './RestAPIs/bugs';
 export * from './RestAPIs/others';
 
 

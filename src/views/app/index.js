@@ -31,6 +31,7 @@ const ReportModule = React.lazy(() => import('./report'));
 const SettingModule = React.lazy(() => import('./settings'));
 const UserModule = React.lazy(() => import('./user'));
 const DashboardPage = React.lazy(() => import('./dashboard'));
+const BugModule = React.lazy(() => import('./bug'));
 
 const App = ({
   match,
@@ -98,6 +99,12 @@ const App = ({
               path={`${match.url}/dashboard`}
               render={(props) => <DashboardPage {...props} />}
             />
+
+            <Route 
+              path={`${match.url}/bug`}
+              render={(props) => <BugModule {...props} />}
+            />
+
             <Route
               path={`${match.url}/comment`}
               render={(props) => <CommentModule {...props} />}

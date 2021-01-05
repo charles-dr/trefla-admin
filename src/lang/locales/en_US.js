@@ -68,6 +68,8 @@ module.exports = {
   'menu.blank-page': 'Blank Page',
 
   'menu.add': 'Add',
+  'menu.bugs': 'Bugs',
+  'menu.bug': 'Bug',
   'menu.db-backups': 'Database Backups',
   'menu.config': 'Config',
   'menu.comments': 'Comments',
@@ -109,6 +111,8 @@ module.exports = {
   'pages.error-code': 'Error code',
   'pages.go-back-home': 'GO BACK HOME',
 
+  'pages.bug': 'Bug',
+  'pages.bugs': 'Bugs',
   'pages.comment': 'Comment',
   'pages.comments': 'Comments',
   'pages.config': 'Config',
