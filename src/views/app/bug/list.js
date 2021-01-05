@@ -68,7 +68,23 @@ const CommentList = ({
 			accessor: 'report',
 			cellClass: 'text-muted  w-20',
 			Cell: (props) => <>{props.value}</>,
-		},
+    },
+    {
+      Header: "File",
+      accessor: 'file',
+      cellClass: 'text-muted w-20',
+      Cell: (props) => <>{
+        props.value ? 
+          <div>
+            <a href={props.value} target="_blank"><img src={props.value} alt="Report" style={{ width: '100%', maxWidth: 150 }} /> </a>
+          </div> : 
+          <Badge
+            color='danger'
+            pill
+            className="mb-1"
+          >No file</Badge>
+      }</>
+    },
 		{
 			Header: 'Time',
 			accessor: 'create_time',
