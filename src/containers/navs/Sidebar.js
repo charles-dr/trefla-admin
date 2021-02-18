@@ -330,7 +330,7 @@ class Sidebar extends Component {
     if (item.permission === undefined) return true;
 
     if (typeof item.permission === 'boolean') return item.permission; // constant value;
-    console.log('[role]', role)
+
     const keys = item.permission.split('.');
     if (keys.length === 1) {
       return permission[keys[0]];
@@ -416,7 +416,7 @@ class Sidebar extends Component {
                       data-parent={item.id}
                     >
                       {item.subs &&
-                        item.subs.map((sub, index) => {
+                        item.subs.filter(sub => this.menuShowable(sub)).map((sub, index) => {
                           return (
                             <NavItem
                               key={`${item.id}_${index}`}
@@ -466,7 +466,7 @@ class Sidebar extends Component {
                                     }
                                   >
                                     <Nav className="third-level-menu">
-                                      {sub.subs.map((thirdSub, thirdIndex) => {
+                                      {sub.subs.filter(thirdSub => this.menuShowable(thirdSub)).map((thirdSub, thirdIndex) => {
                                         return (
                                           <NavItem
                                             key={`${item.id}_${index}_${thirdIndex}`}

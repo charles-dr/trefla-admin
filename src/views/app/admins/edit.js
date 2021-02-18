@@ -107,6 +107,14 @@ const ProfilePage = ({
     setLoading1(false);
     if (res.status) {
       NotificationManager.success(res.message, 'Admin Permission', 3000);
+      api.r_getEmployeeRequest(match.params.id)
+      .then(({ data: admin, status, permission: adminPermission }) => {
+        if (status) {
+          setPermission(adminPermission);
+        } else {
+          NotificationManager.error('Error while loading data!', 'Admin Profile');
+        }
+      })
     } else {
       NotificationManager.error(res.message, 'Admin Permission', 3000);
     }
