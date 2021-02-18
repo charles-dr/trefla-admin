@@ -47,10 +47,14 @@ const ProfilePage = ({
   const onAddAdministrator = async (values) => {
     const file = avatarInput.files[0];
     setLoading(true);
-    await api.r_addEmployeeRequest(profile, file);
-    NotificationManager.success('Administrator has been added.', 'Add Administrator', 3000);
+    const res = await api.r_addEmployeeRequest(profile, file);
+    if (res.status) {
+      NotificationManager.success('Administrator has been added.', 'Add Administrator', 3000);
+      history.push('/app/admin/list');
+    } else {
+      NotificationManager.error(res.message, 'Add Administrator', 3000);
+    }
     setLoading(false);
-    history.push('/app/admin/list');
   };
   const openFileSelector = () => {
     avatarInput.click();

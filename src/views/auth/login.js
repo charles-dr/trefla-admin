@@ -63,7 +63,7 @@ const Login = ({
     .catch(error => {
       console.log('[Firebase login] Error', error);
     })
-    updateLoginAction({ status: login, message: '' });
+    // updateLoginAction({ status: login, message: '' });
     if (login) {
       history.push('/app');
     }

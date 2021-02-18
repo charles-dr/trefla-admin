@@ -20,11 +20,13 @@ const data = [
             icon: 'simple-icon-list',
             label: 'menu.list',
             to: '/app/user/list',
+            permission: 'user.list.show',
           },
           {
             icon: 'iconsminds-id-card',
             label: 'menu.national-ids',
             to: '/app/user/national-ids',
+            permission: 'user.nationalId.show'
           },
           // {
           //   icon: 'iconsminds-quill-3',
@@ -35,17 +37,20 @@ const data = [
             icon: 'iconsminds-shield',
             label: 'menu.id-transfer',
             to: '/app/user/id-transfer',
+            permission: 'user.idTransfer.show'
           }
         ],
       },{
         id: 'notification',
         label: 'menu.notification',
         to: '/app/notification',
+        permission: 'user.sendNotification.show',
         subs: [
           {
             icon: 'simple-icon-bell',
             label: 'menu.send-notification',
             to: '/app/notification/send',
+            permission: 'user.sendNotification.show',
           },
         ]
       }
@@ -56,36 +61,42 @@ const data = [
     icon: 'simple-icon-paper-plane',
     label: 'menu.posts',
     to: '/app/post',
+    permission: 'post.show',
   },
   {
     id: 'commentmenu',
     icon: 'simple-icon-bubbles',
     label: 'menu.comments',
     to: '/app/comment',
+    permission: 'comment.show',
   },
   {
     id: 'reportmenu',
     icon: 'simple-icon-shield',
     label: 'menu.reports',
     to: '/app/report',
+    permission: 'report.show',
   },
   {
     id: 'bugmenu',
     icon: 'iconsminds-security-bug',
     label: 'menu.bugs',
     to: '/app/bug',
+    permission: 'bug.show',
   },
   {
     id: 'languages',
     icon: 'simple-icon-globe',
     label: 'menu.languages',
     to: '/app/lang',
+    permission: 'lang.show',
   },
   {
     id: 'administrators',
     icon: 'iconsminds-support', // iconsminds-hipster-men, iconsminds-king-2, iconsminds-engineering
     label: 'menu.administrators',
     to: '/app/admin',
+    permission: false,
   },
   {
     id: 'settings',
@@ -102,21 +113,25 @@ const data = [
         icon: 'iconsminds-inbox-full',
         label: 'menu.email-templates',
         to: '/app/settings/email-templates',
+        permission: 'settings.emailTemplate',
       },
       {
         icon: 'iconsminds-gears',
         label: 'menu.config',
         to: '/app/settings/config',
+        permission: 'settings.config',
       },
       {
         icon: 'iconsminds-profile',
         label: 'menu.profile',
         to: '/app/settings/profile',
+        permission: true,
       },
       {
         icon: 'iconsminds-key-lock',
         label: 'menu.password',
         to: '/app/settings/password',
+        permission: true,
       },
     ],
   },

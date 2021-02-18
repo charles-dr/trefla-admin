@@ -1,6 +1,16 @@
 import { nodeInstance as axios } from '../instance';
 import { r_uploadFileRequest } from './others';
 
+export const r_authenticateToken = async (token) => {
+  try {
+    const { data: res } = await axios.post('/api/v1/admin/authenticate-token', {});
+    return res;
+  } catch (e) {
+    console.log(e, e.response.data);
+    return e.response.data;
+  }
+}
+
 export const r_addEmployeeRequest = async (profile, file) => {
   try {
     let avatar = '';

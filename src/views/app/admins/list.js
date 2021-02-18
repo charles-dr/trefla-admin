@@ -57,12 +57,6 @@ const CommentList = ({
 				</>
 			),
 		},
-		{
-			Header: 'Email',
-			accessor: 'email',
-			cellClass: 'text-muted  w-20',
-			Cell: (props) => <>{props.value}</>,
-		},
     {
       Header: 'Image',
       accessor: 'avatar',
@@ -80,10 +74,19 @@ const CommentList = ({
       ),
     },
 		{
-			Header: 'Created At',
-			accessor: 'create_time',
+			Header: 'Email',
+			accessor: 'email',
+			cellClass: 'text-muted  w-20',
+			Cell: (props) => <>{props.value}</>,
+		},
+		{
+			Header: 'Last Login',
+			accessor: 'last_login',
 			cellClass: 'text-muted  w-10',
-			Cell: (props) => <>{formatTime(new Date(Number(props.value) * 1000), "Y-m-d H:i:s")}</>,
+			Cell: (props) => <>
+        {props.value && formatTime(new Date(Number(props.value) * 1000), "Y-m-d H:i:s")}
+        {!props.value && <Badge color={'danger'} pill className="mb-1">No Login</Badge>}
+      </>,
 		},
 		{
 			Header: 'Updated At',
@@ -333,7 +336,6 @@ const CommentList = ({
 };
 
 const mapStateToProps = ({ }) => {
-
 	return {};
 };
 

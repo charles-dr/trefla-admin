@@ -35,7 +35,7 @@ const nodeBasicInst = axios.create({
     'Authorization': {
       toString() {
         const pair = `${process.env.REACT_APP_BASIC_USERNAME}:api123V1$$!`;
-        console.log(btoa(pair));
+        // console.log(btoa(pair));
         return `Basic ${btoa(pair)}`;
       }
     }

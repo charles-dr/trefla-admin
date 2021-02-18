@@ -49,11 +49,12 @@ const App = ({
   posts,
 }) => {
   const history = useHistory();
+
   useEffect(() => {
-    if (!login) {
-      console.log('[->] Login');
-      history.push('/auth/login');
-    }
+    // if (!login) {
+    //   console.log('[->] Login');
+    //   history.push('/auth/login');
+    // }
 
     anonymousLogin()
       .then(result => {
@@ -85,6 +86,7 @@ const App = ({
     getAllReportsAction,
     history,
   ]);
+
   return (
     <AppLayout>
       <div className="dashboard-wrapper">

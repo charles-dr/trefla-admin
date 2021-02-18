@@ -24,7 +24,6 @@ import {
 function* loginRequest(action) {
   yield put({ type: AUTH_LOADING, payload: true });
   const res = yield call(api.r_loginRequest, action.payload);
-  console.log('[Saga] login', res);
   // process session data
   if (res.status === true) {
     saveAuthToken(res.token);
@@ -37,24 +36,39 @@ function* loginRequest(action) {
 }
 
 function* checkLogin(action) {
-  const saved = getAuthToken();
   try {
-    const decoded = jwt_decode(saved);
-    if (saved) {
+    const saved = getAuthToken();
+    if (!saved) {
+      yield put({
+        type: AUTH_LOGIN_SUCCESS,
+        payload: { status: false, message: "" },
+      });
+      return;
+    }
+    else {
+      const decoded = jwt_decode(saved);
       const now = new Date().getTime();
       if (now < decoded.exp * 1000) {
-        yield put({
-          type: AUTH_LOGIN_SUCCESS,
-          payload: { status: true, message: '' },
-        });
+        const res = yield call(api.r_authenticateToken, saved);
+        if (res.status) {
+          yield put({
+            type: AUTH_LOGIN_SUCCESS,
+            payload: res, //{ status: true, message: '' },
+          });
+        } else {
+          
+          throw Object.assign(new Error(res.message), { code: 400 });
+        }
       } else {
+        console.log('[Token][Expired]')
         throw Object.assign(new Error('Token is expired'), { code: 400 });
       }
     }
   } catch (e) {
+    console.log(e);
     yield put({
       type: AUTH_LOGIN_SUCCESS,
-      payload: { status: false, message: '' },
+      payload: { status: false, message: e.message },
     });
     deleteAuthToken();    
   }
