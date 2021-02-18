@@ -1,3 +1,4 @@
+/* eslint-disable global-require */
 import React, { useState } from 'react';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
@@ -45,6 +46,7 @@ const NationalIDList = ({
   const [refreshTable, setRefreshTable] = useState(0);
 
   const [loading, setLoading] = useState(false);
+  // eslint-disable-next-line
   const [modalDetails, setModalDetails] = useState(false);
   const [modalOptions, setModalOptions] = useState({
     comment: true,

@@ -46,67 +46,51 @@ const CommentList = ({
 
 	const cols = [
 		{
-			Header: 'User',
+			Header: 'Name',
 			accessor: 'user',
 			cellClass: 'list-item-heading w-15',
 			Cell: (props) => (
 				<>
-					<Link to={`/app/user/edit/${props.value.id}`}>
+					<Link to={`/app/admin/edit/${props.value.id}`}>
 						{props.value.user_name}
 					</Link>
 				</>
 			),
 		},
 		{
-			Header: 'Device Model',
-			accessor: 'device_model',
+			Header: 'Email',
+			accessor: 'email',
 			cellClass: 'text-muted  w-20',
 			Cell: (props) => <>{props.value}</>,
 		},
-		{
-			Header: 'Report',
-			accessor: 'report',
-			cellClass: 'text-muted  w-20',
-			Cell: (props) => <>{props.value}</>,
-    },
     {
-      Header: "File",
-      accessor: 'file',
-      cellClass: 'text-muted w-20',
-      Cell: (props) => <>{
-        props.value ? 
-          <div>
-            <a href={props.value} target="_blank"><img src={props.value} alt="Report" style={{ width: '100%', maxWidth: 150 }} /> </a>
-          </div> : 
-          <Badge
-            color='danger'
-            pill
-            className="mb-1"
-          >No file</Badge>
-      }</>
+      Header: 'Image',
+      accessor: 'avatar',
+      cellClass: 'list-item-heading w-10',
+      Cell: (props) => (
+        <>
+          <div className="">
+            <img
+              src={getAdminAvatar(props.value)}
+              style={{ width: 50, height: 50, borderRadius: '50%' }}
+              alt="User Profile"
+            />
+          </div>
+        </>
+      ),
     },
 		{
-			Header: 'Time',
+			Header: 'Created At',
 			accessor: 'create_time',
 			cellClass: 'text-muted  w-10',
 			Cell: (props) => <>{formatTime(new Date(Number(props.value) * 1000), "Y-m-d H:i:s")}</>,
 		},
-    {
-      Header: 'Fixed',
-      accessor: 'fixed',
-      cellClass: 'text-muted  w-5',
-      Cell: (props) => (
-        <>
-          <Badge
-            color={props.value === 1 ? 'success' : 'danger'}
-            pill
-            className="mb-1"
-          >
-            {props.value === 1 ? 'Fixed' : 'Pending'}
-          </Badge>
-        </>
-      ),
-    },
+		{
+			Header: 'Updated At',
+			accessor: 'update_time',
+			cellClass: 'text-muted  w-10',
+			Cell: (props) => <>{formatTime(new Date(Number(props.value) * 1000), "Y-m-d H:i:s")}</>,
+		},
 		{
 			Header: 'Actions',
 			accessor: 'action',
@@ -114,24 +98,14 @@ const CommentList = ({
 			Cell: (props) => (
 				<>
 					<div className="tbl-actions">
-						{/* <a href={`mailto:${props.value.email}`}> */}
+            <Link to={`/app/admin/edit/${props.value.id}`}>
             <i
-              className={`${
-                props.value.self.fixed === 1
-                  ? 'simple-icon-ban'
-                  : 'simple-icon-check'
-              } ${props.value.self.fixed === 1 ? 'warning' : 'success'}`}
-              title={`${props.value.self.fixed === 1 ? 'Mark As Pending' : 'Mark As Fixed'}`}
+              className={`iconsminds-file-edit info`}
+              title={`Edit`}
               style={{ fontSize: 18 }}
               onClick={() => handleOnUpdateStatus(props.value.self)}
             />
-						<i
-						  className="iconsminds-envelope-2 info"
-							title="Mail to Reporter"
-              style={{ fontSize: 18 }}
-              onClick={() => handleSendEmail(props.value.id)}
-						/>
-						{/* </a> */}
+            </Link>
 						<i
 							className="simple-icon-trash danger"
 							title="Remove"
@@ -145,17 +119,21 @@ const CommentList = ({
 	];
 
   const loadData = ({ limit, page }) => {
-    return api.r_loadBugRequest({ page, limit })
+    return api.r_loadEmployeeRequest({ page, limit })
       .then(res => {
         const { data, pager, status } = res;
         if (status) {
           return {
-            list: data.map(bug => ({
-              ...bug,
+            list: data.map(admin => ({
+              ...admin,
+              user: {
+                user_name: admin.user_name,
+                id: admin.id,
+              },
               action: {
-                id: bug.id,
-                email: bug.user.email,
-                self: bug,
+                id: admin.id,
+                email: admin.email,
+                self: admin,
               },
             })),
             pager,
@@ -170,6 +148,11 @@ const CommentList = ({
     setRefreshTable(refreshTable + 1);
   }
 
+  const getAdminAvatar = ( avatar ) => {
+    if (avatar) return avatar;
+    return `/assets/avatar/avatar_boy1.png`;
+  };
+
 	const handleOnDelete = (id) => {
 		console.log(id);
 		setDelId(id);
@@ -181,7 +164,7 @@ const CommentList = ({
 
 		setLoading(true);
 
-		const res = await api.r_deleteBugRequest(delId);
+		const res = await api.r_deleteEmployeeRequest(delId);
 
 		setLoading(false);
 
@@ -189,17 +172,12 @@ const CommentList = ({
 
 		if (res.status === true) {
 			setDelModal(false);
-			NotificationManager.success(res.message, 'Delete Bug');
+			NotificationManager.success(res.message, 'Delete Employee');
       reloadTableContent();
 		} else {
-			NotificationManager.error(res.message, 'Delete Bug');
+			NotificationManager.error(res.message, 'Delete Employee');
 		}
 	};
-
-  const handleSendEmail = (id) => {
-    setDelId(id);
-    setEmailModal(true);
-  }
 
   const onConfirmEmail = async (event, errors, values) => {
     // console.log('[form values]', event, errors, values);
@@ -243,11 +221,15 @@ const CommentList = ({
     }
   }
 
+  const navigateToAddPage = () => {
+    history.push('/app/admin/add');
+  };
+
 	return (
 		<>
 			<Row>
 				<Colxx xxs="12">
-					<Breadcrumb heading="menu.bugs" match={match} />
+					<Breadcrumb heading="menu.administrators" match={match} />
 					<Separator className="mb-5" />
 				</Colxx>
 			</Row>
@@ -255,9 +237,16 @@ const CommentList = ({
 			<Row>
 				<Colxx xxs="12">
 					<h3 className="mb-4">
-						<IntlMessages id="pages.bugs" />
+						<IntlMessages id="pages.admins" />
 					</h3>
 				</Colxx>
+
+        <Colxx className="d-flex justify-content-end" xxs={12}>
+          <Button color="primary" className="mb-2" onClick={navigateToAddPage}>
+            <i className="simple-icon-plus mr-1" />
+            <IntlMessages id="actions.add" />
+          </Button>{' '}
+        </Colxx>
 
 				<Colxx xxs="12">
           <ReactTableWithPaginationCard 
@@ -338,68 +327,6 @@ const CommentList = ({
 					</div>
 				</ModalBody>
 			</Modal>
-
-      {/* Email Modal */}
-      <Modal
-        isOpen={emailModal}
-        toggle={() => setEmailModal(!emailModal)}
-        backdrop="static"
-      >
-        <ModalHeader>Email to Reporter</ModalHeader>
-        <ModalBody>
-          <AvForm
-            className="av-tooltip tooltip-label-right"
-            onSubmit={(event, errors, values) =>
-              onConfirmEmail(event, errors, values)
-            }
-          >
-              <AvGroup>
-                <Label>Subject:</Label>
-                <AvInput
-                  type="text"
-                  name="subject"
-                  id="subject"
-                  required
-                />
-                <AvFeedback>Please enter subject!</AvFeedback>
-              </AvGroup>
-              <AvGroup>
-                <Label>Body:</Label>
-                <AvInput
-                  type="textarea"
-                  name="body"
-                  id="body"
-                  required
-                />
-                <AvFeedback>Please enter content!</AvFeedback>
-              </AvGroup>
-
-            <Separator className="mb-5 mt-3" />
-            <div className="d-flex justify-content-end">
-              <Button
-                type="submit"
-                color="primary"
-                className={`btn-shadow btn-multiple-state mr-2 ${
-                  loading ? 'show-spinner' : ''
-                }`}
-                size="lg"
-              >
-                <span className="spinner d-inline-block">
-                  <span className="bounce1" />
-                  <span className="bounce2" />
-                  <span className="bounce3" />
-                </span>
-                <span className="label">
-                  Submit
-                </span>
-              </Button>{' '}
-              <Button color="secondary" onClick={() => setEmailModal(false)}>
-                <IntlMessages id="actions.cancel" />
-              </Button>
-            </div>
-          </AvForm>
-        </ModalBody>
-      </Modal>
 
 		</>
 	);

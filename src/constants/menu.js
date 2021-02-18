@@ -82,6 +82,12 @@ const data = [
     to: '/app/lang',
   },
   {
+    id: 'administrators',
+    icon: 'iconsminds-support', // iconsminds-hipster-men, iconsminds-king-2, iconsminds-engineering
+    label: 'menu.administrators',
+    to: '/app/admin',
+  },
+  {
     id: 'settings',
     icon: 'simple-icon-settings',
     label: 'menu.settings',

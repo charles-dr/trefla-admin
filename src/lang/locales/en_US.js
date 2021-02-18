@@ -25,7 +25,6 @@ module.exports = {
   'user.email': 'E-mail',
   'user.new-password': 'New Password',
   'user.old-password': 'Old Password',
-  'user.password': 'Password',
   'user.confirm-password': 'Confirm Password',
   'user.forgot-password-question': 'Forget password?',
   'user.fullname': 'Full Name',
@@ -45,9 +44,11 @@ module.exports = {
   'user.lang-file': 'Language File',
   'user.location': 'Location',
   'user.name': 'Name',
-  'user.username': 'Username',
+  'user.password': "Password",
+  "user.password.confirm": "Confirm Password",
   'user.save': 'Save',
   'user.submit': 'Submit',
+  'user.username': 'Username',
   'user.update': 'Update',
   'user.upload-new-file': 'Upload New File',
 
@@ -68,6 +69,9 @@ module.exports = {
   'menu.blank-page': 'Blank Page',
 
   'menu.add': 'Add',
+  'menu.administrators': 'Administrators',
+  'menu.admins': 'Administrators',
+  'menu.admin': 'Administrator',
   'menu.bugs': 'Bugs',
   'menu.bug': 'Bug',
   'menu.db-backups': 'Database Backups',
@@ -111,6 +115,10 @@ module.exports = {
   'pages.error-code': 'Error code',
   'pages.go-back-home': 'GO BACK HOME',
 
+  
+  'pages.admins': 'Administrators',
+  'pages.admin': 'Administrator',
+  'pages.admin.add': 'Add Administrator',
   'pages.bug': 'Bug',
   'pages.bugs': 'Bugs',
   'pages.comment': 'Comment',

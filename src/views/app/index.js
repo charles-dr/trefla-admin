@@ -32,6 +32,7 @@ const SettingModule = React.lazy(() => import('./settings'));
 const UserModule = React.lazy(() => import('./user'));
 const DashboardPage = React.lazy(() => import('./dashboard'));
 const BugModule = React.lazy(() => import('./bug'));
+const AdminModule = React.lazy(() => import('./admins'));
 
 const App = ({
   match,
@@ -135,6 +136,10 @@ const App = ({
             <Route
               path={`${match.url}/user`}
               render={(props) => <UserModule {...props} />}
+            />
+            <Route
+              path={`${match.url}/admin`}
+              render={(props) => <AdminModule {...props} />}
             />
             <Redirect to="/error" />
           </Switch>

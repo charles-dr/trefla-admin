@@ -150,3 +150,7 @@ export const getMapPositionFromString = (str) => {
 export const moderateString = (str, len) => {
   return str.length > len ? `${str.substr(0, len)}...` : str;
 };
+
+export const toCamelCase = (str) => {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}

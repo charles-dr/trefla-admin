@@ -87,16 +87,21 @@ const DashboardPage = ({ match, history }) => {
     return () => {};
   }, []);
 
-  const getUserAvatarUrl = ({ photo, sex, avatarIndex }) => {
-    if (photo) {
-      return photo;
+  const getUserAvatarUrl = (userInfo) => {
+    if (userInfo) {
+      const { photo, sex, avatarIndex } = userInfo;
+      if (photo) {
+        return photo;
+      }
+      if (avatarIndex !== undefined && avatarIndex !== '') {
+        return `/assets/avatar/${
+          sex === '1' ? 'girl' : 'boy'
+        }/${avatarIndex}.png`;
+      }
+      return `/assets/avatar/avatar_${sex === '1' ? 'girl2' : 'boy1'}.png`;
     }
-    if (avatarIndex !== undefined && avatarIndex !== '') {
-      return `/assets/avatar/${
-        sex === '1' ? 'girl' : 'boy'
-      }/${avatarIndex}.png`;
-    }
-    return `/assets/avatar/avatar_${sex === '1' ? 'girl2' : 'boy1'}.png`;
+
+    return `/assets/avatar/avatar_boy1.png`;
   };
 
   return (

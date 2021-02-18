@@ -49,7 +49,7 @@ const CommentList = ({
 			cellClass: 'list-item-heading w-15',
 			Cell: (props) => (
 				<>
-					<Link to={`/#/app/user/edit/${props.value.id}`}>
+					<Link to={`/app/user/edit/${props.value.id}`}>
 						{props.value.user_name}
 					</Link>
 				</>
