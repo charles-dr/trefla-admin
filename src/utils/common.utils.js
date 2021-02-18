@@ -154,3 +154,18 @@ export const moderateString = (str, len) => {
 export const toCamelCase = (str) => {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
+
+export const menuPermission = ({ role, permission }, strKey = '') => {
+  if (role === 'SUPER_ADMIN') return true;
+  const keys = strKey.split('.');
+  if (keys.length === 1) {
+    return permission[keys[0]];
+  } else if (keys.length === 2) {
+    return permission[keys[0]][keys[1]];
+  } else if (keys.length === 3) {
+    return permission[keys[0]][keys[1]][keys[2]];
+  } else if (keys.length === 4) {
+    return permission[keys[0]][keys[1]][keys[2]][keys[3]];
+  }
+  return false;
+}

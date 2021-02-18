@@ -25,9 +25,10 @@ import {
   getLangFileContentRequest,
   refreshLanguage,
   transformTime,
+  menuPermission,
 } from '../../../utils';
 
-const UserList = ({ history, match, langs, loadAllLangsAction }) => {
+const UserList = ({ history, match, langs, loadAllLangsAction, permission, role }) => {
   // const [data, setData] = useState([]);
   const [refreshTable, setRefreshTable] = useState(0);
   const [confirm, setConfirm] = useState(false);
@@ -76,30 +77,30 @@ const UserList = ({ history, match, langs, loadAllLangsAction }) => {
       Cell: (props) => (
         <>
           <div className="tbl-actions">
-            <i
+            {menuPermission({role, permission}, 'lang.edit') && <i
               className="iconsminds-file-edit info"
               title="Edit"
               style={{ fontSize: 18 }}
               onClick={() => handleOnEdit(props.value)}
-            />
-            <i
+            />}
+            {menuPermission({role, permission}, 'lang.edit') && <i
               className="simple-icon-cloud-download success"
               title="Download"
               style={{ fontSize: 18 }}
               onClick={() => handleOnDownload(props.value)}
-            />
-            <i
+            />}
+            {menuPermission({role, permission}, 'lang.async') && <i
               className="simple-icon-refresh refresh"
               title="Synchronize"
               style={{ fontSize: 18 }}
               onClick={() => refreshLangKeys(props.value)}
-            />
-            <i
+            />}
+            {menuPermission({role, permission}, 'lang.delete') && <i
               className="simple-icon-trash danger"
               title="Remove"
               style={{ fontSize: 18 }}
               onClick={() => handleOnDelete(props.value)}
-            />
+            />}
           </div>
         </>
       ),
@@ -296,11 +297,14 @@ const UserList = ({ history, match, langs, loadAllLangsAction }) => {
   );
 };
 
-const mapStateToProps = ({ langs: langApp }) => {
+const mapStateToProps = ({ langs: langApp, auth }) => {
   const { list: langs } = langApp;
+  const { permission, info: { role } } = auth;
 
   return {
     langs,
+    permission,
+    role,
   };
 };
 

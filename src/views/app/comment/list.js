@@ -8,13 +8,13 @@ import { Colxx, Separator } from '../../../components/common/CustomBootstrap';
 import Breadcrumb from '../../../containers/navs/Breadcrumb';
 import { ReactTableWithPaginationCard } from '../../../containers/ui/ReactTableCards';
 
-import { deleteCommentByIdRequest, transformTime } from '../../../utils';
+import { deleteCommentByIdRequest, transformTime, menuPermission } from '../../../utils';
 import { loadAllComments } from '../../../redux/actions';
 import { reactionImages } from '../../../constants/custom';
 import * as api from '../../../api';
 
 
-const CommentList = ({ match, users, posts, history, loadAllCommentsAction }) => {
+const CommentList = ({ match, users, posts, permission, role, history, loadAllCommentsAction }) => {
   const [data, setData] = useState([]);
   const [refreshTable, setRefreshTable] = useState(0);
   const [delModal, setDelModal] = useState(false);
@@ -87,7 +87,7 @@ const CommentList = ({ match, users, posts, history, loadAllCommentsAction }) =>
       Cell: (props) => (
         <>
           <div className="tbl-actions">
-            <NavLink
+            {menuPermission({role, permission}, 'comment.edit') && <NavLink
               href={`/#/app/comment/edit/${props.value}`}
               style={{ display: 'inline-block', padding: '0.5rem' }}
             ><i
@@ -95,12 +95,13 @@ const CommentList = ({ match, users, posts, history, loadAllCommentsAction }) =>
                 title="Edit"
                 style={{ fontSize: 18 }}
               /></NavLink>
-            <i
+            }
+            {menuPermission({role, permission}, 'comment.delete') && <i
               className="simple-icon-trash danger"
               title="Remove"
               style={{ fontSize: 18 }}
               onClick={() => handleOnDelete(props.value)}
-            />
+            />}
           </div>
         </>
       ),
@@ -292,8 +293,11 @@ const CommentList = ({ match, users, posts, history, loadAllCommentsAction }) =>
   );
 };
 
-const mapStateToProps = ({  }) => {
+const mapStateToProps = ({ auth }) => {
+  const { permission, info: { role } } = auth;
   return {
+    permission,
+    role,
   };
 };
 

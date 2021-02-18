@@ -38,10 +38,12 @@ import { ReactTableWithPaginationCard } from '../../../containers/ui/ReactTableC
 // } from '../../../utils';
 // import { loadAllUsers } from '../../../redux/actions';
 import * as api from '../../../api';
+import { menuPermission } from '../../../utils';
 
 const NationalIDList = ({
   match,
   history,
+  permission, role,
 }) => {
   const [refreshTable, setRefreshTable] = useState(0);
 
@@ -166,7 +168,7 @@ const NationalIDList = ({
       Cell: (props) => (
         <>
           <div className="tbl-actions">
-            {!props.value.verified && (
+            {(!props.value.verified && menuPermission({role, permission}, 'user.nationalId.verify')) && (
               <i
                 className="iconsminds-security-check success"
                 title="Verify Now"
@@ -174,7 +176,7 @@ const NationalIDList = ({
                 onClick={() => verifyUserById(props.value.user_id)}
               />
             )}
-            {props.value.verified && (
+            {(props.value.verified  && menuPermission({role, permission}, 'user.nationalId.verify')) && (
               <i
                 className="iconsminds-security-bug danger"
                 title="Unverify Now"
@@ -463,9 +465,9 @@ const NationalIDList = ({
   );
 };
 
-const mapStateToProps = ({ }) => {
-  
-  return {};
+const mapStateToProps = ({ auth }) => {
+  const { permission, info: { role } } = auth;
+  return { permission, role };
 };
 
 export default connect(mapStateToProps, {

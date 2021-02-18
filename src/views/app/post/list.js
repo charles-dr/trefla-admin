@@ -8,11 +8,11 @@ import { Colxx, Separator } from '../../../components/common/CustomBootstrap';
 import Breadcrumb from '../../../containers/navs/Breadcrumb';
 import { ReactTableWithPaginationCard } from '../../../containers/ui/ReactTableCards';
 
-import { transformTime } from '../../../utils';
+import { transformTime, menuPermission } from '../../../utils';
 import { reactionImages, typeIcons } from '../../../constants/custom';
 import * as api from '../../../api';
 
-const PostList = ({ match, history, posts, users }) => {
+const PostList = ({ match, history, posts, users, permission, role }) => {
   // const tableRef = React.useRef();
   const [delModal, setDelModal] = useState(false);
   const [delId, setDelId] = useState(-1);
@@ -111,18 +111,18 @@ const PostList = ({ match, history, posts, users }) => {
       Cell: (props) => (
         <>
           <div className="tbl-actions">
-            <i
+            {menuPermission({role, permission}, 'post.edit') && <i
               className="iconsminds-file-edit info"
               title="Edit"
               style={{ fontSize: 18 }}
               onClick={() => handleOnEdit(props.value)}
-            />
-            <i
+            />}
+            {menuPermission({role, permission}, 'post.delete') && <i
               className="simple-icon-trash danger"
               title="Remove"
               style={{ fontSize: 18 }}
               onClick={() => handleOnDelete(props.value)}
-            />
+            />}
           </div>
         </>
       ),
@@ -276,13 +276,15 @@ const PostList = ({ match, history, posts, users }) => {
   );
 };
 
-const mapStateToProps = ({ posts: postApp, users: userApp }) => {
+const mapStateToProps = ({ posts: postApp, users: userApp, auth }) => {
+  const { permission, info: { role } } = auth;
   const { list: posts } = postApp;
   const { list: users } = userApp;
 
   return {
     users,
     posts,
+    permission, role,
   };
 };
 

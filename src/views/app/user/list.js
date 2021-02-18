@@ -25,7 +25,7 @@ import { Colxx, Separator } from '../../../components/common/CustomBootstrap';
 import Breadcrumb from '../../../containers/navs/Breadcrumb';
 import { ReactTableWithPaginationCard } from '../../../containers/ui/ReactTableCards';
 
-import { ru_toggleBanStatus } from '../../../utils';
+import { ru_toggleBanStatus, menuPermission } from '../../../utils';
 import { loadAllUsers } from '../../../redux/actions';
 import * as api from '../../../api';
 
@@ -36,6 +36,7 @@ const UserList = ({
   posts,
   users,
   loadAllUsersAction,
+  permission, role,
 }) => {
   const [refreshTable, setRefreshTable] = useState(0);
 
@@ -155,13 +156,13 @@ const UserList = ({
       Cell: (props) => (
         <>
           <div className="tbl-actions">
-            <i
+            {menuPermission({role, permission}, 'user.list.edit') && <i
               className="iconsminds-file-edit info"
               title="Edit"
               style={{ fontSize: 18 }}
               onClick={() => handleOnEdit(props.value.user_id)}
-            />
-            <i
+            />}
+            {menuPermission({role, permission}, 'user.list.ban') && <i
               className={`${
                 props.value.active === 1
                   ? 'simple-icon-ban'
@@ -170,13 +171,13 @@ const UserList = ({
               title={`${props.value.active === 1 ? 'Ban' : 'Release'} User`}
               style={{ fontSize: 18 }}
               onClick={() => handleOnBanUser(props.value)}
-            />
-            <i
+            />}
+            {menuPermission({role, permission}, 'user.list.delete') && <i
               className="simple-icon-trash danger"
               title="Remove"
               style={{ fontSize: 18 }}
               onClick={() => handleOnDelete(props.value.user_id)}
-            />
+            />}
           </div>
         </>
       ),
@@ -531,6 +532,7 @@ const UserList = ({
 };
 
 const mapStateToProps = ({
+  auth,
   friends: friendApp,
   posts: postApp,
   users: userApp,
@@ -538,11 +540,13 @@ const mapStateToProps = ({
   const { list: posts } = postApp;
   const { list: users } = userApp;
   const { list: friends } = friendApp;
+  const { permission, info: { role } } = auth;
 
   return {
     friends,
     users,
     posts,
+    permission, role,
   };
 };
 

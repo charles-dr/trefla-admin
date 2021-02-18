@@ -25,13 +25,15 @@ import { Colxx, Separator } from '../../../components/common/CustomBootstrap';
 import Breadcrumb from '../../../containers/navs/Breadcrumb';
 import { ReactTableWithPaginationCard } from '../../../containers/ui/ReactTableCards';
 
-import { deleteReportByIdRequest, transformTime } from '../../../utils';
+import { deleteReportByIdRequest, transformTime, menuPermission } from '../../../utils';
 import { loadAllReports } from '../../../redux/actions';
 import * as api from '../../../api';
 // import { reactionImages } from '../../../constants/custom';
 
 const CommentList = ({
 	match,
+  permission,
+  role,
 	history,
 }) => {
   const [refreshTable, setRefreshTable] = useState(0);
@@ -101,20 +103,18 @@ const CommentList = ({
 			Cell: (props) => (
 				<>
 					<div className="tbl-actions">
-						{/* <a href={`mailto:${props.value.email}`}> */}
-						<i
+						{menuPermission({role, permission}, 'report.email') && <i
 						  className="iconsminds-envelope-2 warning"
 							title="Mail to Reporter"
               style={{ fontSize: 18 }}
               onClick={() => handleSendEmail(props.value.id)}
-						/>
-						{/* </a> */}
-						<i
+						/>}
+						{menuPermission({role, permission}, 'report.delete') && <i
 							className="simple-icon-trash danger"
 							title="Remove"
 							style={{ fontSize: 18 }}
 							onClick={() => handleOnDelete(props.value.id)}
-						/>
+						/>}
 					</div>
 				</>
 			),
@@ -329,9 +329,9 @@ const CommentList = ({
 	);
 };
 
-const mapStateToProps = ({ }) => {
-
-	return {};
+const mapStateToProps = ({ auth }) => {
+  const { permission, info: { role } } = auth;
+	return { permission, role };
 };
 
 export default connect(mapStateToProps, {

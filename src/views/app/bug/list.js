@@ -25,13 +25,15 @@ import { Colxx, Separator } from '../../../components/common/CustomBootstrap';
 import Breadcrumb from '../../../containers/navs/Breadcrumb';
 import { ReactTableWithPaginationCard } from '../../../containers/ui/ReactTableCards';
 
-import { deleteReportByIdRequest, transformTime, formatTime } from '../../../utils';
+import { deleteReportByIdRequest, transformTime, formatTime, menuPermission } from '../../../utils';
 import { loadAllReports } from '../../../redux/actions';
 import * as api from '../../../api';
 // import { reactionImages } from '../../../constants/custom';
 
 const CommentList = ({
 	match,
+  permission,
+  role,
 	history,
 }) => {
   const [refreshTable, setRefreshTable] = useState(0);
@@ -114,8 +116,7 @@ const CommentList = ({
 			Cell: (props) => (
 				<>
 					<div className="tbl-actions">
-						{/* <a href={`mailto:${props.value.email}`}> */}
-            <i
+            {menuPermission({role, permission}, 'bug.mark') && <i
               className={`${
                 props.value.self.fixed === 1
                   ? 'simple-icon-ban'
@@ -124,20 +125,19 @@ const CommentList = ({
               title={`${props.value.self.fixed === 1 ? 'Mark As Pending' : 'Mark As Fixed'}`}
               style={{ fontSize: 18 }}
               onClick={() => handleOnUpdateStatus(props.value.self)}
-            />
-						<i
+            />}
+						{menuPermission({role, permission}, 'bug.email') && <i
 						  className="iconsminds-envelope-2 info"
 							title="Mail to Reporter"
               style={{ fontSize: 18 }}
               onClick={() => handleSendEmail(props.value.id)}
-						/>
-						{/* </a> */}
-						<i
+						/>}
+						{menuPermission({role, permission}, 'bug.delete') && <i
 							className="simple-icon-trash danger"
 							title="Remove"
 							style={{ fontSize: 18 }}
 							onClick={() => handleOnDelete(props.value.id)}
-						/>
+						/>}
 					</div>
 				</>
 			),
@@ -405,9 +405,9 @@ const CommentList = ({
 	);
 };
 
-const mapStateToProps = ({ }) => {
-
-	return {};
+const mapStateToProps = ({ auth }) => {
+  const { permission, info: { role } } = auth;
+	return { permission, role };
 };
 
 export default connect(mapStateToProps, {
