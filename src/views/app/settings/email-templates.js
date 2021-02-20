@@ -56,7 +56,7 @@ const EmailTemplateList = ({ history, match }) => {
   const loadData = ({ limit, page }) => {
     return api.r_loadEmailTemplateRequest({ page, limit })
       .then(res => {
-        const { data, pager, status } = res;
+        const { data, pager, status, message } = res;
         if (status) {
           return {
             list: data.map(row => ({
@@ -65,7 +65,7 @@ const EmailTemplateList = ({ history, match }) => {
             pager,
           };
         } else {
-          NotificationManager.error("Error while loading data!", "Email Templates")
+          NotificationManager.error(message, "Email Templates")
         }
       });
   }

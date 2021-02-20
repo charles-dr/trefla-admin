@@ -65,7 +65,7 @@ const EmailTemplatePage = ({
 
   useEffect(() => {
     api.r_getEmailTemplateByIdRequest(match.params.id)
-      .then(({ data: res, status}) => {
+      .then(({ data: res, status, message }) => {
         if (status) {
           if (res === false) {
             NotificationManager.error('Error occurred while fetching template data!', 'Email Template');
@@ -74,7 +74,7 @@ const EmailTemplatePage = ({
             setTemplBody(res.body);
           }
         } else {
-          NotificationManager.error('Error while loading data', 'Email Template');
+          NotificationManager.error(message, 'Email Template');
         }
       });
     return () => { };
