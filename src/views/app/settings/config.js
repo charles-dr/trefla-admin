@@ -14,7 +14,7 @@ import * as api from '../../../api';
 
 import { getConfigRequest, updateConfigRequest } from '../../../utils';
 
-const PasswordPage = ({
+const ConfigPage = ({
   history,
   match,
   loginUserAction,
@@ -43,9 +43,9 @@ const PasswordPage = ({
 
   const loadConfigData = () => {
     api.r_loadAdminConfigRequest()
-      .then(({ status, data }) => {
+      .then(({ status, message, data }) => {
         if (!status) {
-          NotificationManager.warning('Data not found on firestore!', 'Config');
+          NotificationManager.warning(message, 'Config');
         } else {
           setConfig(data);
         }
@@ -169,4 +169,4 @@ const mapStateToProps = (state) => {
 export default connect(mapStateToProps, {
   loginUserAction: login,
   updateLoginAction: updateLogin,
-})(PasswordPage);
+})(ConfigPage);

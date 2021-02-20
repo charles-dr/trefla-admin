@@ -189,7 +189,7 @@ const IDTransferList = ({
   const loadData = ({ limit, page }) => {
     return api.r_loadIDTrasferRequest({ page, limit })
       .then(res => {
-        const { data, pager, status } = res;
+        const { data, pager, status, message } = res;
         if (status) {
           return {
             list: data.map(row => ({
@@ -199,7 +199,7 @@ const IDTransferList = ({
             pager,
           };
         } else {
-
+          NotificationManager.error(message, 'ID Transfer');
         }
       });
   }
