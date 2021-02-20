@@ -111,7 +111,7 @@ const CommentList = ({ match, users, posts, permission, role, history, loadAllCo
   const loadData = ({ limit, page }) => {
     return api.r_loadCommentRequest({ page, limit, type: 'ALL' })
       .then(res => {
-        const { data, pager, status } = res;
+        const { data, pager, status, message } = res;
         if (status) {
           return {
             list: data.map(comment => ({
@@ -126,7 +126,7 @@ const CommentList = ({ match, users, posts, permission, role, history, loadAllCo
             pager,
           };
         } else {
-
+          NotificationManager.error(message, 'Post');
         }
       });
   }

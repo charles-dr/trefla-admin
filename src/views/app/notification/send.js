@@ -180,7 +180,11 @@ const EditUserPage = ({ history, match, user_list, loadAllUsersAction }) => {
     api.r_sendNotification2User(params)
       .then(res => {
         setLoading(false);
-        NotificationManager.success('Notification has been sent!', 'Send Notification');
+        if (res.status) {
+          NotificationManager.success('Notification has been sent!', 'Send Notification');
+        } else {
+          NotificationManager.error(res.message, 'Notification');
+        }
         setSingleNoti({ title: '', body: '' });
         setSingleUser(null);
       })
@@ -208,7 +212,11 @@ const EditUserPage = ({ history, match, user_list, loadAllUsersAction }) => {
         // setMultiNoti({ title: '', body: '' });
         setMultiUser(null);
         resetForm();
-        NotificationManager.success('Notifications have been sent!', 'Send Notification');
+        if (res.status) {
+          NotificationManager.success('Notifications have been sent!', 'Send Notification');
+        } else {
+          NotificationManager.error(res.message, 'Notification');
+        }
       })
       .catch(err => {
         setLoading(false);

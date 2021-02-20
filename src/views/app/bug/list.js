@@ -147,7 +147,7 @@ const CommentList = ({
   const loadData = ({ limit, page }) => {
     return api.r_loadBugRequest({ page, limit })
       .then(res => {
-        const { data, pager, status } = res;
+        const { data, pager, status, message } = res;
         if (status) {
           return {
             list: data.map(bug => ({
@@ -161,7 +161,7 @@ const CommentList = ({
             pager,
           };
         } else {
-
+          NotificationManager.error(message, 'Bug');
         }
       });
   }

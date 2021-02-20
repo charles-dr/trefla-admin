@@ -124,7 +124,7 @@ const CommentList = ({
   const loadData = ({ limit, page }) => {
     return api.r_loadReportRequest({ page, limit })
       .then(res => {
-        const { data, pager, status } = res;
+        const { data, pager, status, message } = res;
         if (status) {
           return {
             list: data.map(report => ({
@@ -137,7 +137,7 @@ const CommentList = ({
             pager,
           };
         } else {
-
+          NotificationManager.error(message, 'Post');
         }
       });
   }

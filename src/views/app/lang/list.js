@@ -110,7 +110,7 @@ const UserList = ({ history, match, langs, loadAllLangsAction, permission, role 
   const loadData = ({ limit, page }) => {
     return api.r_loadLangRequest({ page, limit })
       .then(res => {
-        const { data, pager, status } = res;
+        const { data, pager, status, message } = res;
         if (status) {
           return {
             list: data.map(lang => ({
@@ -119,7 +119,7 @@ const UserList = ({ history, match, langs, loadAllLangsAction, permission, role 
             pager,
           };
         } else {
-
+          NotificationManager.error(message, 'Language');
         }
       });
   }

@@ -25,6 +25,7 @@ const EditLangPage = ({
   history,
   match,
   lang_list,
+  permission, role,
   loadAllLangsAction,
   loginUserAction,
   updateLoginAction,
@@ -41,6 +42,10 @@ const EditLangPage = ({
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    if (role === 'ADMIN' && !permission.lang.edit) {
+      NotificationManager.error('Permission denied!', 'Language');
+      return;
+    }
     api.r_getLangRequest(match.params.id)
       .then(({ status, data: res }) => {
         // console.log(res);
@@ -367,9 +372,10 @@ const EditLangPage = ({
   );
 };
 
-const mapStateToProps = ({ langs: langApp }) => {
+const mapStateToProps = ({ langs: langApp, auth }) => {
   const { list: lang_list } = langApp;
-  return { lang_list };
+  const { permission, info: { role } } = auth;
+  return { lang_list, permission, role };
 };
 
 export default connect(mapStateToProps, {

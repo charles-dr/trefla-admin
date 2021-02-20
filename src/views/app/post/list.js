@@ -132,7 +132,7 @@ const PostList = ({ match, history, posts, users, permission, role }) => {
   const loadData = ({ limit, page }) => {
     return api.r_loadPostRequest({ page, limit, type: 'ALL' })
       .then(res => {
-        const { data, pager, status } = res;
+        const { data, pager, status, message } = res;
         if (status) {
           return {
             list: data.map(post => ({
@@ -142,7 +142,7 @@ const PostList = ({ match, history, posts, users, permission, role }) => {
             pager,
           };
         } else {
-
+          NotificationManager.error(message, 'Post');
         }
       });
   }
