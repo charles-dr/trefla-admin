@@ -13,7 +13,6 @@ import { Colxx, Separator } from '../../../components/common/CustomBootstrap';
 import IntlMessages from '../../../helpers/IntlMessages';
 import Breadcrumb from '../../../containers/navs/Breadcrumb';
 
-import { getCommentByIdRequest, updateCommentRequest } from '../../../utils';
 import { loadAllPosts } from '../../../redux/actions';
 import * as api from '../../../api';
 
@@ -225,7 +224,7 @@ const EditCommentPage = ({ history, match, loadAllPostsAction }) => {
   );
 };
 
-const mapStateToProps = ({ }) => {
+const mapStateToProps = (state) => {
   return {  };
 };
 

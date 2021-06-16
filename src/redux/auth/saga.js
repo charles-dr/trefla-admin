@@ -1,5 +1,8 @@
 import { call, put, takeEvery } from 'redux-saga/effects';
 import jwt_decode from "jwt-decode";
+
+import { NotificationManager } from '../../components/common/react-notifications';
+
 import * as api from '../../api';
 import {
   AUTH_AVATAR,
@@ -15,7 +18,6 @@ import {
 import {
   getAdminAvatarURL,
   getAdminInfo,
-  loginAdmin,
   getAuthToken,
   saveAuthToken,
   deleteAuthToken,
@@ -39,11 +41,7 @@ function* checkLogin(action) {
   try {
     const saved = getAuthToken();
     if (!saved) {
-      yield put({
-        type: AUTH_LOGIN_SUCCESS,
-        payload: { status: false, message: "" },
-      });
-      return;
+      throw new Error('Authentication Error!!');
     }
     else {
       const decoded = jwt_decode(saved);
@@ -55,22 +53,23 @@ function* checkLogin(action) {
             type: AUTH_LOGIN_SUCCESS,
             payload: res, //{ status: true, message: '' },
           });
-        } else {
-          
-          throw Object.assign(new Error(res.message), { code: 400 });
+        } else {          
+          throw new Error("Authentication Error!");
         }
       } else {
-        console.log('[Token][Expired]')
-        throw Object.assign(new Error('Token is expired'), { code: 400 });
+        // console.log('[Token][Expired]');
+        throw new Error('Login has been expired!');
       }
     }
   } catch (e) {
-    console.log(e);
+    NotificationManager.error(e.message, 'Authentication');
+
     yield put({
       type: AUTH_LOGIN_SUCCESS,
       payload: { status: false, message: e.message },
     });
-    deleteAuthToken();    
+    deleteAuthToken();
+    window.location.href = '#auth';
   }
 }
 

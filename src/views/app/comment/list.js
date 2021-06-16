@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { connect } from 'react-redux';
 import { Badge, Button, Modal, ModalHeader, ModalBody, NavLink, Row } from 'reactstrap';
 
@@ -8,14 +8,13 @@ import { Colxx, Separator } from '../../../components/common/CustomBootstrap';
 import Breadcrumb from '../../../containers/navs/Breadcrumb';
 import { ReactTableWithPaginationCard } from '../../../containers/ui/ReactTableCards';
 
-import { deleteCommentByIdRequest, transformTime, menuPermission } from '../../../utils';
+import { transformTime, menuPermission } from '../../../utils';
 import { loadAllComments } from '../../../redux/actions';
 import { reactionImages } from '../../../constants/custom';
 import * as api from '../../../api';
 
 
 const CommentList = ({ match, users, posts, permission, role, history, loadAllCommentsAction }) => {
-  const [data, setData] = useState([]);
   const [refreshTable, setRefreshTable] = useState(0);
   const [delModal, setDelModal] = useState(false);
   const [delId, setDelId] = useState(-1);
@@ -154,18 +153,6 @@ const CommentList = ({ match, users, posts, permission, role, history, loadAllCo
       return <Badge color="outline-warning" pill className="mb-1">
         No reactions
             </Badge>;
-    }
-  }
-
-  const getUserNameById = id => {
-    if (users.length > 0) {
-      for (let user of users) {
-        if (Number(user.user_id) === Number(id)) {
-          return user.user_name;
-        }
-      }
-    } else {
-      return '';
     }
   }
 

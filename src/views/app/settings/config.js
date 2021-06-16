@@ -14,8 +14,6 @@ import Breadcrumb from '../../../containers/navs/Breadcrumb';
 
 import * as api from '../../../api';
 
-import { getConfigRequest, updateConfigRequest } from '../../../utils';
-
 const ConfigPage = ({
   history,
   match,

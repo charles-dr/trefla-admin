@@ -384,7 +384,8 @@ const EditPostPage = ({ history, match, loadAllPostsAction }) => {
   );
 };
 
-const mapStateToProps = ({ }) => {
+// eslint-disable-next-line
+const mapStateToProps = (state) => {
   return { };
 };
 

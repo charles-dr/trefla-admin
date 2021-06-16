@@ -15,8 +15,6 @@ import * as api from '../../api';
 import {
   formatTime,
   moderateString,
-  statIn7Days,
-  transformTime,
 } from '../../utils';
 
 const DashboardPage = ({ match, history }) => {
@@ -32,7 +30,7 @@ const DashboardPage = ({ match, history }) => {
   const [recentPosts, setRecentPosts] = useState([]);
 
   useEffect(() => {
-
+    setTimeout(() => {
     api.r_getStatsRequest()
       .then(result => {
         if (result.status) {
@@ -84,7 +82,9 @@ const DashboardPage = ({ match, history }) => {
           setStat({ ...stat, posts: stats4Post });
         }
       })
+    }, 1000);
     return () => {};
+    // eslint-disable-next-line
   }, []);
 
   const getUserAvatarUrl = (userInfo) => {
@@ -139,7 +139,7 @@ const DashboardPage = ({ match, history }) => {
   );
 };
 
-const mapStateToProps = ({}) => {
+const mapStateToProps = (state) => {
 
   return {};
 };

@@ -140,11 +140,11 @@ const UserList = ({
       Cell: (props) => (
         <>
           <Badge
-            color={props.value === 1 ? 'success' : 'danger'}
+            color={props.value === 0 ? 'success' : 'danger'}
             pill
             className="mb-1"
           >
-            {props.value === 1 ? 'Active' : 'Disabled'}
+            {props.value === 0 ? 'Active' : 'Disabled'}
           </Badge>
         </>
       ),
@@ -164,11 +164,11 @@ const UserList = ({
             />}
             {menuPermission({role, permission}, 'user.list.ban') && <i
               className={`${
-                props.value.active === 1
+                props.value.active === 0
                   ? 'simple-icon-ban'
                   : 'simple-icon-energy'
-              } ${props.value.active === 1 ? 'warning' : 'success'}`}
-              title={`${props.value.active === 1 ? 'Ban' : 'Release'} User`}
+              } ${props.value.active === 0 ? 'warning' : 'success'}`}
+              title={`${props.value.active === 0 ? 'Ban' : 'Release'} User`}
               style={{ fontSize: 18 }}
               onClick={() => handleOnBanUser(props.value)}
             />}
@@ -258,14 +258,14 @@ const UserList = ({
       setLoading(true);
       const res = await ru_toggleBanStatus(
         banInfo,
-        banInfo.active === 1 ? values.banReason : ''
+        banInfo.active === 0 ? values.banReason : ''
       );
       console.log(res);
       setLoading(false);
       if (res.status === true) {
         NotificationManager.success(
           res.message,
-          `${banInfo.active === 1 ? 'Ban' : 'Release'} User`
+          `${banInfo.active === 0 ? 'Ban' : 'Release'} User`
         );
         setBanModal(false);
         reloadTableContent();
@@ -273,7 +273,7 @@ const UserList = ({
       } else {
         NotificationManager.error(
           res.message,
-          `${banInfo.active === 1 ? 'Ban' : 'Release'} User`
+          `${banInfo.active === 0 ? 'Ban' : 'Release'} User`
         );
       }
     }
@@ -485,7 +485,7 @@ const UserList = ({
               onConfirmBan(event, errors, values)
             }
           >
-            {banInfo.active === 1 && (
+            {banInfo.active === 0 && (
               <AvGroup>
                 <Label>Ban Reason:</Label>
                 <AvInput
@@ -497,7 +497,7 @@ const UserList = ({
                 <AvFeedback>Please enter ban reason!</AvFeedback>
               </AvGroup>
             )}
-            {banInfo.active !== 1 && (
+            {banInfo.active !== 0 && (
               <label>Are you sure to release this user?</label>
             )}
 
@@ -517,7 +517,7 @@ const UserList = ({
                   <span className="bounce3" />
                 </span>
                 <span className="label">
-                  {banInfo.active === 1 ? 'Ban' : 'Release'}
+                  {banInfo.active === 0 ? 'Ban' : 'Release'}
                 </span>
               </Button>{' '}
               <Button color="secondary" onClick={() => setBanModal(false)}>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Button, Collapse, CustomInput, Form, FormGroup, Label } from 'reactstrap';
+import { Button, Collapse, CustomInput } from 'reactstrap';
 import { toCamelCase } from '../../../utils';
 
 const SubMenuPermission = ({ label, value, onUpdate }) => {

@@ -14,12 +14,7 @@ import IntlMessages from '../../../helpers/IntlMessages';
 import Breadcrumb from '../../../containers/navs/Breadcrumb';
 
 import * as api from '../../../api';
-import {
-  addNewLangRequest,
-  getJSON,
-  getLangInfoByIdRequest,
-  getLangFileContentRequest,
-} from '../../../utils';
+
 
 const EditLangPage = ({
   history,
@@ -61,7 +56,7 @@ const EditLangPage = ({
             })
             .catch(error => {
               NotificationManager.error('Error while loading language file!', 'Edit Language');
-            })
+            });
         }
       })
       .catch((err) => {
@@ -76,6 +71,7 @@ const EditLangPage = ({
       // setLang([]);
       return true;
     };
+  // eslint-disable-next-line
   }, [match]);
 
   const handleOnSubmit = async (value) => {

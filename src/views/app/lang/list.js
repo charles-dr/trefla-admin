@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { connect } from 'react-redux';
 import {
   Badge,
@@ -20,11 +20,6 @@ import * as api from '../../../api';
 
 import { loadAllLangs } from '../../../redux/actions';
 import {
-  deleteLangByIdRequest,
-  getLangInfoByIdRequest,
-  getLangFileContentRequest,
-  refreshLanguage,
-  transformTime,
   menuPermission,
 } from '../../../utils';
 
@@ -184,8 +179,6 @@ const UserList = ({ history, match, langs, loadAllLangsAction, permission, role 
     tempLink.click();
   };
   const refreshLangKeys = async (lang_id) => {
-    
-    console.log(lang_id, lang_id == 0, lang_id === 0);
 
     setProcessing(true);
 
@@ -197,29 +190,6 @@ const UserList = ({ history, match, langs, loadAllLangsAction, permission, role 
       NotificationManager.success(res.message);
     } else {
       NotificationManager.error(res.message);
-    }
-  };
-
-  const refreshAllLangs = async () => {
-    setProcessing(true);
-    try {
-      for (const lang of langs) {
-        if (Number(lang.lang_id) === 0) {
-          continue;
-        }
-
-        await refreshLanguage(lang, langs[0]);
-      }
-
-      setProcessing(false);
-      NotificationManager.success(
-        'All languages are synchronized!',
-        'Sync Language'
-      );
-    } catch (err) {
-      console.log(err);
-      setProcessing(false);
-      NotificationManager.error(err.message, 'Sync Language');
     }
   };
 
@@ -240,10 +210,6 @@ const UserList = ({ history, match, langs, loadAllLangsAction, permission, role 
         </Colxx>
 
         <Colxx className="d-flex justify-content-end" xxs={12}>
-          {/* <Button color="info" className="mb-2 mr-2" onClick={refreshAllLangs}>
-            <i className="simple-icon-refresh mr-1" />
-            Sync All Langs
-          </Button>{' '} */}
           <Button color="primary" className="mb-2" onClick={toAddPage}>
             <i className="simple-icon-plus mr-1" />
             <IntlMessages id="actions.add" />

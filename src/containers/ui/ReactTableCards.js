@@ -116,12 +116,13 @@ function Table({ columns, data, divided = false, defaultPageSize = 10, pageCount
 export const ReactTableWithPaginationCard = ({ cols, loadData, refresh }, ref) => {
 
   const [data, setData] = React.useState([]);
-  const [lastId, setLastId] = React.useState(null);
+  // const [lastId, setLastId] = React.useState(null);
   const [pageCount, setPageCount] = React.useState(0);
   const [pager, setPager] = React.useState({ limit: 10, page: 0 });
 
   React.useEffect(() => {
     if (refresh > 0) fetchData({ pageSize: pager.limit, pageIndex: pager.page });
+    // eslint-disable-next-line
   }, [refresh]);
 
   const fetchData = React.useCallback(async ({ pageSize, pageIndex: pIdx }) => {
@@ -134,6 +135,7 @@ export const ReactTableWithPaginationCard = ({ cols, loadData, refresh }, ref) =
       .catch(e => {
         console.log(e);
       })
+    // eslint-disable-next-line
   }, []);
 
   return (

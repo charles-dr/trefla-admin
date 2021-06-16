@@ -50,13 +50,6 @@ const NationalIDList = ({
   const [loading, setLoading] = useState(false);
   // eslint-disable-next-line
   const [modalDetails, setModalDetails] = useState(false);
-  const [modalOptions, setModalOptions] = useState({
-    comment: true,
-    post: true,
-    report: true,
-    friend: true,
-    chat: true,
-  });
 
   const [cardImgs, setCardImgs] = useState([]);
   const [currentImage, setCurrentImg] = useState(0);
@@ -252,17 +245,6 @@ const NationalIDList = ({
     return `/assets/avatar/avatar_${sex === '1' ? 'girl2' : 'boy1'}.png`;
   };
 
-  const formatCoordinate = (coord) => {
-    if (!coord) return '';
-    const arr = coord.split(',');
-    return (
-      <>
-        <p>X: {arr[0]}</p>
-        <p>Y: {arr[1]}</p>
-      </>
-    );
-  };
-
   const openAddModal = () => {
     history.push('/app/user/add');
   };
@@ -317,26 +299,6 @@ const NationalIDList = ({
   const onConfirmVerification = async (event, errors, values) => {
     // console.log(event, errors, values);
     return verifyInfo.mode === 1 ? confirmVerification() : confirmUnverification();
-  };
-
-  const getAllActive = () => {
-    return (
-      modalOptions.post &&
-      modalOptions.comment &&
-      modalOptions.report &&
-      modalOptions.chat &&
-      modalOptions.friend
-    );
-  };
-
-  const setAllActive = (st) => {
-    setModalOptions({
-      comment: st,
-      post: st,
-      report: st,
-      friend: st,
-      chat: st,
-    });
   };
 
   // Image Viewer

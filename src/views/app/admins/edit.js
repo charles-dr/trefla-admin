@@ -11,20 +11,12 @@ import { Colxx, Separator } from '../../../components/common/CustomBootstrap';
 import IntlMessages from '../../../helpers/IntlMessages';
 import Breadcrumb from '../../../containers/navs/Breadcrumb';
 
-import {
-  getAdminAvatarURL,
-  getAdminInfo,
-  updateAdminProfile,
-} from '../../../utils';
-import { downloadAvatar, loadAuthInfo } from '../../../redux/actions';
 import * as api from '../../../api';
 import PermissionForm from './permissions';
 
 const ProfilePage = ({
   history,
   match,
-  loadAuthInfoAction,
-  downloadAvatarAction,
 }) => {
   let avatarInput = null;
   const [profile, setProfile] = useState({ email: '', user_name: '' });

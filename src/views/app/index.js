@@ -20,8 +20,8 @@ import {
   loadAllReports,
   loadAllUsers,
   loadAuthInfo,
+  checkLoginSession,
 } from '../../redux/actions';
-import { anonymousLogin } from '../../utils';
 
 const CommentModule = React.lazy(() => import('./comment'));
 const LangModule = React.lazy(() => import('./lang'));
@@ -45,34 +45,14 @@ const App = ({
   getAllUsersAction,
   loadAllAdminNotiAction$,
   loadAuthInfoAction,
+  checkLoginSessionAction,
   login,
   posts,
 }) => {
   const history = useHistory();
 
   useEffect(() => {
-    // if (!login) {
-    //   console.log('[->] Login');
-    //   history.push('/auth/login');
-    // }
-
-    anonymousLogin()
-      .then(result => {
-        // console.log('[firebase] =>');
-        // load all data
-        // getAllCommentsAction();
-        // getAllFriendsAction();
-        // getAllLangsAction();
-        // getAllPostsAction(posts.pager);
-        // getAllUsersAction();
-        // loadAuthInfoAction();
-        // downloadAvatarAction();
-        // getAllReportsAction();
-        // loadAllAdminNotiAction$();
-      })
-      .catch(error => {
-        console.log('[Firebase login] failed');
-      })
+    setTimeout(checkLoginSessionAction, 1000);
   }, [
     // match,
     getAllUsersAction,
@@ -84,6 +64,7 @@ const App = ({
     loadAuthInfoAction,
     downloadAvatarAction,
     getAllReportsAction,
+    checkLoginSessionAction,
     history,
   ]);
 
@@ -168,5 +149,6 @@ export default withRouter(
     getAllUsersAction: loadAllUsers,
     loadAllAdminNotiAction$: loadAllAdminNotiAction,
     loadAuthInfoAction: loadAuthInfo,
+    checkLoginSessionAction: checkLoginSession,
   })(App)
 );

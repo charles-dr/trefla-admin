@@ -6,7 +6,6 @@ export const r_authenticateToken = async (token) => {
     const { data: res } = await axios.post('/api/v1/admin/authenticate-token', {});
     return res;
   } catch (e) {
-    console.log(e, e.response.data);
     return e.response.data;
   }
 }

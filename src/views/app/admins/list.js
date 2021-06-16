@@ -1,23 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import {
 	Badge,
 	Button,
-  Label,
 	Modal,
 	ModalHeader,
 	ModalBody,
-	NavLink,
 	Row,
 } from 'reactstrap';
 // import Mailto from 'react-protected-mailto';
-import {
-  AvForm,
-  AvGroup,
-  AvInput,
-  AvFeedback,
-} from 'availity-reactstrap-validation';
 
 import IntlMessages from '../../../helpers/IntlMessages';
 import { NotificationManager } from '../../../components/common/react-notifications';
@@ -25,7 +17,7 @@ import { Colxx, Separator } from '../../../components/common/CustomBootstrap';
 import Breadcrumb from '../../../containers/navs/Breadcrumb';
 import { ReactTableWithPaginationCard } from '../../../containers/ui/ReactTableCards';
 
-import { deleteReportByIdRequest, transformTime, formatTime } from '../../../utils';
+import { formatTime } from '../../../utils';
 import { loadAllReports } from '../../../redux/actions';
 import * as api from '../../../api';
 // import { reactionImages } from '../../../constants/custom';
@@ -41,9 +33,6 @@ const CommentList = ({
   const [updateData, setUpdateData] = useState({});
   const [loading, setLoading] = useState(false);
   
-  const [emailModal, setEmailModal] = useState(false);
-
-
 	const cols = [
 		{
 			Header: 'Name',
@@ -182,23 +171,6 @@ const CommentList = ({
 		}
 	};
 
-  const onConfirmEmail = async (event, errors, values) => {
-    // console.log('[form values]', event, errors, values);
-    if (!errors.length) {
-      setLoading(true);
-      const res = await api.r_sendEmail2Bugger(delId, values);
-      setLoading(false);
-      setDelId(-1);
-
-      if (res.status) {
-        setEmailModal(false);
-        NotificationManager.success(res.message, 'Email to Reporter');
-      } else {
-        NotificationManager.error(res.message, 'Email to Reporter');
-      }
-    }
-  }
-
   const handleOnUpdateStatus = (bug) => {
     delete bug.user;
     // console.log('[bug]', bug);
@@ -335,7 +307,7 @@ const CommentList = ({
 	);
 };
 
-const mapStateToProps = ({ }) => {
+const mapStateToProps = (state) => {
 	return {};
 };
 

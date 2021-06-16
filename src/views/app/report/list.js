@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import {
@@ -25,7 +25,7 @@ import { Colxx, Separator } from '../../../components/common/CustomBootstrap';
 import Breadcrumb from '../../../containers/navs/Breadcrumb';
 import { ReactTableWithPaginationCard } from '../../../containers/ui/ReactTableCards';
 
-import { deleteReportByIdRequest, transformTime, menuPermission } from '../../../utils';
+import { transformTime, menuPermission } from '../../../utils';
 import { loadAllReports } from '../../../redux/actions';
 import * as api from '../../../api';
 // import { reactionImages } from '../../../constants/custom';

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { connect } from 'react-redux';
 import { Row } from 'reactstrap';
 
@@ -12,7 +12,7 @@ import { moderateString } from '../../../utils';
 import * as api from '../../../api';
 
 const EmailTemplateList = ({ history, match }) => {
-  const [data, setData] = useState([]);
+  // eslint-disable-next-line
   const [refreshTable, setRefreshTable] = useState(0);
 
   const cols = [
@@ -70,17 +70,12 @@ const EmailTemplateList = ({ history, match }) => {
       });
   }
 
-  const reloadTableContent = () => {
-    setRefreshTable(refreshTable + 1);
-  }
 
   const shortenHTMLBody = (html) => {
     const strippedHTML = html.replace(/<[^>]*>?/gm, '');
     return moderateString(strippedHTML, 50);
   }
-  // const toAddPage = () => {
-  //   history.push('/app/lang/add');
-  // };
+
   const handleOnEdit = (id) => {
     history.push(`/app/settings/email-template/${id}`);
   };
@@ -113,7 +108,8 @@ const EmailTemplateList = ({ history, match }) => {
   );
 };
 
-const mapStateToProps = ({ }) => {
+// eslint-disable-next-line
+const mapStateToProps = (state) => {
   return {};
 };
 export default connect(mapStateToProps, {})(EmailTemplateList);

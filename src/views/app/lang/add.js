@@ -13,7 +13,6 @@ import { Colxx, Separator } from '../../../components/common/CustomBootstrap';
 import IntlMessages from '../../../helpers/IntlMessages';
 import Breadcrumb from '../../../containers/navs/Breadcrumb';
 
-import { addNewLangRequest } from '../../../utils';
 import * as api from '../../../api';
 
 const AddLangPage = ({

@@ -15,7 +15,7 @@ import { Colxx, Separator } from '../../../components/common/CustomBootstrap';
 import IntlMessages from '../../../helpers/IntlMessages';
 import Breadcrumb from '../../../containers/navs/Breadcrumb';
 
-import { convertTimeToString, updatePostRequest } from '../../../utils';
+import { convertTimeToString } from '../../../utils';
 import { loadAllPosts } from '../../../redux/actions';
 import * as api from '../../../api';
 
@@ -110,7 +110,6 @@ const AddPostPage = ({
       timeAdded === true ? convertTimeToString(targetTime) : '';
     params.user_id = Number(user.value);
     params.post_time = convertTimeToString();
-    // params.post_id = getPostNewId();
     params.post_name = !post.post_name ? user.label : post.post_name;
 
     params.location_address = '1600, Amphitheatre Parkway, Mountain View, Santa Clara County, 94043, California';
@@ -151,14 +150,6 @@ const AddPostPage = ({
 
   const handleOnChange = (e) => {
     setPost({ ...post, [e.target.name]: e.target.value });
-  };
-
-  const getPostNewId = () => {
-    let newId = -1;
-    for (const post of post_list) {
-      newId = post.post_id > newId ? post.post_id : newId;
-    }
-    return newId + 1;
   };
 
   const initialValues = post;

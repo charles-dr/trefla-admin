@@ -27,11 +27,9 @@ import Breadcrumb from '../../../containers/navs/Breadcrumb';
 import { ReactTableWithPaginationCard } from '../../../containers/ui/ReactTableCards';
 import CustomSelectInput from '../../../components/common/CustomSelectInput';
 
-import { judgeIDTransferRequest, sendConsentEmail } from '../../../api/functions.api';
 import {
   addVerificationRequest,
   addIDTransferRequest,
-  deleteAdminNotiByIdRequest,
 } from '../../../utils';
 import { loadAllUsers, loadAllAdminNotiAction } from '../../../redux/actions';
 import * as api from '../../../api';
@@ -47,7 +45,7 @@ const IDTransferList = ({
   loadAllAdminNotiAction$,
 }) => {
   // Table Data
-  const [refreshTable, setRefreshTable] = useState(0);
+  const [refreshTable] = useState(0);
 
   const [loading, setLoading] = useState(false);
   const [preloading, setPreloading] = useState(false);
@@ -144,7 +142,7 @@ const IDTransferList = ({
       cellClass: 'list-item-heading w-10',
       Cell: (props) => (
         <>
-          {props.value.length === undefined || props.value.length === 0 && <Badge color="outline-danger" pill>Never Sent</Badge>}
+          {(props.value.length === undefined || props.value.length === 0) && <Badge color="outline-danger" pill>Never Sent</Badge>}
           {props.value.length !== undefined && props.value.length > 0 && <Badge color="outline-success" pill>{props.value.length} Times</Badge>}
         </>
       )
@@ -202,10 +200,6 @@ const IDTransferList = ({
           NotificationManager.error(message, 'ID Transfer');
         }
       });
-  }
-
-  const reloadTableContent = () => {
-    setRefreshTable(refreshTable + 1);
   }
 
   useEffect(() => {
@@ -340,13 +334,6 @@ const IDTransferList = ({
       });
   }
 
-  const openAddModal = () => {
-    history.push('/app/user/add');
-  };
-  const getUserById = (id) => {
-    const filtered = users.filter(user => user.user_id === id);
-    return filtered.length > 0 ? filtered[0] : {};
-  }
   const getNewNotificationId = () => {
     let newId = -1;
     for (const noti of notifications) {

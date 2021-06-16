@@ -75,8 +75,7 @@ const EditUserPage = ({ history, match, user_list, loadAllUsersAction }) => {
 
     api.r_loadUserRequest({ page: 0, limit: 0, mode: 'SIMPLE' })
       .then(res => {
-        // console.log('[users]', users.length, users)
-        const { status, message, data } = res;
+        const { status, data } = res;
         if (status) {
           setUserOptions(data.map((user, i) => ({ label: user.user_name, value: user.id, key: i })));
         } else {

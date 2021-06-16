@@ -195,7 +195,10 @@ export const r_getStatsRequest = async () => {
     const { data: res } = await axios.get('/api/v1/admin/stats');
     return res;
   } catch (e) {
-    console.log(e, e.response.data);
+    console.log(e, e.response, e.response.data);
+    if (e.response.status === 401) {
+      
+    }
     return e.response.data;
   }
 }

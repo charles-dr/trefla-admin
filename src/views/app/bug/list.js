@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import {
@@ -8,7 +8,6 @@ import {
 	Modal,
 	ModalHeader,
 	ModalBody,
-	NavLink,
 	Row,
 } from 'reactstrap';
 // import Mailto from 'react-protected-mailto';
@@ -25,7 +24,7 @@ import { Colxx, Separator } from '../../../components/common/CustomBootstrap';
 import Breadcrumb from '../../../containers/navs/Breadcrumb';
 import { ReactTableWithPaginationCard } from '../../../containers/ui/ReactTableCards';
 
-import { deleteReportByIdRequest, transformTime, formatTime, menuPermission } from '../../../utils';
+import { formatTime, menuPermission } from '../../../utils';
 import { loadAllReports } from '../../../redux/actions';
 import * as api from '../../../api';
 // import { reactionImages } from '../../../constants/custom';
@@ -78,7 +77,7 @@ const CommentList = ({
       Cell: (props) => <>{
         props.value ? 
           <div>
-            <a href={props.value} target="_blank"><img src={props.value} alt="Report" style={{ width: '100%', maxWidth: 150 }} /> </a>
+            <a href={props.value} target="_blank" rel="noopener noreferrer"><img src={props.value} alt="Report" style={{ width: '100%', maxWidth: 150 }} /> </a>
           </div> : 
           <Badge
             color='danger'

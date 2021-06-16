@@ -13,7 +13,6 @@ import ColorSwitcher from './components/common/ColorSwitcher';
 import { NotificationContainer } from './components/common/react-notifications';
 import { isMultiColorActive } from './constants/defaultValues';
 import { getDirection } from './helpers/Utils';
-import { checkLoginSession } from './redux/actions';
 
 const ViewMain = React.lazy(() =>
   import(/* webpackChunkName: "views" */ './views')
@@ -42,8 +41,7 @@ class App extends React.Component {
   }
 
   componentDidMount() {
-    const { checkLoginSessionAction } = this.props;
-    checkLoginSessionAction();
+    
   }
 
   render() {
@@ -95,8 +93,5 @@ const mapStateToProps = ({ settings }) => {
   const { locale } = settings;
   return { locale };
 };
-const mapActionsToProps = {
-  checkLoginSessionAction: checkLoginSession,
-};
 
-export default connect(mapStateToProps, mapActionsToProps)(App);
+export default connect(mapStateToProps)(App);
