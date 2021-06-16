@@ -116,12 +116,6 @@ const NationalIDList = ({
         </>
       ),
     },
-    // {
-    //     Header: 'Location',
-    //     accessor: 'location_address',
-    //     cellClass: 'text-muted  w-5',
-    //     Cell: (props) => <>{props.value}</>,
-    // },
     {
       Header: 'Active',
       accessor: 'active',
@@ -129,11 +123,11 @@ const NationalIDList = ({
       Cell: (props) => (
         <>
           <Badge
-            color={props.value === 1 ? 'success' : 'danger'}
+            color={props.value === 0 ? 'success' : 'danger'}
             pill
             className="mb-1"
           >
-            {props.value === 1 ? 'Active' : 'Disabled'}
+            {props.value === 0 ? 'Active' : 'Disabled'}
           </Badge>
         </>
       ),
