@@ -14,13 +14,24 @@ import Breadcrumb from '../../../containers/navs/Breadcrumb';
 
 import * as api from '../../../api';
 
+const initConfig = {
+  lang_version: '',
+  admin_email: '',
+  default_zone: '',
+  apply_default_zone: 0,
+  android_version: '',
+  android_link: '',
+  apple_version: '',
+  apple_link: '',
+};
+
 const ConfigPage = ({
   history,
   match,
   loginUserAction,
   updateLoginAction,
 }) => {
-  const [config, setConfig] = useState({ lang_version: '', admin_email: '', default_zone: '', apply_default_zone: 0 });
+  const [config, setConfig] = useState(initConfig);
   const [loading, setLoading] = useState(false);
   useEffect(() => {
     loadConfigData();
@@ -28,6 +39,7 @@ const ConfigPage = ({
     return () => {};
   }, [match]);
   const onUpdateConfig = async (values) => {
+    if (loading) return;
     // set loading
     setLoading(true);
     const res = await api.r_updateAdminConfigRequest(config);
@@ -161,6 +173,80 @@ const ConfigPage = ({
                       checked={config.apply_default_zone === 1}
                       onChange={(st) => setConfig({ ...config, apply_default_zone: st === true ? 1 : 0 })}
                     />
+                  </FormGroup>
+                </Colxx>
+              </Row>
+
+              <Row>
+                <Colxx xxs="12" md="6">
+                  <FormGroup className="form-group">
+                    <Label>Android Version</Label>
+                    <Field
+                      className="form-control"
+                      type="text"
+                      name="android_version"
+                      value={config.android_version}
+                      onChange={handleOnChange}
+                    />
+                    {errors.android_version && touched.android_version && (
+                      <div className="invalid-feedback d-block">
+                        {errors.android_version}
+                      </div>
+                    )}
+                  </FormGroup>
+                </Colxx>
+                <Colxx xxs="12" md="6">
+                  <FormGroup className="form-group">
+                    <Label>Android Link</Label>
+                    <Field
+                      className="form-control"
+                      type="text"
+                      name="android_link"
+                      value={config.android_link}
+                      onChange={handleOnChange}
+                    />
+                    {errors.android_link && touched.android_link && (
+                      <div className="invalid-feedback d-block">
+                        {errors.android_link}
+                      </div>
+                    )}
+                  </FormGroup>
+                </Colxx>
+              </Row>
+
+              <Row>
+                <Colxx xxs="12" md="6">
+                  <FormGroup className="form-group">
+                    <Label>Apple Version</Label>
+                    <Field
+                      className="form-control"
+                      type="text"
+                      name="apple_version"
+                      value={config.apple_version}
+                      onChange={handleOnChange}
+                    />
+                    {errors.apple_version && touched.apple_version && (
+                      <div className="invalid-feedback d-block">
+                        {errors.apple_version}
+                      </div>
+                    )}
+                  </FormGroup>
+                </Colxx>
+                <Colxx xxs="12" md="6">
+                  <FormGroup className="form-group">
+                    <Label>Apple Link</Label>
+                    <Field
+                      className="form-control"
+                      type="text"
+                      name="apple_link"
+                      value={config.apple_link}
+                      onChange={handleOnChange}
+                    />
+                    {errors.apple_link && touched.apple_link && (
+                      <div className="invalid-feedback d-block">
+                        {errors.apple_link}
+                      </div>
+                    )}
                   </FormGroup>
                 </Colxx>
               </Row>
