@@ -8,7 +8,6 @@ import {
 	Modal,
 	ModalHeader,
 	ModalBody,
-	NavLink,
 	Row,
 } from 'reactstrap';
 // import Mailto from 'react-protected-mailto';
@@ -25,7 +24,7 @@ import { Colxx, Separator } from '../../../components/common/CustomBootstrap';
 import Breadcrumb from '../../../containers/navs/Breadcrumb';
 import { ReactTableWithPaginationCard } from '../../../containers/ui/ReactTableCards';
 
-import { transformTime, menuPermission } from '../../../utils';
+import { formatTime, menuPermission } from '../../../utils';
 import { loadAllReports } from '../../../redux/actions';
 import * as api from '../../../api';
 // import { reactionImages } from '../../../constants/custom';
@@ -39,6 +38,8 @@ const CommentList = ({
   const [refreshTable, setRefreshTable] = useState(0);
 	const [delModal, setDelModal] = useState(false);
 	const [delId, setDelId] = useState(-1);
+  const [updateModal, setUpdateModal] = useState(false);
+  const [updateData, setUpdateData] = useState({});
   const [loading, setLoading] = useState(false);
   
   const [emailModal, setEmailModal] = useState(false);
@@ -58,44 +59,55 @@ const CommentList = ({
 			),
 		},
 		{
-			Header: 'Reason',
-			accessor: 'reason',
+			Header: 'Device Model',
+			accessor: 'device_model',
 			cellClass: 'text-muted  w-20',
 			Cell: (props) => <>{props.value}</>,
 		},
 		{
-			Header: 'Target',
-			accessor: 'target',
-			cellClass: 'text-muted w-25',
-			Cell: (props) => <>{getParentContent(props.value)}</>,
-		},
-		{
-			Header: 'Target Type',
-			accessor: 'type',
-			cellClass: 'text-muted  w-5',
-			Cell: (props) => (
-				<>
-					{props.value === 'COMMENT' && (
-						<Badge color="outline-info" pill className="mb-1">
-							{' '}
-              Comment{' '}
-						</Badge>
-					)}
-					{props.value !== 'COMMENT' && (
-						<Badge color="outline-primary" pill className="mb-1">
-							{' '}
-              Post{' '}
-						</Badge>
-					)}
-				</>
-			),
-		},
+			Header: 'Report',
+			accessor: 'report',
+			cellClass: 'text-muted  w-20',
+			Cell: (props) => <>{props.value}</>,
+    },
+    {
+      Header: "File",
+      accessor: 'file',
+      cellClass: 'text-muted w-20',
+      Cell: (props) => <>{
+        props.value ? 
+          <div>
+            <a href={props.value} target="_blank" rel="noopener noreferrer"><img src={props.value} alt="Report" style={{ width: '100%', maxWidth: 150 }} /> </a>
+          </div> : 
+          <Badge
+            color='danger'
+            pill
+            className="mb-1"
+          >No file</Badge>
+      }</>
+    },
 		{
 			Header: 'Time',
-			accessor: 'time',
+			accessor: 'create_time',
 			cellClass: 'text-muted  w-10',
-			Cell: (props) => <>{transformTime(props.value)}</>,
+			Cell: (props) => <>{formatTime(new Date(Number(props.value) * 1000), "Y-m-d H:i:s")}</>,
 		},
+    {
+      Header: 'Fixed',
+      accessor: 'fixed',
+      cellClass: 'text-muted  w-5',
+      Cell: (props) => (
+        <>
+          <Badge
+            color={props.value === 1 ? 'success' : 'danger'}
+            pill
+            className="mb-1"
+          >
+            {props.value === 1 ? 'Fixed' : 'Pending'}
+          </Badge>
+        </>
+      ),
+    },
 		{
 			Header: 'Actions',
 			accessor: 'action',
@@ -103,13 +115,23 @@ const CommentList = ({
 			Cell: (props) => (
 				<>
 					<div className="tbl-actions">
-						{menuPermission({role, permission}, 'report.email') && <i
-						  className="iconsminds-envelope-2 warning"
+            {menuPermission({role, permission}, 'bug.mark') && <i
+              className={`${
+                props.value.self.fixed === 1
+                  ? 'simple-icon-ban'
+                  : 'simple-icon-check'
+              } ${props.value.self.fixed === 1 ? 'warning' : 'success'}`}
+              title={`${props.value.self.fixed === 1 ? 'Mark As Pending' : 'Mark As Fixed'}`}
+              style={{ fontSize: 18 }}
+              onClick={() => handleOnUpdateStatus(props.value.self)}
+            />}
+						{menuPermission({role, permission}, 'bug.email') && <i
+						  className="iconsminds-envelope-2 info"
 							title="Mail to Reporter"
               style={{ fontSize: 18 }}
               onClick={() => handleSendEmail(props.value.id)}
 						/>}
-						{menuPermission({role, permission}, 'report.delete') && <i
+						{menuPermission({role, permission}, 'bug.delete') && <i
 							className="simple-icon-trash danger"
 							title="Remove"
 							style={{ fontSize: 18 }}
@@ -122,22 +144,23 @@ const CommentList = ({
 	];
 
   const loadData = ({ limit, page }) => {
-    return api.r_loadReportRequest({ page, limit })
+    return api.r_loadBugRequest({ page, limit })
       .then(res => {
         const { data, pager, status, message } = res;
         if (status) {
           return {
-            list: data.map(report => ({
-              ...report,
+            list: data.map(bug => ({
+              ...bug,
               action: {
-                id: report.id,
-                email: report.user.email,
+                id: bug.id,
+                email: bug.user.email,
+                self: bug,
               },
             })),
             pager,
           };
         } else {
-          NotificationManager.error(message, 'Post');
+          NotificationManager.error(message, 'Bug');
         }
       });
   }
@@ -145,16 +168,6 @@ const CommentList = ({
   const reloadTableContent = () => {
     setRefreshTable(refreshTable + 1);
   }
-  
-	const getParentContent = (target) => {
-    if (!target) 
-      return <Badge color="outline-danger" pill className="mb-1"> Unknown </Badge>;
-    else if (target.feed) {
-      return <NavLink href={`/#/app/post/edit/${target.id}`}>{target.feed}</NavLink>;
-    } else if (target.comment) {
-      return <NavLink href={`/#/app/comment/edit/${target.id}`}>{target.comment}</NavLink>;
-    }
-	};
 
 	const handleOnDelete = (id) => {
 		console.log(id);
@@ -167,7 +180,7 @@ const CommentList = ({
 
 		setLoading(true);
 
-		const res = await api.r_deleteReportRequest(delId);
+		const res = await api.r_deleteBugRequest(delId);
 
 		setLoading(false);
 
@@ -175,10 +188,10 @@ const CommentList = ({
 
 		if (res.status === true) {
 			setDelModal(false);
-			NotificationManager.success(res.message, 'Delete Post');
+			NotificationManager.success(res.message, 'Delete Bug');
       reloadTableContent();
 		} else {
-			NotificationManager.error(res.message, 'Delete Post');
+			NotificationManager.error(res.message, 'Delete Bug');
 		}
 	};
 
@@ -191,7 +204,7 @@ const CommentList = ({
     // console.log('[form values]', event, errors, values);
     if (!errors.length) {
       setLoading(true);
-      const res = await api.r_sendEmail2Reporter(delId, values);
+      const res = await api.r_sendEmail2Bugger(delId, values);
       setLoading(false);
       setDelId(-1);
 
@@ -204,11 +217,36 @@ const CommentList = ({
     }
   }
 
+  const handleOnUpdateStatus = (bug) => {
+    delete bug.user;
+    // console.log('[bug]', bug);
+    setUpdateData(bug);
+    setUpdateModal(true);
+  }
+
+  const confirmUpdateStatus = async (event, errors, values) => {
+    const newData = { ...updateData, fixed: 1 - updateData.fixed };
+    if (!errors || !errors.length) {
+      setLoading(true);
+      const res = await api.r_updateBugRequest(newData);
+      setLoading(false);
+      setUpdateData({});
+
+      if (res.status) {
+        setUpdateModal(false);
+        NotificationManager.success(res.message, 'Update Status');
+        reloadTableContent();
+      } else {
+        NotificationManager.error(res.message, 'Update Status');
+      }
+    }
+  }
+
 	return (
 		<>
 			<Row>
 				<Colxx xxs="12">
-					<Breadcrumb heading="menu.reports" match={match} />
+					<Breadcrumb heading="menu.bugs" match={match} />
 					<Separator className="mb-5" />
 				</Colxx>
 			</Row>
@@ -216,7 +254,7 @@ const CommentList = ({
 			<Row>
 				<Colxx xxs="12">
 					<h3 className="mb-4">
-						<IntlMessages id="pages.reports" />
+						<IntlMessages id="pages.bugs" />
 					</h3>
 				</Colxx>
 
@@ -235,9 +273,9 @@ const CommentList = ({
 				toggle={() => setDelModal(!delModal)}
 				backdrop="static"
 			>
-				<ModalHeader>Delete Comment</ModalHeader>
+				<ModalHeader>Delete Bug</ModalHeader>
 				<ModalBody>
-					<p>Are you sure to delete this comment?</p>
+					<p>Are you sure to delete this bug?</p>
 
 					<Separator className="mb-5 mt-3" />
 					<div className="d-flex justify-content-end">
@@ -258,6 +296,42 @@ const CommentList = ({
 							<span className="label">Delete</span>
 						</Button>{' '}
 						<Button color="secondary" onClick={() => setDelModal(false)}>
+							<IntlMessages id="actions.cancel" />
+						</Button>
+					</div>
+				</ModalBody>
+			</Modal>
+
+
+			{/* Update Modal */}
+			<Modal
+				isOpen={updateModal}
+				toggle={() => setUpdateModal(!updateModal)}
+				backdrop="static"
+			>
+				<ModalHeader>Update Status</ModalHeader>
+				<ModalBody>
+					<p>Are you sure to update status of this bug?</p>
+
+					<Separator className="mb-5 mt-3" />
+					<div className="d-flex justify-content-end">
+						<Button
+							type="button"
+							color="primary"
+							className={`btn-shadow btn-multiple-state mr-2 ${
+								loading ? 'show-spinner' : ''
+								}`}
+							size="lg"
+							onClick={confirmUpdateStatus}
+						>
+							<span className="spinner d-inline-block">
+								<span className="bounce1" />
+								<span className="bounce2" />
+								<span className="bounce3" />
+							</span>
+							<span className="label">Update</span>
+						</Button>{' '}
+						<Button color="secondary" onClick={() => setUpdateModal(false)}>
 							<IntlMessages id="actions.cancel" />
 						</Button>
 					</div>
@@ -325,6 +399,7 @@ const CommentList = ({
           </AvForm>
         </ModalBody>
       </Modal>
+
 		</>
 	);
 };

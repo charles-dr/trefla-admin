@@ -1,5 +1,8 @@
 import { call, put, takeEvery } from 'redux-saga/effects';
 import jwt_decode from "jwt-decode";
+
+import { NotificationManager } from '../../components/common/react-notifications';
+
 import * as api from '../../api';
 import {
   AUTH_AVATAR,
@@ -15,7 +18,6 @@ import {
 import {
   getAdminAvatarURL,
   getAdminInfo,
-  loginAdmin,
   getAuthToken,
   saveAuthToken,
   deleteAuthToken,
@@ -24,7 +26,6 @@ import {
 function* loginRequest(action) {
   yield put({ type: AUTH_LOADING, payload: true });
   const res = yield call(api.r_loginRequest, action.payload);
-  console.log('[Saga] login', res);
   // process session data
   if (res.status === true) {
     saveAuthToken(res.token);
@@ -37,26 +38,38 @@ function* loginRequest(action) {
 }
 
 function* checkLogin(action) {
-  const saved = getAuthToken();
   try {
-    const decoded = jwt_decode(saved);
-    if (saved) {
+    const saved = getAuthToken();
+    if (!saved) {
+      throw new Error('Authentication Error!!');
+    }
+    else {
+      const decoded = jwt_decode(saved);
       const now = new Date().getTime();
       if (now < decoded.exp * 1000) {
-        yield put({
-          type: AUTH_LOGIN_SUCCESS,
-          payload: { status: true, message: '' },
-        });
+        const res = yield call(api.r_authenticateToken, saved);
+        if (res.status) {
+          yield put({
+            type: AUTH_LOGIN_SUCCESS,
+            payload: res, //{ status: true, message: '' },
+          });
+        } else {          
+          throw new Error("Authentication Error!");
+        }
       } else {
-        throw Object.assign(new Error('Token is expired'), { code: 400 });
+        // console.log('[Token][Expired]');
+        throw new Error('Login has been expired!');
       }
     }
   } catch (e) {
+    NotificationManager.error(e.message, 'Authentication');
+
     yield put({
       type: AUTH_LOGIN_SUCCESS,
-      payload: { status: false, message: '' },
+      payload: { status: false, message: e.message },
     });
-    deleteAuthToken();    
+    deleteAuthToken();
+    window.location.href = '#auth';
   }
 }
 

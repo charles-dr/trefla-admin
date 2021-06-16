@@ -20,8 +20,8 @@ import {
   loadAllReports,
   loadAllUsers,
   loadAuthInfo,
+  checkLoginSession,
 } from '../../redux/actions';
-import { anonymousLogin } from '../../utils';
 
 const CommentModule = React.lazy(() => import('./comment'));
 const LangModule = React.lazy(() => import('./lang'));
@@ -31,6 +31,8 @@ const ReportModule = React.lazy(() => import('./report'));
 const SettingModule = React.lazy(() => import('./settings'));
 const UserModule = React.lazy(() => import('./user'));
 const DashboardPage = React.lazy(() => import('./dashboard'));
+const BugModule = React.lazy(() => import('./bug'));
+const AdminModule = React.lazy(() => import('./admins'));
 
 const App = ({
   match,
@@ -43,33 +45,14 @@ const App = ({
   getAllUsersAction,
   loadAllAdminNotiAction$,
   loadAuthInfoAction,
+  checkLoginSessionAction,
   login,
   posts,
 }) => {
   const history = useHistory();
-  useEffect(() => {
-    if (!login) {
-      console.log('[->] Login');
-      history.push('/auth/login');
-    }
 
-    anonymousLogin()
-      .then(result => {
-        // console.log('[firebase] =>');
-        // load all data
-        // getAllCommentsAction();
-        // getAllFriendsAction();
-        // getAllLangsAction();
-        // getAllPostsAction(posts.pager);
-        // getAllUsersAction();
-        // loadAuthInfoAction();
-        // downloadAvatarAction();
-        // getAllReportsAction();
-        // loadAllAdminNotiAction$();
-      })
-      .catch(error => {
-        console.log('[Firebase login] failed');
-      })
+  useEffect(() => {
+    setTimeout(checkLoginSessionAction, 1000);
   }, [
     // match,
     getAllUsersAction,
@@ -81,8 +64,10 @@ const App = ({
     loadAuthInfoAction,
     downloadAvatarAction,
     getAllReportsAction,
+    checkLoginSessionAction,
     history,
   ]);
+
   return (
     <AppLayout>
       <div className="dashboard-wrapper">
@@ -98,6 +83,12 @@ const App = ({
               path={`${match.url}/dashboard`}
               render={(props) => <DashboardPage {...props} />}
             />
+
+            <Route 
+              path={`${match.url}/bug`}
+              render={(props) => <BugModule {...props} />}
+            />
+
             <Route
               path={`${match.url}/comment`}
               render={(props) => <CommentModule {...props} />}
@@ -129,6 +120,10 @@ const App = ({
               path={`${match.url}/user`}
               render={(props) => <UserModule {...props} />}
             />
+            <Route
+              path={`${match.url}/admin`}
+              render={(props) => <AdminModule {...props} />}
+            />
             <Redirect to="/error" />
           </Switch>
         </Suspense>
@@ -154,5 +149,6 @@ export default withRouter(
     getAllUsersAction: loadAllUsers,
     loadAllAdminNotiAction$: loadAllAdminNotiAction,
     loadAuthInfoAction: loadAuthInfo,
+    checkLoginSessionAction: checkLoginSession,
   })(App)
 );

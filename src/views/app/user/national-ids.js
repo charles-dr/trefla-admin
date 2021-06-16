@@ -1,17 +1,18 @@
-import React, { useEffect, useState } from 'react';
+/* eslint-disable global-require */
+import React, { useState } from 'react';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 import {
   Badge,
   Button,
-  Label,
+  // Label,
   Modal,
   ModalHeader,
   ModalBody,
   Row,
 } from 'reactstrap';
 
-import Switch from 'rc-switch';
+// import Switch from 'rc-switch';
 import 'rc-switch/assets/index.css';
 import {
   AvForm,
@@ -27,36 +28,28 @@ import { Colxx, Separator } from '../../../components/common/CustomBootstrap';
 import Breadcrumb from '../../../containers/navs/Breadcrumb';
 import { ReactTableWithPaginationCard } from '../../../containers/ui/ReactTableCards';
 
-import {
-  verifyUserByIdRequest
-} from '../../../api/functions.api';
-import {
-  deleteUserById,
-  // toggleBanStatus,
-  updateUserProfile,
-} from '../../../utils';
-import { loadAllUsers } from '../../../redux/actions';
+// import {
+//   verifyUserByIdRequest
+// } from '../../../api/functions.api';
+// import {
+//   deleteUserById,
+//   // toggleBanStatus,
+//   updateUserProfile,
+// } from '../../../utils';
+// import { loadAllUsers } from '../../../redux/actions';
+import * as api from '../../../api';
+import { menuPermission } from '../../../utils';
 
 const NationalIDList = ({
   match,
   history,
-  friends,
-  posts,
-  users,
-  loadAllUsersAction,
+  permission, role,
 }) => {
-  const [data, setData] = useState([]);
+  const [refreshTable, setRefreshTable] = useState(0);
 
   const [loading, setLoading] = useState(false);
-  const [delId] = useState(-1); //, setDeleteId
+  // eslint-disable-next-line
   const [modalDetails, setModalDetails] = useState(false);
-  const [modalOptions, setModalOptions] = useState({
-    comment: true,
-    post: true,
-    report: true,
-    friend: true,
-    chat: true,
-  });
 
   const [cardImgs, setCardImgs] = useState([]);
   const [currentImage, setCurrentImg] = useState(0);
@@ -64,7 +57,7 @@ const NationalIDList = ({
 
   const [verifyModal, setVerifyModal] = useState(false);
   const [verifyInfo, setVerifyInfo] = useState({ mode: 0, user_id: -1, active: 1 }); // mode 0 - unverify, mode 1 - verify
-  
+
 
   const cols = [
     {
@@ -123,12 +116,6 @@ const NationalIDList = ({
         </>
       ),
     },
-    // {
-    //     Header: 'Location',
-    //     accessor: 'location_address',
-    //     cellClass: 'text-muted  w-5',
-    //     Cell: (props) => <>{props.value}</>,
-    // },
     {
       Header: 'Active',
       accessor: 'active',
@@ -136,11 +123,11 @@ const NationalIDList = ({
       Cell: (props) => (
         <>
           <Badge
-            color={props.value === 1 ? 'success' : 'danger'}
+            color={props.value === 0 ? 'success' : 'danger'}
             pill
             className="mb-1"
           >
-            {props.value === 1 ? 'Active' : 'Disabled'}
+            {props.value === 0 ? 'Active' : 'Disabled'}
           </Badge>
         </>
       ),
@@ -168,7 +155,7 @@ const NationalIDList = ({
       Cell: (props) => (
         <>
           <div className="tbl-actions">
-            {!props.value.verified && (
+            {(!props.value.verified && menuPermission({role, permission}, 'user.nationalId.verify')) && (
               <i
                 className="iconsminds-security-check success"
                 title="Verify Now"
@@ -176,7 +163,7 @@ const NationalIDList = ({
                 onClick={() => verifyUserById(props.value.user_id)}
               />
             )}
-            {props.value.verified && (
+            {(props.value.verified  && menuPermission({role, permission}, 'user.nationalId.verify')) && (
               <i
                 className="iconsminds-security-bug danger"
                 title="Unverify Now"
@@ -190,25 +177,55 @@ const NationalIDList = ({
     },
   ];
 
-  useEffect(() => {
-    recomposeUsers();
-    return () => {
-      return true;
-    };
-  }, [match, users, posts, friends]);
+  const loadData = ({ limit, page }) => {
+    return api.r_loadCardRequest({ page, limit })
+      .then(res => {
+        const { data, pager, status } = res;
+        if (status) {
 
-  useEffect(() => {
-    const usersWithImg = users.filter((user) => user.card_img_url);
+          // const usersWithImg = data.filter(user => user.card_img_url);
+          const imgObjects = data.filter(user => user.card_img_url).map(user => ({
+            src: user.card_img_url,
+            srcSet: [user.card_img_url],
+            alt: user.id,
+            caption: user.user_name,
+          }));
+          setCardImgs(imgObjects);
 
-    const imgObjects = usersWithImg.map((user) => ({
-      src: user.card_img_url,
-      srcSet: [user.card_img_url],
-      alt: user.user_id,
-      caption: user.user_name,
-    }));
+          return {
+            list: data.map(user => ({
+              ...user,
+              image: {
+                photo: user.photo,
+                sex: user.sex,
+                avatarIndex: user.avatarIndex,
+              },
+              card_img: {
+                url: user.card_img_url,
+                user_id: user.id,
+              },
+              action: {
+                user_id: user.id,
+                active: user.active,
+                verified: user.card_verified === 1,
+              },
+              verified: user.card_verified,
+              user: {
+                id: user.id,
+                name: user.user_name,
+              },
+            })),
+            pager,
+          };
+        } else {
 
-    setCardImgs(imgObjects);
-  }, [users]);
+        }
+      });
+  }
+
+  const reloadTableContent = () => {
+    setRefreshTable(refreshTable + 1);
+  }
 
   const getUserAvatarUrl = ({ photo, sex, avatarIndex }) => {
     if (photo) {
@@ -222,161 +239,60 @@ const NationalIDList = ({
     return `/assets/avatar/avatar_${sex === '1' ? 'girl2' : 'boy1'}.png`;
   };
 
-  const formatCoordinate = (coord) => {
-    if (!coord) return '';
-    const arr = coord.split(',');
-    return (
-      <>
-        <p>X: {arr[0]}</p>
-        <p>Y: {arr[1]}</p>
-      </>
-    );
-  };
-  const recomposeUsers = () => {
-    const new_users = [];
-
-    const verifyUsers = users.filter(
-      (user) => user.card_img_url || user.card_number
-    );
-    for (const user of verifyUsers) {
-      const user_item = {};
-      // copy all key-values
-      for (const key in user) {
-        if (user[key] !== undefined) {
-          user_item[key] = user[key];
-        }
-      };
-      // new key - image
-      user_item.image = {
-        photo: user.photo,
-        sex: user.sex,
-        avatarIndex: user.avatarIndex,
-      };
-      user_item.card_img = {
-        url: user.card_img_url,
-        user_id: user.user_id,
-      };
-      user_item.action = {
-        user_id: user.user_id,
-        active: user.active,
-        verified: user.card_verified || false,
-      };
-      user_item.verified = user.card_verified || false;
-      user_item.user = {
-        id: user.user_id,
-        name: user.user_name,
-      };
-
-      // put item to array
-      new_users.push(user_item);
-    }
-    setData(new_users);
-  };
-
   const openAddModal = () => {
     history.push('/app/user/add');
   };
 
   const verifyUserById = async (user_id) => {
-    setVerifyInfo({...verifyInfo, user_id: user_id, mode: 1});
+    setVerifyInfo({...verifyInfo, user_id: user_id, mode: 1}); // mode: target status
     setVerifyModal(true);
   }
+
   const confirmVerification = async () => {
     const user_id = verifyInfo.user_id;
     try {
-      // history.push(`/app/user/edit/${user_id}`);
-      // const usersF = users.filter((user) => user.user_id === user_id);
-      // console.log(usersF[0]);
-      // const profile = usersF[0];
-      // profile.card_verified = 1;
-      // const res = await updateUserProfile(profile);
-
       setLoading(true);
-      const res = await verifyUserByIdRequest(user_id);
+      const res = await api.r_verifyUserRequest({ id: user_id });
       setLoading(false);
       setVerifyModal(false);
       if (res.status === true) {
-        NotificationManager.success('User has been verified', 'Verification');
-        loadAllUsersAction();
+        NotificationManager.success('User has been verified!', 'Verification');
+        reloadTableContent();
       } else {
         NotificationManager.error(res.message, 'Verification');
       }
     } catch (err) {
-      NotificationManager.error(
-        'Error while updating verification!',
-        'Verification'
-      );
+      NotificationManager.error('Error while updating verification!', 'Verification');
     }
   };
+
   const unverifyUserById = (user_id) => {
     setVerifyInfo({...verifyInfo, user_id: user_id, mode: 0});
     setVerifyModal(true);
   }
+
   const confirmUnverification = async () => {
     const user_id = verifyInfo.user_id;
     try {
-      const usersF = users.filter((user) => user.user_id === user_id);
-      const profile = usersF[0];
-      profile.card_verified = 0;
-
-      const res = await updateUserProfile(profile);
+      setLoading(true);
+      const res = await api.r_unverifyUserRequest({ id: user_id }); //updateUserProfile(profile);
+      setLoading(false);
       setVerifyModal(false);
 
       if (res.status === true) {
         NotificationManager.success('User has been unverified', 'Verification');
-        loadAllUsersAction();
+        reloadTableContent();
       } else {
         NotificationManager.error(res.message, 'Verification');
       }
     } catch (err) {
-      NotificationManager.error(
-        'Error while updating verification!',
-        'Verification'
-      );
+      NotificationManager.error('Error while updating verification!', 'Verification');
     }
   };
+
   const onConfirmVerification = async (event, errors, values) => {
     // console.log(event, errors, values);
     return verifyInfo.mode === 1 ? confirmVerification() : confirmUnverification();
-  };
-
-  const onConfirmDelete = async () => {
-    console.log(delId, modalOptions);
-
-    try {
-      setLoading(true);
-      const res = await deleteUserById(delId, modalOptions);
-      setLoading(false);
-      if (res.status === true) {
-        NotificationManager.success(res.message, 'Delete User');
-        loadAllUsersAction();
-        setModalDetails(false);
-      } else {
-        NotificationManager.error(res.message, 'Delete User');
-      }
-    } catch (err) {
-      setLoading(false);
-      console.error(err);
-      NotificationManager.error('Something went wrong', 'Delete User');
-    }
-  };
-  const getAllActive = () => {
-    return (
-      modalOptions.post &&
-      modalOptions.comment &&
-      modalOptions.report &&
-      modalOptions.chat &&
-      modalOptions.friend
-    );
-  };
-  const setAllActive = (st) => {
-    setModalOptions({
-      comment: st,
-      post: st,
-      report: st,
-      friend: st,
-      chat: st,
-    });
   };
 
   // Image Viewer
@@ -384,17 +300,21 @@ const NationalIDList = ({
     const prevIndex = (cardImgs.length + currentImage - 1) % cardImgs.length;
     setCurrentImg(prevIndex);
   };
+
   const gotoNextImage = () => {
     setCurrentImg((cardImgs.length + currentImage + 1) % cardImgs.length);
   };
+
   const closeViewer = () => {
     setViewerOpen(false);
   };
+
   const showCardImage = (user_id) => {
     // get index
     setCurrentImg(getIndexInImgViewer(user_id));
     setViewerOpen(true);
   };
+
   const getIndexInImgViewer = (user_id) => {
     let index = 0;
 
@@ -432,7 +352,11 @@ const NationalIDList = ({
         </Colxx>
 
         <Colxx xxs="12">
-          <ReactTableWithPaginationCard cols={cols} data={data} />
+          <ReactTableWithPaginationCard 
+            cols={cols}
+            loadData={loadData}
+            refresh={refreshTable} 
+          />
         </Colxx>
       </Row>
 
@@ -445,119 +369,6 @@ const NationalIDList = ({
         onClose={closeViewer}
       />
 
-      {/* Delete Modal */}
-      <Modal
-        isOpen={modalDetails}
-        toggle={() => setModalDetails(!modalDetails)}
-        backdrop="static"
-      >
-        <ModalHeader>
-          <IntlMessages id="pages.delete-user" />
-        </ModalHeader>
-        <ModalBody>
-          <AvForm
-            className="av-tooltip tooltip-label-right"
-            onSubmit={(event, errors, values) =>
-              onConfirmDelete(event, errors, values)
-            }
-          >
-            <h5>Delete together user's:</h5>
-            <Colxx className="mb-4" xxs="12">
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Label>All</Label>
-                <Switch
-                  className="custom-switch custom-switch-secondary"
-                  checked={getAllActive()}
-                  onChange={setAllActive}
-                />
-              </div>
-            </Colxx>
-
-            <Colxx className="mb-2" xxs="12">
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Label>Posts</Label>
-                <Switch
-                  className="custom-switch custom-switch-secondary"
-                  checked={modalOptions.post}
-                  onChange={(st) =>
-                    setModalOptions({ ...modalOptions, post: st })
-                  }
-                />
-              </div>
-            </Colxx>
-            <Colxx className="mb-2" xxs="12">
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Label>Comments</Label>
-                <Switch
-                  className="custom-switch custom-switch-secondary"
-                  checked={modalOptions.comment}
-                  onChange={(st) =>
-                    setModalOptions({ ...modalOptions, comment: st })
-                  }
-                />
-              </div>
-            </Colxx>
-            <Colxx className="mb-2" xxs="12">
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Label>Reports</Label>
-                <Switch
-                  className="custom-switch custom-switch-secondary"
-                  checked={modalOptions.report}
-                  onChange={(st) =>
-                    setModalOptions({ ...modalOptions, report: st })
-                  }
-                />
-              </div>
-            </Colxx>
-            <Colxx className="mb-2" xxs="12">
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Label>Chat</Label>
-                <Switch
-                  className="custom-switch custom-switch-secondary"
-                  checked={modalOptions.chat}
-                  onChange={(st) =>
-                    setModalOptions({ ...modalOptions, chat: st })
-                  }
-                />
-              </div>
-            </Colxx>
-            <Colxx className="mb-2" xxs="12">
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Label>Friend</Label>
-                <Switch
-                  className="custom-switch custom-switch-secondary"
-                  checked={modalOptions.friend}
-                  onChange={(st) =>
-                    setModalOptions({ ...modalOptions, friend: st })
-                  }
-                />
-              </div>
-            </Colxx>
-
-            <Separator className="mb-5 mt-5" />
-            <div className="d-flex justify-content-end">
-              <Button
-                type="submit"
-                color="primary"
-                className={`btn-shadow btn-multiple-state mr-2 ${
-                  loading ? 'show-spinner' : ''
-                }`}
-                size="lg"
-              >
-                <span className="spinner d-inline-block">
-                  <span className="bounce1" />
-                  <span className="bounce2" />
-                  <span className="bounce3" />
-                </span>
-                <span className="label">Delete</span>
-              </Button>{' '}
-              <Button color="secondary" onClick={() => setModalDetails(false)}>
-                <IntlMessages id="actions.cancel" />
-              </Button>
-            </div>
-          </AvForm>
-        </ModalBody>
-      </Modal>
 
       {/* Verify/Unverify Modal */}
       <Modal
@@ -610,22 +421,11 @@ const NationalIDList = ({
   );
 };
 
-const mapStateToProps = ({
-  friends: friendApp,
-  posts: postApp,
-  users: userApp,
-}) => {
-  const { list: posts } = postApp;
-  const { list: users } = userApp;
-  const { list: friends } = friendApp;
-
-  return {
-    friends,
-    users,
-    posts,
-  };
+const mapStateToProps = ({ auth }) => {
+  const { permission, info: { role } } = auth;
+  return { permission, role };
 };
 
 export default connect(mapStateToProps, {
-  loadAllUsersAction: loadAllUsers,
+
 })(NationalIDList);

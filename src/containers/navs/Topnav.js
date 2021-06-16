@@ -327,7 +327,7 @@ const mapStateToProps = ({ auth, menu, settings }) => {
   const { containerClassnames, menuClickCount, selectedMenuHasSubItems } = menu;
   const { locale } = settings;
   const {
-    info: { name },
+    info: { user_name: name },
     avatar,
   } = auth;
   return {

@@ -323,6 +323,27 @@ class Sidebar extends Component {
     return false;
   };
 
+  menuShowable = (item) => {
+    const { permission, role } = this.props;
+    if (!role) return false;
+    if (role === 'SUPER_ADMIN') return true;
+    if (item.permission === undefined) return true;
+
+    if (typeof item.permission === 'boolean') return item.permission; // constant value;
+
+    const keys = item.permission.split('.');
+    if (keys.length === 1) {
+      return permission[keys[0]];
+    } else if (keys.length === 2) {
+      return permission[keys[0]][keys[1]];
+    } else if (keys.length === 3) {
+      return permission[keys[0]][keys[1]][keys[2]];
+    } else if (keys.length === 4) {
+      return permission[keys[0]][keys[1]][keys[2]][keys[3]];
+    }
+    return false;
+  }
+
   render() {
     const {
       selectedParentMenu,
@@ -338,7 +359,7 @@ class Sidebar extends Component {
             >
               <Nav vertical className="list-unstyled">
                 {menuItems &&
-                  menuItems.map((item) => {
+                  menuItems.filter(item => this.menuShowable(item)).map((item) => {
                     return (
                       <NavItem
                         key={item.id}
@@ -395,7 +416,7 @@ class Sidebar extends Component {
                       data-parent={item.id}
                     >
                       {item.subs &&
-                        item.subs.map((sub, index) => {
+                        item.subs.filter(sub => this.menuShowable(sub)).map((sub, index) => {
                           return (
                             <NavItem
                               key={`${item.id}_${index}`}
@@ -445,7 +466,7 @@ class Sidebar extends Component {
                                     }
                                   >
                                     <Nav className="third-level-menu">
-                                      {sub.subs.map((thirdSub, thirdIndex) => {
+                                      {sub.subs.filter(thirdSub => this.menuShowable(thirdSub)).map((thirdSub, thirdIndex) => {
                                         return (
                                           <NavItem
                                             key={`${item.id}_${index}_${thirdIndex}`}
@@ -495,7 +516,7 @@ class Sidebar extends Component {
   }
 }
 
-const mapStateToProps = ({ menu }) => {
+const mapStateToProps = ({ menu, auth }) => {
   const {
     containerClassnames,
     subHiddenBreakpoint,
@@ -503,12 +524,15 @@ const mapStateToProps = ({ menu }) => {
     menuClickCount,
     selectedMenuHasSubItems,
   } = menu;
+  const { permission, info: { role } } = auth;
   return {
     containerClassnames,
     subHiddenBreakpoint,
     menuHiddenBreakpoint,
     menuClickCount,
     selectedMenuHasSubItems,
+    permission,
+    role,
   };
 };
 export default withRouter(

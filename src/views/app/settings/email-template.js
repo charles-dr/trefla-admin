@@ -12,8 +12,8 @@ import { Colxx, Separator } from '../../../components/common/CustomBootstrap';
 import IntlMessages from '../../../helpers/IntlMessages';
 import Breadcrumb from '../../../containers/navs/Breadcrumb';
 
-import { getEmailTemplateByIdRequest, updateEmailTemplateRequest } from '../../../utils';
 import { loadAllEmailTemplateAction } from '../../../redux/actions';
+import * as api from '../../../api';
 
 import 'react-quill/dist/quill.snow.css';
 import 'react-quill/dist/quill.bubble.css';
@@ -57,20 +57,23 @@ const EmailTemplatePage = ({
   match,
   loadAllEmailTemplateAction$,
 }) => {
-  const [templ, setTempl] = useState({ id: match.params.id, subject: '', body: '', usage: '' });
+  const [templ, setTempl] = useState({ id: match.params.id, subject: '', body: '', use_case: '' });
   const [templBody, setTemplBody] = useState('');
 
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    getEmailTemplateByIdRequest(match.params.id)
-      .then(res => {
-        // console.log(res);
-        if (res === false) {
-          NotificationManager.error('Error occurred while fetching template data!', 'Email Template');
+    api.r_getEmailTemplateByIdRequest(match.params.id)
+      .then(({ data: res, status, message }) => {
+        if (status) {
+          if (res === false) {
+            NotificationManager.error('Error occurred while fetching template data!', 'Email Template');
+          } else {
+            setTempl(res);
+            setTemplBody(res.body);
+          }
         } else {
-          setTempl(res);
-          setTemplBody(res.body);
+          NotificationManager.error(message, 'Email Template');
         }
       });
     return () => { };
@@ -81,25 +84,14 @@ const EmailTemplatePage = ({
 
     // set loading
     setLoading(true);
-    const res = await updateEmailTemplateRequest(templ_new);
+    const res = await api.r_updateEmailTemplateRequest(templ_new.id, templ_new);
     // cancel the loading
     setLoading(false);
     if (res.status === true) {
-      NotificationManager.success(
-        res.message,
-        'Email Template'
-      );
-      loadAllEmailTemplateAction$();
+      NotificationManager.success(res.message, 'Email Template');
       history.push('/app/settings/email-templates');
     } else {
-      NotificationManager.warning(
-        res.message,
-        'Email Template',
-        3000,
-        null,
-        null,
-        ''
-      );
+      NotificationManager.warning(res.message, 'Email Template', 3000, null, null, '');
     }
   };
 
@@ -152,9 +144,9 @@ const EmailTemplatePage = ({
                 <Field
                   className="form-control"
                   type="text"
-                  name="usage"
-                  value={templ.usage}
-                  onChange={(e) => setTempl({ ...templ, usage: e.target.value })}
+                  name="use_case"
+                  value={templ.use_case}
+                  onChange={(e) => setTempl({ ...templ, use_case: e.target.value })}
                 />
                 {errors.usage && touched.usage && (
                   <div className="invalid-feedback d-block">

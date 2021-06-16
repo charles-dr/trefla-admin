@@ -18,7 +18,6 @@ const UserSettings = ({ profile, loadAllUsersAction, ...props }) => {
   const [prof, setProf] = useState(profile);
 
   useEffect(() => {
-    console.log('[profile]', profile)
     setProf(profile);
     return () => {};
   }, [profile]);

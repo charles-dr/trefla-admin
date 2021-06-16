@@ -6,7 +6,7 @@ import 'firebase/auth';
 
 import {
   convertTimeToString,
-  formatTwoDigits,
+  // formatTwoDigits,
   transformTime,
 } from './common.utils';
 import { MONTHS } from '../constants/custom';
@@ -1157,7 +1157,7 @@ export const getSimpleFormatDay = (time = null) => {
 
   const m = dt.getMonth();
   const d = dt.getDate();
-  const d2 = formatTwoDigits(d);
+  // const d2 = formatTwoDigits(d);
 
   return `${MONTHS[m]} ${d}`;
 };

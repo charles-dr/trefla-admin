@@ -47,7 +47,6 @@ refered from
  - admin_notifications "13": id changes
 
 
-
  - optional val
     30, 35, 36, 50, 51, 
  - type
@@ -60,6 +59,12 @@ refered from
 
 (51, 43) comment <br/>
 (50, 43) comment
+
+
+## Permissons
+
+- notification, manage users, manage posts, comments, edit langaugae
+- bug, report
 
 
 ## To-dos

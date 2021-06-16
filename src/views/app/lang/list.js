@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { connect } from 'react-redux';
 import {
   Badge,
@@ -16,17 +16,16 @@ import { Colxx, Separator } from '../../../components/common/CustomBootstrap';
 import Breadcrumb from '../../../containers/navs/Breadcrumb';
 import { ReactTableWithPaginationCard } from '../../../containers/ui/ReactTableCards';
 
+import * as api from '../../../api';
+
 import { loadAllLangs } from '../../../redux/actions';
 import {
-  deleteLangByIdRequest,
-  getLangInfoByIdRequest,
-  getLangFileContentRequest,
-  refreshLanguage,
-  transformTime,
+  menuPermission,
 } from '../../../utils';
 
-const UserList = ({ history, match, langs, loadAllLangsAction }) => {
-  const [data, setData] = useState([]);
+const UserList = ({ history, match, langs, loadAllLangsAction, permission, role }) => {
+  // const [data, setData] = useState([]);
+  const [refreshTable, setRefreshTable] = useState(0);
   const [confirm, setConfirm] = useState(false);
   const [delId, setDelId] = useState(-1);
   const [processing, setProcessing] = useState(false);
@@ -48,7 +47,7 @@ const UserList = ({ history, match, langs, loadAllLangsAction }) => {
       Header: 'Last Update',
       accessor: 'update_time',
       cellClass: 'text-muted  w-25',
-      Cell: (props) => <>{transformTime(props.value)}</>,
+      Cell: (props) => <>{new Date(props.value * 1000).toLocaleString()}</>,
     },
     {
       Header: 'Active',
@@ -68,66 +67,65 @@ const UserList = ({ history, match, langs, loadAllLangsAction }) => {
     },
     {
       Header: 'Actions',
-      accessor: 'lang_id',
+      accessor: 'id',
       cellClass: 'text-muted  w-15',
       Cell: (props) => (
         <>
           <div className="tbl-actions">
-            <i
+            {menuPermission({role, permission}, 'lang.edit') && <i
               className="iconsminds-file-edit info"
               title="Edit"
               style={{ fontSize: 18 }}
               onClick={() => handleOnEdit(props.value)}
-            />
-            <i
+            />}
+            {menuPermission({role, permission}, 'lang.edit') && <i
               className="simple-icon-cloud-download success"
               title="Download"
               style={{ fontSize: 18 }}
               onClick={() => handleOnDownload(props.value)}
-            />
-            <i
+            />}
+            {menuPermission({role, permission}, 'lang.async') && <i
               className="simple-icon-refresh refresh"
               title="Synchronize"
               style={{ fontSize: 18 }}
               onClick={() => refreshLangKeys(props.value)}
-            />
-            <i
+            />}
+            {menuPermission({role, permission}, 'lang.delete') && <i
               className="simple-icon-trash danger"
               title="Remove"
               style={{ fontSize: 18 }}
               onClick={() => handleOnDelete(props.value)}
-            />
+            />}
           </div>
         </>
       ),
     },
   ];
 
-  useEffect(() => {
-    // console.log(friends, users, posts);
-    recomposeLangs();
-    return () => {};
-  }, [match, langs, recomposeLangs]);
-
-  const recomposeLangs = () => {
-    const new_langs = [];
-    for (const lang of langs) {
-      const lang_item = {};
-      // copy all key-values
-      for (const key in lang) {
-        if (lang[key] !== undefined) {
-          lang_item[key] = lang[key];
+  const loadData = ({ limit, page }) => {
+    return api.r_loadLangRequest({ page, limit })
+      .then(res => {
+        const { data, pager, status, message } = res;
+        if (status) {
+          return {
+            list: data.map(lang => ({
+              ...lang
+            })),
+            pager,
+          };
+        } else {
+          NotificationManager.error(message, 'Language');
         }
-      }
+      });
+  }
 
-      // put item to array
-      new_langs.push(lang_item);
-    }
-    setData(new_langs);
-  };
   const toAddPage = () => {
     history.push('/app/lang/add');
   };
+
+  const reloadTableContent = () => {
+    setRefreshTable(refreshTable + 1);
+  }
 
   const handleOnEdit = (lang_id) => {
     history.push(`/app/lang/edit/${lang_id}`);
@@ -136,25 +134,19 @@ const UserList = ({ history, match, langs, loadAllLangsAction }) => {
     setDelId(lang_id);
     setConfirm(true);
   };
-  const deleteLanguage = () => {
+  const deleteLanguage = async () => {
     if (delId > -1) {
       setConfirm(false);
       setDelId(-1);
 
-      deleteLangByIdRequest(delId)
-        .then((res) => {
-          console.log(res);
-          if (res.status === true) {
-            NotificationManager.success(res.message, 'Delete Language');
-            loadAllLangsAction();
-          } else {
-            NotificationManager.warning(res.message, 'Delete Language');
-          }
-        })
-        .catch((err) => {
-          console.error(err);
-          NotificationManager.warning(err.message, 'Delete Language');
-        });
+      const result = await api.r_deleteLangRequest(delId);
+
+      if (result.status) {
+        NotificationManager.success(result.message, 'Delete Language');
+      } else {
+        NotificationManager.error(result.message, 'Delete Language');
+      }
+      reloadTableContent();
     } else {
       NotificationManager.warning(
         'No found language to delete!',
@@ -163,20 +155,18 @@ const UserList = ({ history, match, langs, loadAllLangsAction }) => {
     }
   };
   const handleOnDownload = async (lang_id) => {
-    const lang = await getLangInfoByIdRequest(lang_id);
-    if (!lang) {
+    const { data: lang, status } = await api.r_getLangRequest(lang_id);
+    if (!status) {
       NotificationManager.warning(
         'Not found language info!',
         'Download Language'
       );
     } else {
-      const json_res = await getLangFileContentRequest(lang.code);
-
-      if (json_res.status === true) {
-        downloadAsFile(json_res.data, `${lang.code}.json`);
-      } else {
-        NotificationManager.warning(json_res.message, 'Download Language');
+      const json_res = await api.r_getLangFileContentRequest(lang_id);
+      if (json_res.status !== undefined) {
+        NotificationManager.error(json_res.message,'Download Content'); return;
       }
+      downloadAsFile(json_res, `${lang.code}.json`);
     }
   };
   const downloadAsFile = (json, download_name) => {
@@ -189,29 +179,10 @@ const UserList = ({ history, match, langs, loadAllLangsAction }) => {
     tempLink.click();
   };
   const refreshLangKeys = async (lang_id) => {
-    console.log(lang_id, lang_id == 0, lang_id === 0);
-
-    // no need to refresh English here.
-    if (Number(lang_id) === 0) {
-      NotificationManager.warning(
-        'This is the default language!',
-        'Sync Language'
-      );
-      return;
-    }
-
-    // lang object
-    let lang_target = {};
-    for (const lang of langs) {
-      if (lang.lang_id === lang_id) {
-        lang_target = lang;
-      }
-    }
-    const lang_default = langs[0];
 
     setProcessing(true);
 
-    const res = await refreshLanguage(lang_target, lang_default);
+    const res = await api.r_syncLangRequest(lang_id);
 
     setProcessing(false);
 
@@ -219,30 +190,6 @@ const UserList = ({ history, match, langs, loadAllLangsAction }) => {
       NotificationManager.success(res.message);
     } else {
       NotificationManager.error(res.message);
-    }
-
-    // console.log(lang_target);
-  };
-  const refreshAllLangs = async () => {
-    setProcessing(true);
-    try {
-      for (const lang of langs) {
-        if (Number(lang.lang_id) === 0) {
-          continue;
-        }
-
-        await refreshLanguage(lang, langs[0]);
-      }
-
-      setProcessing(false);
-      NotificationManager.success(
-        'All languages are synchronized!',
-        'Sync Language'
-      );
-    } catch (err) {
-      console.log(err);
-      setProcessing(false);
-      NotificationManager.error(err.message, 'Sync Language');
     }
   };
 
@@ -263,10 +210,6 @@ const UserList = ({ history, match, langs, loadAllLangsAction }) => {
         </Colxx>
 
         <Colxx className="d-flex justify-content-end" xxs={12}>
-          <Button color="info" className="mb-2 mr-2" onClick={refreshAllLangs}>
-            <i className="simple-icon-refresh mr-1" />
-            Sync All Langs
-          </Button>{' '}
           <Button color="primary" className="mb-2" onClick={toAddPage}>
             <i className="simple-icon-plus mr-1" />
             <IntlMessages id="actions.add" />
@@ -274,7 +217,11 @@ const UserList = ({ history, match, langs, loadAllLangsAction }) => {
         </Colxx>
 
         <Colxx xxs="12">
-          <ReactTableWithPaginationCard cols={cols} data={data} />
+          <ReactTableWithPaginationCard 
+            cols={cols}
+            loadData={loadData}
+            refresh={refreshTable}
+            />
         </Colxx>
       </Row>
 
@@ -316,11 +263,14 @@ const UserList = ({ history, match, langs, loadAllLangsAction }) => {
   );
 };
 
-const mapStateToProps = ({ langs: langApp }) => {
+const mapStateToProps = ({ langs: langApp, auth }) => {
   const { list: langs } = langApp;
+  const { permission, info: { role } } = auth;
 
   return {
     langs,
+    permission,
+    role,
   };
 };
 

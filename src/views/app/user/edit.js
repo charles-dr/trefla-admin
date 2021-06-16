@@ -37,7 +37,6 @@ import * as api from '../../../api';
 import {
   formatTime,
   getMapPositionFromString,
-  getUserByIdRequest,
   transformTime,
   ru_updateUserProfile,
 } from '../../../utils';

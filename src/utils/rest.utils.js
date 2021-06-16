@@ -19,8 +19,6 @@ export const ru_updateUserProfile = async (profile, avatarFile = null, cardFile 
 };
 
 export const ru_addUserProfile = async (profile, avatarFile = null, cardFile = null) => {
-  const { id: user_id } = profile;
-
   return Promise.all([
     avatarFile ? api.r_uploadFileRequest(avatarFile) : null,
     cardFile ? api.r_uploadFileRequest(cardFile) : null,
@@ -46,7 +44,7 @@ export const ru_toggleBanStatus = async ({ active, user_id }, banReason) => {
       if (res.status) {
         return {
           status: true,
-          message: active ? 'You banned the user!' : 'You released the user!'
+          message: updateData.active === 1 ? 'You banned the user!' : 'You released the user!'
         };
       } else {
         return {
@@ -62,4 +60,3 @@ export const ru_toggleBanStatus = async ({ active, user_id }, banReason) => {
       };
     })
 }
-

@@ -18,34 +18,36 @@ const ProfilePage = ({
   downloadAvatarAction,
 }) => {
   let avatarInput = null;
-  const [profile, setProfile] = useState({ email: '', user_name: '' });
+  const [profile, setProfile] = useState({ email: '', user_name: '', password: '', cpassword: '' });
   const [avatar, setAvatar] = useState('/assets/img/no_profile.png');
-  const [loading1, setLoading1] = useState(true);
+  const [loading1, setLoading1] = useState(true); // preloader
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    api.r_getProfileRequest()
-      .then(({ data: admin, status }) => {
-        setLoading1(false);
-        if (status) {
-          setProfile(admin);
-          admin.avatar ? setAvatar(admin.avatar): console.log(null);
-        } else {
-          NotificationManager.error('Error while loading data!', 'Admin Profile');
-        }
-      })
+    setLoading1(false);
+    // api.r_getProfileRequest()
+    //   .then(({ data: admin, status }) => {
+    //     if (status) {
+    //       setProfile(admin);
+    //       admin.avatar ? setAvatar(admin.avatar): console.log(null);
+    //     } else {
+    //       NotificationManager.error('Error while loading data!', 'Admin Profile');
+    //     }
+    //   })
 
     return () => {};
   }, [match]);
 
-  const onUpdateProfile = async (values) => {
+  const onAddAdministrator = async (values) => {
     const file = avatarInput.files[0];
     setLoading(true);
-    await api.r_updateProfileRequest(profile, file);
-    // await updateAdminProfile(profile, file);
-    console.log('done');
-
-    NotificationManager.success('Profile has been updated.', 'Profile Update', 3000);
+    const res = await api.r_addEmployeeRequest(profile, file);
+    if (res.status) {
+      NotificationManager.success('Administrator has been added.', 'Add Administrator', 3000);
+      history.push('/app/admin/list');
+    } else {
+      NotificationManager.error(res.message, 'Add Administrator', 3000);
+    }
     setLoading(false);
   };
   const openFileSelector = () => {
@@ -75,6 +77,26 @@ const ProfilePage = ({
     }
     return error;
   };
+  const validatePassword = () => {
+    const value = profile.password;
+    let error;
+    if (!value) {
+      error = 'Please enter password';
+    } else if (value.length < 4) {
+      error = 'Value must be longer than 3 characters';
+    }
+    return error;
+  }
+  const validateCPassword = () => {
+    const value = profile.cpassword;
+    let error;
+    if (!value) {
+      error = 'Please confirm password';
+    } else if (profile.password !== value) {
+      error = 'Password does not match!';
+    }
+    return error;
+  }
   const handleOnChange = (e) => {
     setProfile({ ...profile, [e.target.name]: e.target.value });
   };
@@ -83,7 +105,7 @@ const ProfilePage = ({
     <>
       <Row>
         <Colxx xxs="12">
-          <Breadcrumb heading="menu.profile" match={match} />
+          <Breadcrumb heading="menu.admin" match={match} />
           <Separator className="mb-5" />
         </Colxx>
       </Row>
@@ -91,12 +113,12 @@ const ProfilePage = ({
       <Row>
         <Colxx xxs="12">
           <h3 className="mb-4">
-            <IntlMessages id="pages.profile" />
+            <IntlMessages id="pages.admin.add" />
           </h3>
         </Colxx>
         {loading1 && <div className="loading" />}
         {
-          <Formik initialValues={initialValues} onSubmit={onUpdateProfile}>
+          <Formik initialValues={initialValues} onSubmit={onAddAdministrator}>
             {({ errors, touched }) => (
               <Form
                 className="av-tooltip tooltip-label-bottom mx-auto"
@@ -154,6 +176,44 @@ const ProfilePage = ({
                     </div>
                   )}
                 </FormGroup>
+                <FormGroup className="form-group">
+                  <Label>
+                    <IntlMessages id="user.password" />
+                  </Label>
+                  <Field
+                    className="form-control"
+                    name="password"
+                    value={profile.password}
+                    type="password"
+                    onChange={handleOnChange}
+                    validate={validatePassword}
+                    autoCorrect="false"
+                  />
+                  {errors.password && touched.password && (
+                    <div className="invalid-feedback d-block">
+                      {errors.password}
+                    </div>
+                  )}
+                </FormGroup>
+                <FormGroup className="form-group">
+                  <Label>
+                    <IntlMessages id="user.password.confirm" />
+                  </Label>
+                  <Field
+                    className="form-control"
+                    name="cpassword"
+                    value={profile.cpassword}
+                    type="password"
+                    onChange={handleOnChange}
+                    validate={validateCPassword}
+                    autoCorrect="false"
+                  />
+                  {errors.cpassword && touched.cpassword && (
+                    <div className="invalid-feedback d-block">
+                      {errors.cpassword}
+                    </div>
+                  )}
+                </FormGroup>
 
                 <div className="d-flex justify-content-end align-items-center">
                   <Button
@@ -170,7 +230,7 @@ const ProfilePage = ({
                       <span className="bounce3" />
                     </span>
                     <span className="label">
-                      <IntlMessages id="user.save" />
+                      <IntlMessages id="user.submit" />
                     </span>
                   </Button>
                 </div>

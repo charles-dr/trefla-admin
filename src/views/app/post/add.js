@@ -15,8 +15,9 @@ import { Colxx, Separator } from '../../../components/common/CustomBootstrap';
 import IntlMessages from '../../../helpers/IntlMessages';
 import Breadcrumb from '../../../containers/navs/Breadcrumb';
 
-import { convertTimeToString, updatePostRequest } from '../../../utils';
+import { convertTimeToString } from '../../../utils';
 import { loadAllPosts } from '../../../redux/actions';
+import * as api from '../../../api';
 
 const typeList = [
   { value: '0', label: 'Card', key: 0 },
@@ -52,7 +53,7 @@ const INIT_POST_INFO = {
   type: 1,
 };
 
-const EditPostPage = ({
+const AddPostPage = ({
   history,
   match,
   post_list,
@@ -74,24 +75,25 @@ const EditPostPage = ({
 
   useEffect(() => {
     // compose the user select source
-    const list = [];
-
-    let index = 0;
-    for (const user of user_list) {
-      list.push({
-        label: user.user_name,
-        value: user.user_id.toString(),
-        key: index,
+    Promise.all([
+      api.r_loadUserRequest({ page: 0, limit: 0, mode: 'SIMPLE' }),
+    ])
+      .then(([usersRes]) => {
+        if (usersRes.status) {
+          const { data: users } = usersRes;
+          const userList = users.map(user => ({
+            label: user.user_name,
+            value: user.id.toString(),
+            key: user.id.toString(),
+          }));
+          setUserSelValues(userList);
+          setUser(userList[0]);
+        }
       });
-      index++;
-    }
-    setUserSelValues(list);
-    setUser(list[0]);
-
     return () => {
       return true;
     };
-  }, [match, user_list]);
+  }, [match]);
 
   const onCreatePost = async () => {
     // copy post
@@ -106,22 +108,23 @@ const EditPostPage = ({
     params.active = active === true ? 1 : 0;
     params.target_date =
       timeAdded === true ? convertTimeToString(targetTime) : '';
-    params.post_user_id = Number(user.value);
+    params.user_id = Number(user.value);
     params.post_time = convertTimeToString();
-    params.post_id = getPostNewId();
     params.post_name = !post.post_name ? user.label : post.post_name;
 
-    console.log(params);
+    params.location_address = '1600, Amphitheatre Parkway, Mountain View, Santa Clara County, 94043, California';
+    params.location_coordinate = '37.421998333333335,-122.08400000000002';
+    // console.log(params);
 
     setLoading(true);
 
-    const res = await updatePostRequest(params);
+    const res = await api.r_createPostRequest(params);
 
     setLoading(false);
 
     if (res.status === true) {
       NotificationManager.success('Post has been created!', 'Add Post');
-      loadAllPostsAction();
+      // loadAllPostsAction();
       history.push('/app/post');
     } else {
       NotificationManager.error(res.message, 'Add Post');
@@ -147,14 +150,6 @@ const EditPostPage = ({
 
   const handleOnChange = (e) => {
     setPost({ ...post, [e.target.name]: e.target.value });
-  };
-
-  const getPostNewId = () => {
-    let newId = -1;
-    for (const post of post_list) {
-      newId = post.post_id > newId ? post.post_id : newId;
-    }
-    return newId + 1;
   };
 
   const initialValues = post;
@@ -333,4 +328,4 @@ const mapStateToProps = ({ posts: postApp, users: userApp }) => {
 
 export default connect(mapStateToProps, {
   loadAllPostsAction: loadAllPosts,
-})(EditPostPage);
+})(AddPostPage);

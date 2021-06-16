@@ -27,14 +27,12 @@ import Breadcrumb from '../../../containers/navs/Breadcrumb';
 import { ReactTableWithPaginationCard } from '../../../containers/ui/ReactTableCards';
 import CustomSelectInput from '../../../components/common/CustomSelectInput';
 
-import { judgeIDTransferRequest, sendConsentEmail } from '../../../api/functions.api';
 import {
   addVerificationRequest,
   addIDTransferRequest,
-  deleteAdminNotiByIdRequest,
 } from '../../../utils';
 import { loadAllUsers, loadAllAdminNotiAction } from '../../../redux/actions';
-
+import * as api from '../../../api';
 
 const IDTransferList = ({
   match,
@@ -47,7 +45,7 @@ const IDTransferList = ({
   loadAllAdminNotiAction$,
 }) => {
   // Table Data
-  const [data, setData] = useState([]);
+  const [refreshTable] = useState(0);
 
   const [loading, setLoading] = useState(false);
   const [preloading, setPreloading] = useState(false);
@@ -74,7 +72,7 @@ const IDTransferList = ({
   const cols = [
     {
       Header: 'Transfer From',
-      accessor: 'fromUser',
+      accessor: 'from',
       cellClass: 'list-item-heading w-15',
       Cell: (props) => (
         <>
@@ -107,7 +105,7 @@ const IDTransferList = ({
     },
     {
       Header: 'Transfer To',
-      accessor: 'toUser',
+      accessor: 'to',
       cellClass: 'list-item-heading w-10',
       Cell: (props) => (
         <>
@@ -140,18 +138,18 @@ const IDTransferList = ({
     },
     {
       Header: 'Consent Email',
-      accessor: 'consent_emails',
+      accessor: 'emails',
       cellClass: 'list-item-heading w-10',
       Cell: (props) => (
         <>
-          {props.value.length === undefined || props.value.length === 0 && <Badge color="outline-danger" pill>Never Sent</Badge>}
+          {(props.value.length === undefined || props.value.length === 0) && <Badge color="outline-danger" pill>Never Sent</Badge>}
           {props.value.length !== undefined && props.value.length > 0 && <Badge color="outline-success" pill>{props.value.length} Times</Badge>}
         </>
       )
     },
     {
       Header: 'Actions',
-      accessor: 'noti_id',
+      accessor: 'id',
       cellClass: 'text-muted  w-10',
       Cell: (props) => (
         <>
@@ -186,36 +184,39 @@ const IDTransferList = ({
     },
   ];
 
-  useEffect(() => {
-    recomposeIDTransfer();
-    return () => {
-      return true;
-    };
-  }, [match, users, notifications]);
+  const loadData = ({ limit, page }) => {
+    return api.r_loadIDTrasferRequest({ page, limit })
+      .then(res => {
+        const { data, pager, status, message } = res;
+        if (status) {
+          return {
+            list: data.map(row => ({
+              ...row,
+              consent_emails: row.from.email,
+            })),
+            pager,
+          };
+        } else {
+          NotificationManager.error(message, 'ID Transfer');
+        }
+      });
+  }
 
   useEffect(() => {
-    const filtered = users.map((user, i) => ({
-      label: `${user.user_name} (${user.email})`, value: user.user_id, key: i
-    }));
-    setVerifyUsers(filtered);
-    if (filtered.length > 0) setVerifyUser(filtered[0]);
+    api.r_loadUserRequest({ page: 0, limit: 0, mode: 'SIMPLE'})
+      .then(({data: users, status}) => {
+        if (status) {
+          const filtered = users.map((user, i) => ({
+            label: `${user.user_name} (${user.email})`, value: user.id, key: i
+          }));
+          setVerifyUsers(filtered);
+          if (filtered.length > 0) setVerifyUser(filtered[0]);        
+        }
+      })
+
     return () => { };
-  }, [match, users]);
+  }, [match]);
 
-  const recomposeIDTransfer = () => {
-    let idTransfers = notifications.filter(noti => noti.type === '12');
-    let format_data = [];
-    for (let transfer of idTransfers) {
-      let newItem = {};
-      // copy all fields to new object
-      Object.keys(transfer).forEach((key, i) => newItem[key] = transfer[key]);
-      newItem.fromUser = getUserById(transfer.old_user_id);
-      newItem.toUser = getUserById(transfer.user_id);
-      newItem.consent_emails = transfer.consent_emails || [];
-      format_data.push(newItem);
-    }
-    setData(format_data);
-  };
   const getUserAvatarUrl = ({ photo, sex, avatarIndex }) => {
     if (photo) {
       return photo;
@@ -226,91 +227,69 @@ const IDTransferList = ({
     }
     return `/assets/avatar/avatar_${sex === '1' ? 'girl2' : 'boy1'}.png`;
   };
-  const sendConsentEmailToUserA = (id) => {
+  const sendConsentEmailToUserA = async (id) => {
     setPreloading(true);
-    sendConsentEmail({ noti_id: id })
-      .then(res => {
-        setPreloading(false);
-        NotificationManager.success(res.message, 'ID Transfer');
-        loadAllAdminNotiAction$();
-      })
-      .catch(err => {
-        setPreloading(false);
-        NotificationManager.error(err.message, 'ID Transfer');
-      });
-  }
-  const judgeRequest = (id) => {
-    const tempNotis = notifications.filter(noti => noti.noti_id === id);
 
-    if (tempNotis.length === 0) {
-      // no matches
-      NotificationManager.error('Not found the notification!', 'ID Transfer'); return;
+    const { status, message } = await api.r_sendConsentEmailRequest(id);
+
+    setPreloading(false);
+
+    if (status) {
+      NotificationManager.success(message, 'ID Transfer');
+    } else {
+      NotificationManager.error(message, 'ID Transfer');
     }
-    const notification = tempNotis[0];
+  }
+  const judgeRequest = async (id) => {
+    
+    const { data: noti, status } = await api.r_IDTransferByIdRequest(id);
 
-    // set ban info
-    const fromUser = getUserById(notification.old_user_id);
-    const toUser = getUserById(notification.user_id);
+    if (!status) {
+      NotificationManager.error('Error while loading data!', 'ID Tranfer');
+      return;
+    }
 
-    setJudgeInfo({ from: fromUser, to: toUser, noti_id: id });
-    setVerified({ from: !!fromUser.card_verified, to: !!toUser.card_verified });
+    setJudgeInfo({ from: noti.from, to: noti.to, noti_id: noti.id });
+    setVerified({ from: !!noti.from.card_verified, to: !!noti.to.card_verified });
 
     setJudgeModal(true);
   }
-  const confirmJudgeIDTransfer = () => {
+  const confirmJudgeIDTransfer = async () => {
     if (verified.from && verified.to) {
       NotificationManager.warning("Both user can't be verified at a time!", 'ID Transfer'); return;
     } else if (!verified.from && !verified.to) {
       NotificationManager.warning("Please select a user to be verified!", "ID Transfer"); return;
     }
     setLoading(true);
-    judgeIDTransferRequest({
-      noti_id: judgeInfo.noti_id, verified: {
-        from: verified.from === true ? 1 : 0,
-        to: verified.to === true ? 1 : 0,
-      }
-    })
-      .then(res => {
-        setLoading(false);
-        if (res.status === true) {
-          NotificationManager.success(res.message, 'ID Transfer');
-          setJudgeModal(false);
-          loadAllUsersAction();
-        } else {
-          NotificationManager.error(res.message, 'ID Transfer');
-        }
-      })
-      .catch(error => {
-        setLoading(false);
-        console.log(error.message);
-        NotificationManager.error('Something went wrong!', 'ID Transfer');
-      });
+
+    const newOwnerId = verified.from ? judgeInfo.from.id : (verified.to ? judgeInfo.to.id : 0);
+    const result = await api.r_verifyUserRequest({ id: newOwnerId});
+    setLoading(false);
+
+    if (result.status) {
+      NotificationManager.success(result.message, 'ID Transfer');
+    } else {
+      NotificationManager.error(result.message, 'ID Transfer');
+    }
   }
   const deleteIDTransfer = (id) => {
     setDeleteId(id);
     setDelModal(true);
   }
-  const confirmDeleteIDTransfer = () => {
+  const confirmDeleteIDTransfer = async () => {
     console.log(delId);
     setLoading(true);
-    deleteAdminNotiByIdRequest(delId) 
-      .then(res => {
-        setLoading(false);
-        setDelModal(false);
-        if (res.status === true) {
-          NotificationManager.success('ID transfer request deleted!', 'Delete ID Transfer Request');
-          setAddVTModal(false);
-          loadAllAdminNotiAction$();
-        } else {
-          NotificationManager.error('Failed to delete ID transfer request!', 'Delete ID Transfer Request')
-        }
-      })
-      .catch(error => {
-        console.log('[Del ID Transfer]', error.message);
-        setLoading(false);
-        setDelModal(false);
-        NotificationManager.error('Something went wrong!', 'Delete ID Transfer Request');
-      });
+
+    const { status, message } = await api.r_deleteIDTransferRequest(delId);
+    
+    setLoading(false);
+    setDelModal(false);
+
+    if (status) {
+      NotificationManager.success(message, 'Delete ID Transfer Request');
+    } else {
+      NotificationManager.error(message, 'Delete ID Transfer Request');
+    }
   }
   const confirmAddVerificationReq = () => {
     setLoading(true);
@@ -355,13 +334,6 @@ const IDTransferList = ({
       });
   }
 
-  const openAddModal = () => {
-    history.push('/app/user/add');
-  };
-  const getUserById = (id) => {
-    const filtered = users.filter(user => user.user_id === id);
-    return filtered.length > 0 ? filtered[0] : {};
-  }
   const getNewNotificationId = () => {
     let newId = -1;
     for (const noti of notifications) {
@@ -394,17 +366,21 @@ const IDTransferList = ({
         </Colxx>
 
         <Colxx className="d-flex justify-content-end" xxs={12}>
-          <Button color="primary" className="mb-2 mr-2" onClick={() => setAddVModal(true)}>
+          {/* <Button color="primary" className="mb-2 mr-2" onClick={() => setAddVModal(true)}>
             <i className="simple-icon-plus mr-1" /> Verification
-          </Button>{' '}
+          </Button>{' '} */}
 
-          <Button color="primary" className="mb-2" onClick={() => setAddVTModal(true)}>
+          {/* <Button color="primary" className="mb-2" onClick={() => setAddVTModal(true)}>
             <i className="simple-icon-plus mr-1" /> ID Transfer
-          </Button>{' '}
+          </Button>{' '} */}
         </Colxx>
 
         <Colxx xxs="12">
-          <ReactTableWithPaginationCard cols={cols} data={data} />
+          <ReactTableWithPaginationCard 
+            cols={cols} 
+            loadData={loadData}
+            refresh={refreshTable}
+            />
         </Colxx>
       </Row>
 

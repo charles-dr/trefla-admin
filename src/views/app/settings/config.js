@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Row, Label, FormGroup, Button } from 'reactstrap';
 import { connect } from 'react-redux';
-
+import Switch from 'rc-switch';
+import 'rc-switch/assets/index.css';
 import { Formik, Form, Field } from 'formik';
+
 import { NotificationManager } from '../../../components/common/react-notifications';
 
 import { login, updateLogin } from '../../../redux/actions';
@@ -10,42 +12,42 @@ import { Colxx, Separator } from '../../../components/common/CustomBootstrap';
 import IntlMessages from '../../../helpers/IntlMessages';
 import Breadcrumb from '../../../containers/navs/Breadcrumb';
 
-import { getConfigRequest, updateConfigRequest } from '../../../utils';
+import * as api from '../../../api';
 
-const PasswordPage = ({
+const ConfigPage = ({
   history,
   match,
   loginUserAction,
   updateLoginAction,
 }) => {
-  const [config, setConfig] = useState({ lang_version: '', admin_email: '' });
+  const [config, setConfig] = useState({ lang_version: '', admin_email: '', default_zone: '', apply_default_zone: 0 });
   const [loading, setLoading] = useState(false);
   useEffect(() => {
     loadConfigData();
 
     return () => {};
   }, [match]);
-  const onUpdateProfile = async (values) => {
+  const onUpdateConfig = async (values) => {
     // set loading
     setLoading(true);
-    const res = await updateConfigRequest(config);
+    const res = await api.r_updateAdminConfigRequest(config);
 
     // unset loading
     setLoading(false);
     if (res.status === true) {
       NotificationManager.success(res.message, 'Config');
-      loadConfigData(); // reload data to confirm operation
     } else {
       NotificationManager.warning(res.message, 'Config');
     }
   };
+
   const loadConfigData = () => {
-    getConfigRequest()
-      .then((res) => {
-        if (!res) {
-          NotificationManager.warning('Data not found on firestore!', 'Config');
+    api.r_loadAdminConfigRequest()
+      .then(({ status, message, data }) => {
+        if (!status) {
+          NotificationManager.warning(message, 'Config');
         } else {
-          setConfig(res);
+          setConfig(data);
         }
       })
       .catch((err) => {
@@ -53,6 +55,7 @@ const PasswordPage = ({
         NotificationManager.warning('Failed to get config info', 'Config');
       });
   };
+
   const validateLangVersion = () => {
     const value = config.lang_version;
     let error;
@@ -61,6 +64,7 @@ const PasswordPage = ({
     }
     return error;
   };
+
   const handleOnChange = (e) => {
     setConfig({ ...config, [e.target.name]: e.target.value });
   };
@@ -82,7 +86,7 @@ const PasswordPage = ({
           </h3>
         </Colxx>
 
-        <Formik initialValues={initialValues} onSubmit={onUpdateProfile}>
+        <Formik initialValues={initialValues} onSubmit={onUpdateConfig}>
           {({ errors, touched }) => (
             <Form
               className="av-tooltip tooltip-label-bottom mx-auto"
@@ -131,6 +135,36 @@ const PasswordPage = ({
                 </Colxx>
               </Row>
 
+              <Row>
+                <Colxx xxs="12" md="6">
+                  <FormGroup className="form-group">
+                    <Label>
+                      Default Zone
+                    </Label>
+                    <Field
+                      className="form-control"
+                      type="text"
+                      name="default_zone"
+                      value={config.default_zone}
+                      onChange={handleOnChange}
+                    />
+                  </FormGroup>
+                </Colxx>
+
+                <Colxx xxs="12" md="6">
+                  <FormGroup className="form-group">
+                    <Label>
+                      Apply Default Zone
+                    </Label>
+                    <Switch
+                      className="custom-switch custom-switch-secondary"
+                      checked={config.apply_default_zone === 1}
+                      onChange={(st) => setConfig({ ...config, apply_default_zone: st === true ? 1 : 0 })}
+                    />
+                  </FormGroup>
+                </Colxx>
+              </Row>
+
               <div className="d-flex justify-content-end align-items-center">
                 <Button
                   type="submit"
@@ -165,4 +199,4 @@ const mapStateToProps = (state) => {
 export default connect(mapStateToProps, {
   loginUserAction: login,
   updateLoginAction: updateLogin,
-})(PasswordPage);
+})(ConfigPage);

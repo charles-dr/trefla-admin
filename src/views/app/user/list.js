@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { connect } from 'react-redux';
 import {
   Badge,
@@ -25,7 +25,7 @@ import { Colxx, Separator } from '../../../components/common/CustomBootstrap';
 import Breadcrumb from '../../../containers/navs/Breadcrumb';
 import { ReactTableWithPaginationCard } from '../../../containers/ui/ReactTableCards';
 
-import { deleteUserById, ru_toggleBanStatus } from '../../../utils';
+import { ru_toggleBanStatus, menuPermission } from '../../../utils';
 import { loadAllUsers } from '../../../redux/actions';
 import * as api from '../../../api';
 
@@ -36,8 +36,8 @@ const UserList = ({
   posts,
   users,
   loadAllUsersAction,
+  permission, role,
 }) => {
-  const [data, setData] = useState([]);
   const [refreshTable, setRefreshTable] = useState(0);
 
   const [loading, setLoading] = useState(false);
@@ -140,11 +140,11 @@ const UserList = ({
       Cell: (props) => (
         <>
           <Badge
-            color={props.value === 1 ? 'success' : 'danger'}
+            color={props.value === 0 ? 'success' : 'danger'}
             pill
             className="mb-1"
           >
-            {props.value === 1 ? 'Active' : 'Disabled'}
+            {props.value === 0 ? 'Active' : 'Disabled'}
           </Badge>
         </>
       ),
@@ -156,28 +156,28 @@ const UserList = ({
       Cell: (props) => (
         <>
           <div className="tbl-actions">
-            <i
+            {menuPermission({role, permission}, 'user.list.edit') && <i
               className="iconsminds-file-edit info"
               title="Edit"
               style={{ fontSize: 18 }}
               onClick={() => handleOnEdit(props.value.user_id)}
-            />
-            <i
+            />}
+            {menuPermission({role, permission}, 'user.list.ban') && <i
               className={`${
-                props.value.active === 1
+                props.value.active === 0
                   ? 'simple-icon-ban'
                   : 'simple-icon-energy'
-              } ${props.value.active === 1 ? 'warning' : 'success'}`}
-              title={`${props.value.active === 1 ? 'Ban' : 'Release'} User`}
+              } ${props.value.active === 0 ? 'warning' : 'success'}`}
+              title={`${props.value.active === 0 ? 'Ban' : 'Release'} User`}
               style={{ fontSize: 18 }}
               onClick={() => handleOnBanUser(props.value)}
-            />
-            <i
+            />}
+            {menuPermission({role, permission}, 'user.list.delete') && <i
               className="simple-icon-trash danger"
               title="Remove"
               style={{ fontSize: 18 }}
               onClick={() => handleOnDelete(props.value.user_id)}
-            />
+            />}
           </div>
         </>
       ),
@@ -258,14 +258,14 @@ const UserList = ({
       setLoading(true);
       const res = await ru_toggleBanStatus(
         banInfo,
-        banInfo.active === 1 ? values.banReason : ''
+        banInfo.active === 0 ? values.banReason : ''
       );
       console.log(res);
       setLoading(false);
       if (res.status === true) {
         NotificationManager.success(
           res.message,
-          `${banInfo.active === 1 ? 'Ban' : 'Release'} User`
+          `${banInfo.active === 0 ? 'Ban' : 'Release'} User`
         );
         setBanModal(false);
         reloadTableContent();
@@ -273,7 +273,7 @@ const UserList = ({
       } else {
         NotificationManager.error(
           res.message,
-          `${banInfo.active === 1 ? 'Ban' : 'Release'} User`
+          `${banInfo.active === 0 ? 'Ban' : 'Release'} User`
         );
       }
     }
@@ -485,7 +485,7 @@ const UserList = ({
               onConfirmBan(event, errors, values)
             }
           >
-            {banInfo.active === 1 && (
+            {banInfo.active === 0 && (
               <AvGroup>
                 <Label>Ban Reason:</Label>
                 <AvInput
@@ -497,7 +497,7 @@ const UserList = ({
                 <AvFeedback>Please enter ban reason!</AvFeedback>
               </AvGroup>
             )}
-            {banInfo.active !== 1 && (
+            {banInfo.active !== 0 && (
               <label>Are you sure to release this user?</label>
             )}
 
@@ -517,7 +517,7 @@ const UserList = ({
                   <span className="bounce3" />
                 </span>
                 <span className="label">
-                  {banInfo.active === 1 ? 'Ban' : 'Release'}
+                  {banInfo.active === 0 ? 'Ban' : 'Release'}
                 </span>
               </Button>{' '}
               <Button color="secondary" onClick={() => setBanModal(false)}>
@@ -532,6 +532,7 @@ const UserList = ({
 };
 
 const mapStateToProps = ({
+  auth,
   friends: friendApp,
   posts: postApp,
   users: userApp,
@@ -539,11 +540,13 @@ const mapStateToProps = ({
   const { list: posts } = postApp;
   const { list: users } = userApp;
   const { list: friends } = friendApp;
+  const { permission, info: { role } } = auth;
 
   return {
     friends,
     users,
     posts,
+    permission, role,
   };
 };
 

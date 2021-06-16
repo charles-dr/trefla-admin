@@ -106,6 +106,7 @@ const DBBackupList = ({ history, match }) => {
   useEffect(() => {
     loadBackupList();
     return () => { }
+    // eslint-disable-next-line
   }, [match]);
   const loadBackupList = () => {
     getDBBackupRequest()

@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Row, Label, FormGroup, Button } from 'reactstrap';
+import { Row, Label, Nav, NavItem, FormGroup, Button, TabContent, TabPane } from 'reactstrap';
 import { connect } from 'react-redux';
-
+import { NavLink } from 'react-router-dom';
 import { Formik, Form, Field } from 'formik';
+import classnames from 'classnames';
+
 import { NotificationManager } from '../../../components/common/react-notifications';
 
 import { Colxx, Separator } from '../../../components/common/CustomBootstrap';
@@ -10,25 +12,28 @@ import IntlMessages from '../../../helpers/IntlMessages';
 import Breadcrumb from '../../../containers/navs/Breadcrumb';
 
 import * as api from '../../../api';
+import PermissionForm from './permissions';
 
 const ProfilePage = ({
   history,
   match,
-  loadAuthInfoAction,
-  downloadAvatarAction,
 }) => {
   let avatarInput = null;
   const [profile, setProfile] = useState({ email: '', user_name: '' });
+  const [permission, setPermission] = useState({});
   const [avatar, setAvatar] = useState('/assets/img/no_profile.png');
+  const [activeTab, setActiveTab] = useState('1');
+
   const [loading1, setLoading1] = useState(true);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    api.r_getProfileRequest()
-      .then(({ data: admin, status }) => {
+    api.r_getEmployeeRequest(match.params.id)
+      .then(({ data: admin, status, permission: adminPermission }) => {
         setLoading1(false);
         if (status) {
           setProfile(admin);
+          setPermission(adminPermission);
           admin.avatar ? setAvatar(admin.avatar): console.log(null);
         } else {
           NotificationManager.error('Error while loading data!', 'Admin Profile');
@@ -78,24 +83,88 @@ const ProfilePage = ({
   const handleOnChange = (e) => {
     setProfile({ ...profile, [e.target.name]: e.target.value });
   };
+  const filterPermissionFields = (data) => {
+    const excludeKeys = ['id', 'admin_id', 'create_time', 'update_time'];
+    const newData = {};
+    Object.keys(data).forEach(key => {
+      if (!excludeKeys.includes(key)) {
+        newData[key] = data[key];
+      }
+    });
+    return newData;
+  }
+  const onUpdatePermission = async (data) => {
+    setLoading1(true);
+    const res = await api.r_updateEmployeePermission(match.params.id, data);
+    setLoading1(false);
+    if (res.status) {
+      NotificationManager.success(res.message, 'Admin Permission', 3000);
+      api.r_getEmployeeRequest(match.params.id)
+      .then(({ data: admin, status, permission: adminPermission }) => {
+        if (status) {
+          setPermission(adminPermission);
+        } else {
+          NotificationManager.error('Error while loading data!', 'Admin Profile');
+        }
+      })
+    } else {
+      NotificationManager.error(res.message, 'Admin Permission', 3000);
+    }
+  }
+
   const initialValues = { email: profile.email, user_name: profile.user_name };
   return (
     <>
       <Row>
         <Colxx xxs="12">
-          <Breadcrumb heading="menu.profile" match={match} />
+          <Breadcrumb heading="menu.admin" match={match} />
           <Separator className="mb-5" />
         </Colxx>
       </Row>
-
       <Row>
         <Colxx xxs="12">
           <h3 className="mb-4">
-            <IntlMessages id="pages.profile" />
+            <IntlMessages id="pages.admin.add" />
           </h3>
         </Colxx>
-        {loading1 && <div className="loading" />}
-        {
+      </Row>
+      {loading1 && <div className="loading" />}
+      
+      <Nav tabs className="card-header-tabs mb-3">
+        <NavItem>
+          <NavLink
+            to="#"
+            location={{}}
+            className={classnames({
+              active: activeTab === '1',
+              'nav-link': true,
+            })}
+            onClick={() => {
+              setActiveTab('1');
+            }}
+          >
+            Profile
+          </NavLink>
+        </NavItem>
+        <NavItem>
+          <NavLink
+            to="#"
+            location={{}}
+            className={classnames({
+              active: activeTab === '2',
+              'nav-link': true,
+            })}
+            onClick={() => {
+              setActiveTab('2');
+            }}
+          >
+            Permission
+          </NavLink>
+        </NavItem>
+      </Nav>
+
+      <TabContent activeTab={activeTab}>
+        <TabPane tabId="1">
           <Formik initialValues={initialValues} onSubmit={onUpdateProfile}>
             {({ errors, touched }) => (
               <Form
@@ -177,8 +246,16 @@ const ProfilePage = ({
               </Form>
             )}
           </Formik>
-        }
-      </Row>
+        </TabPane>
+
+        <TabPane tabId="2">
+          <PermissionForm 
+            permission={filterPermissionFields(permission)}
+            onUpdate={onUpdatePermission}
+            waiting={loading}
+          />
+        </TabPane>
+      </TabContent>
     </>
   );
 };

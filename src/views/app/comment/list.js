@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { connect } from 'react-redux';
 import { Badge, Button, Modal, ModalHeader, ModalBody, NavLink, Row } from 'reactstrap';
 
@@ -8,14 +8,13 @@ import { Colxx, Separator } from '../../../components/common/CustomBootstrap';
 import Breadcrumb from '../../../containers/navs/Breadcrumb';
 import { ReactTableWithPaginationCard } from '../../../containers/ui/ReactTableCards';
 
-import { deleteCommentByIdRequest, transformTime } from '../../../utils';
+import { transformTime, menuPermission } from '../../../utils';
 import { loadAllComments } from '../../../redux/actions';
 import { reactionImages } from '../../../constants/custom';
 import * as api from '../../../api';
 
 
-const CommentList = ({ match, users, posts, history, loadAllCommentsAction }) => {
-  const [data, setData] = useState([]);
+const CommentList = ({ match, users, posts, permission, role, history, loadAllCommentsAction }) => {
   const [refreshTable, setRefreshTable] = useState(0);
   const [delModal, setDelModal] = useState(false);
   const [delId, setDelId] = useState(-1);
@@ -87,20 +86,21 @@ const CommentList = ({ match, users, posts, history, loadAllCommentsAction }) =>
       Cell: (props) => (
         <>
           <div className="tbl-actions">
-            <NavLink
-              href={`/app/comment/edit/${props.value}`}
+            {menuPermission({role, permission}, 'comment.edit') && <NavLink
+              href={`/#/app/comment/edit/${props.value}`}
               style={{ display: 'inline-block', padding: '0.5rem' }}
             ><i
                 className="iconsminds-file-edit info"
                 title="Edit"
                 style={{ fontSize: 18 }}
               /></NavLink>
-            <i
+            }
+            {menuPermission({role, permission}, 'comment.delete') && <i
               className="simple-icon-trash danger"
               title="Remove"
               style={{ fontSize: 18 }}
               onClick={() => handleOnDelete(props.value)}
-            />
+            />}
           </div>
         </>
       ),
@@ -110,7 +110,7 @@ const CommentList = ({ match, users, posts, history, loadAllCommentsAction }) =>
   const loadData = ({ limit, page }) => {
     return api.r_loadCommentRequest({ page, limit, type: 'ALL' })
       .then(res => {
-        const { data, pager, status } = res;
+        const { data, pager, status, message } = res;
         if (status) {
           return {
             list: data.map(comment => ({
@@ -125,7 +125,7 @@ const CommentList = ({ match, users, posts, history, loadAllCommentsAction }) =>
             pager,
           };
         } else {
-
+          NotificationManager.error(message, 'Post');
         }
       });
   }
@@ -156,18 +156,6 @@ const CommentList = ({ match, users, posts, history, loadAllCommentsAction }) =>
     }
   }
 
-  const getUserNameById = id => {
-    if (users.length > 0) {
-      for (let user of users) {
-        if (Number(user.user_id) === Number(id)) {
-          return user.user_name;
-        }
-      }
-    } else {
-      return '';
-    }
-  }
-
   const getParentContent = (parent) => {
     if (!parent) {
       return <Badge color="outline-warning" pill className="mb-1"> Deleted </Badge>
@@ -176,7 +164,7 @@ const CommentList = ({ match, users, posts, history, loadAllCommentsAction }) =>
 
     if (parent.feed) { // then post
       if (target) {
-        return <NavLink href={`/app/post/edit/${parent.id}`}>{parent.feed}</NavLink>;
+        return <NavLink href={`/#/app/post/edit/${parent.id}`}>{parent.feed}</NavLink>;
       } else {
         return <>
           <Badge color="outline-warning" pill className="mb-1"> Deleted </Badge>
@@ -184,7 +172,7 @@ const CommentList = ({ match, users, posts, history, loadAllCommentsAction }) =>
       }
     } else if (parent.comment) { // then comment
       if (target) {
-        return <NavLink href={`/app/comment/edit/${parent.id}`}>{parent.comment}</NavLink>
+        return <NavLink href={`/#/app/comment/edit/${parent.id}`}>{parent.comment}</NavLink>
       }
       return <>
         <Badge color="outline-warning" pill className="mb-1"> Deleted </Badge>
@@ -292,8 +280,11 @@ const CommentList = ({ match, users, posts, history, loadAllCommentsAction }) =>
   );
 };
 
-const mapStateToProps = ({  }) => {
+const mapStateToProps = ({ auth }) => {
+  const { permission, info: { role } } = auth;
   return {
+    permission,
+    role,
   };
 };
 

@@ -13,13 +13,13 @@ import { Colxx, Separator } from '../../../components/common/CustomBootstrap';
 import IntlMessages from '../../../helpers/IntlMessages';
 import Breadcrumb from '../../../containers/navs/Breadcrumb';
 
+import { getCommentByIdRequest, updateCommentRequest } from '../../../utils';
 import { loadAllPosts } from '../../../redux/actions';
-import * as api from '../../../api';
 
 const INIT_COMMENT_INFO = {
   active: 1,
   comment: '',
-  id: -1,
+  comment_id: -1,
   isGuest: false,
   like_1_num: 0,
   like_2_num: 0,
@@ -33,7 +33,7 @@ const INIT_COMMENT_INFO = {
   user_id: -1,
 };
 
-const EditCommentPage = ({ history, match, loadAllPostsAction }) => {
+const EditCommentPage = ({ history, match, user_list, loadAllPostsAction }) => {
   const [comment, setComment] = useState(INIT_COMMENT_INFO);
   const [userSelValues, setUserSelValues] = useState([]);
   const [user, setUser] = useState(
@@ -41,38 +41,60 @@ const EditCommentPage = ({ history, match, loadAllPostsAction }) => {
   );
   const [guest, setGuest] = useState(false);
   const [active, setActive] = useState(false);
+
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    Promise.all([
-      api.r_loadUserRequest({ page: 0, limit: 0, type: 'SIMPLE' }),
-      api.r_getCommentByIdRequest(match.params.id),
-    ])
-      .then(([usersRes, commentRes]) => {
-        if (usersRes.status) {
-          const userList = usersRes.data.map((user, index) => ({ 
-            label: user.user_name,
-            value: user.id.toString(),
-            key: index
-          }));
-          setUserSelValues(userList);
+    // compose the user select source
+    const list = [];
 
-          if (commentRes.status) {
-            setComment(commentRes.data);
-            const [selValue] = userList.filter(user => user.value === commentRes.data.id.toString());
+    let index = 0;
+    for (const user of user_list) {
+      list.push({
+        label: user.user_name,
+        value: user.user_id.toString(),
+        key: index,
+      });
+      index++;
+    }
+
+    setUserSelValues(list);
+
+    // get post value by id
+    getCommentByIdRequest(match.params.id)
+      .then((res) => {
+        // console.log(res);
+        setComment(res);
+        // set user (value of select element);
+        for (const selValue of list) {
+          if (selValue.value === res.user_id.toString()) {
             setUser(selValue);
-            setGuest(commentRes.data.isGuest);
-            setActive(commentRes.data.active === 1);
           }
         }
+
+        // set  guest
+        setGuest(res.isGuest);
+        // set active
+        setActive(res.active === 1);
+
+        // set Target Time
+        // if (!!res.target_date) {
+        //     setTimeAdded(true);
+        //     const time = transformTime(res.target_date);
+        //     setTargetTime(new Date(time));
+        // }
+      })
+      .catch((err) => {
+        console.error(err);
+        NotificationManager.error('Something went wrong', 'Fetch Post');
       });
 
     return () => {
       return true;
     };
-  }, [match]);
+  }, [match, user_list]);
 
-  const onUpdateComment = async (values) => {
+  const onUpdatePost = async (values) => {
     // copy post
     const params = {};
     for (const key in comment) {
@@ -83,17 +105,17 @@ const EditCommentPage = ({ history, match, loadAllPostsAction }) => {
     params.active = active === true ? 1 : 0;
     params.user_id = Number(user.value);
 
-    // console.log(params); return ;
+    // console.log(params);
 
     setLoading(true);
 
-    const res = await api.r_updateCommentRequest(params);
+    const res = await updateCommentRequest(params);
 
     setLoading(false);
 
     if (res.status === true) {
       NotificationManager.success(res.message, 'Update Comment');
-      // loadAllPostsAction();
+      loadAllPostsAction();
       history.push('/app/comment');
     } else {
       NotificationManager.error(res.message, 'Update Comment');
@@ -131,7 +153,7 @@ const EditCommentPage = ({ history, match, loadAllPostsAction }) => {
           </h3>
         </Colxx>
 
-        <Formik initialValues={initialValues} onSubmit={onUpdateComment}>
+        <Formik initialValues={initialValues} onSubmit={onUpdatePost}>
           {({ errors, touched, values }) => (
             <Form
               className="av-tooltip tooltip-label-bottom mx-auto px-2"
@@ -224,8 +246,9 @@ const EditCommentPage = ({ history, match, loadAllPostsAction }) => {
   );
 };
 
-const mapStateToProps = (state) => {
-  return {  };
+const mapStateToProps = ({ posts: postApp, users: userApp }) => {
+  const { list: user_list } = userApp;
+  return { user_list };
 };
 
 export default connect(mapStateToProps, {

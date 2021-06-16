@@ -9,7 +9,6 @@ import { NotificationManager } from '../../components/common/react-notifications
 import { login, updateLogin } from '../../redux/actions';
 import { Colxx } from '../../components/common/CustomBootstrap';
 import IntlMessages from '../../helpers/IntlMessages';
-import { anonymousLogin } from '../../utils';
 
 const validatePassword = (value) => {
   let error;
@@ -46,7 +45,7 @@ const Login = ({
 
   useEffect(() => {
     if (!login && !!message) {
-      NotificationManager.warning(message, 'Login Error', 3000, null, null, '');
+      // NotificationManager.warning(message, 'Login Error', 3000, null, null, '');
     } else if (login && !!message) {
       NotificationManager.success(
         message,
@@ -57,13 +56,7 @@ const Login = ({
         ''
       );
     }
-    anonymousLogin().then(resp => {
-      // console.log('[Firebase login] success', resp);
-    })
-    .catch(error => {
-      console.log('[Firebase login] Error', error);
-    })
-    updateLoginAction({ status: login, message: '' });
+
     if (login) {
       history.push('/app');
     }
