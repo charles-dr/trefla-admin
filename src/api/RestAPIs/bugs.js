@@ -1,9 +1,9 @@
 import { nodeInstance as axios } from '../instance';
 
-export const r_loadBugRequest = async ({ page, limit }) => {
+export const r_loadBugRequest = async ({ page, limit, sort }) => {
   try {
     const { data: res } = await axios.get('/api/v1/bug', {
-      params: { page, limit }
+      params: { page, limit, sort },
     });
     return res;
   } catch (e) {

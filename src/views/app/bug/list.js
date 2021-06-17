@@ -112,6 +112,7 @@ const CommentList = ({
 			Header: 'Actions',
 			accessor: 'action',
 			cellClass: 'text-muted  w-15',
+      canSort: false,
 			Cell: (props) => (
 				<>
 					<div className="tbl-actions">
@@ -143,8 +144,8 @@ const CommentList = ({
 		},
 	];
 
-  const loadData = ({ limit, page }) => {
-    return api.r_loadBugRequest({ page, limit })
+  const loadData = ({ limit, page, sortBy, sortDir }) => {
+    return api.r_loadBugRequest({ page, limit, sort: { col: sortBy, desc: sortDir } })
       .then(res => {
         const { data, pager, status, message } = res;
         if (status) {
@@ -263,6 +264,7 @@ const CommentList = ({
             cols={cols}
             loadData={loadData}
             refresh={refreshTable}
+            defaultSortBy='create_time'
            />
 				</Colxx>
 			</Row>

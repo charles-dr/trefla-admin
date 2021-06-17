@@ -100,6 +100,7 @@ const CommentList = ({
 			Header: 'Actions',
 			accessor: 'action',
 			cellClass: 'text-muted  w-15',
+      canSort: false,
 			Cell: (props) => (
 				<>
 					<div className="tbl-actions">
