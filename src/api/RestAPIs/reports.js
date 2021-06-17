@@ -1,9 +1,9 @@
 import { nodeInstance as axios } from '../instance';
 
-export const r_loadReportRequest = async ({ page, limit }) => {
+export const r_loadReportRequest = async ({ page, limit, sort }) => {
   try {
     const { data: res } = await axios.get('/api/v1/report', {
-      params: { page, limit }
+      params: { page, limit, sort },
     });
     return res;
   } catch (e) {

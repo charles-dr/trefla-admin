@@ -121,8 +121,8 @@ const CommentList = ({
 		},
 	];
 
-  const loadData = ({ limit, page }) => {
-    return api.r_loadReportRequest({ page, limit })
+  const loadData = ({ limit, page, sortBy, sortDir }) => {
+    return api.r_loadReportRequest({ page, limit, sort: { col: sortBy, desc: sortDir } })
       .then(res => {
         const { data, pager, status, message } = res;
         if (status) {
@@ -137,7 +137,7 @@ const CommentList = ({
             pager,
           };
         } else {
-          NotificationManager.error(message, 'Post');
+          NotificationManager.error(message, 'Report');
         }
       });
   }
@@ -225,6 +225,7 @@ const CommentList = ({
             cols={cols}
             loadData={loadData}
             refresh={refreshTable}
+            defaultSortBy='time'
            />
 				</Colxx>
 			</Row>
