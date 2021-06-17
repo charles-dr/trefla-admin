@@ -13,7 +13,7 @@ import DatatablePagination from '../../components/DatatablePagination';
 
 import products from '../../data/products';
 
-function Table({ columns, data, divided = false, defaultPageSize = 10, pageCount: controlledPageCount = 10, fetchData, defaultSortBy }) {
+function Table({ columns, data, divided = false, defaultPageSize = 10, pageCount: controlledPageCount = 10, fetchData, defaultSortBy, extra }) {
   const [sortCol, setSortCol] = React.useState(columns.map((col) => col.accessor).indexOf(defaultSortBy));
   const [sortDesc, setSortDesc] = React.useState(true);
 
@@ -46,7 +46,7 @@ function Table({ columns, data, divided = false, defaultPageSize = 10, pageCount
   );
 
   React.useEffect(() => {
-    fetchData({ pageIndex, pageSize, sortBy: sortCol, sortDir: sortDesc });
+    fetchData({ pageIndex, pageSize, sortBy: sortCol, sortDir: sortDesc, extra });
     // eslint-disable-next-line
   }, [fetchData, pageIndex, pageSize])
 
@@ -59,7 +59,7 @@ function Table({ columns, data, divided = false, defaultPageSize = 10, pageCount
       setSortCol(columnIndex);
     }
     setSortDesc(newSortDesc);
-    fetchData({ pageIndex, pageSize, sortBy: columnIndex, sortDir: newSortDesc });
+    fetchData({ pageIndex, pageSize, sortBy: columnIndex, sortDir: newSortDesc, extra });
   }
 
   return (
@@ -134,20 +134,21 @@ function Table({ columns, data, divided = false, defaultPageSize = 10, pageCount
   );
 }
 
-export const ReactTableWithPaginationCard = ({ cols, loadData, refresh, defaultSortBy }, ref) => {
+export const ReactTableWithPaginationCard = ({ cols, loadData, refresh, defaultSortBy, extra }, ref) => {
   const defaultSortIndex = cols.map((col) => col.accessor).indexOf(defaultSortBy);
   const [data, setData] = React.useState([]);
   // const [lastId, setLastId] = React.useState(null);
+  const [extraInfo] = React.useState(extra);
   const [pageCount, setPageCount] = React.useState(0);
   const [pager, setPager] = React.useState({ limit: 10, page: 0, sortBy: defaultSortIndex, sortDir: true });
 
   React.useEffect(() => {
-    if (refresh > 0) fetchData({ ...pager, pageSize: pager.limit, pageIndex: pager.page });
+    if (refresh > 0) fetchData({ ...pager, pageSize: pager.limit, pageIndex: pager.page, extra });
     // eslint-disable-next-line
   }, [refresh]);
 
-  const fetchData = React.useCallback(async ({ pageSize, pageIndex: pIdx, sortDir, sortBy }) => {
-    return loadData({ page: pIdx, limit: pageSize, sortBy, sortDir })
+  const fetchData = React.useCallback(async ({ pageSize, pageIndex: pIdx, sortDir, sortBy, extra: extraInfo }) => {
+    return loadData({ page: pIdx, limit: pageSize, sortBy, sortDir, ...extraInfo })
       .then(({ list, pager }) => {
         setPageCount(Math.ceil(pager.total / pager.limit));
         setData(list);
@@ -170,6 +171,7 @@ export const ReactTableWithPaginationCard = ({ cols, loadData, refresh, defaultS
           fetchData={fetchData}
           pageCount={pageCount}
           defaultSortBy={defaultSortBy}
+          extra={extra}
           />
       </CardBody>
     </Card>

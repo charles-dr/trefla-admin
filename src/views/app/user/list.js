@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import {
   Badge,
   Button,
+  FormGroup,
   Label,
   Modal,
   ModalHeader,
@@ -18,6 +19,8 @@ import {
   AvInput,
   AvFeedback,
 } from 'availity-reactstrap-validation';
+import Select from 'react-select';
+import { Formik, Form, Field } from 'formik';
 
 import IntlMessages from '../../../helpers/IntlMessages';
 import { NotificationManager } from '../../../components/common/react-notifications';
@@ -25,7 +28,7 @@ import { Colxx, Separator } from '../../../components/common/CustomBootstrap';
 import Breadcrumb from '../../../containers/navs/Breadcrumb';
 import { ReactTableWithPaginationCard } from '../../../containers/ui/ReactTableCards';
 
-import { ru_toggleBanStatus, menuPermission } from '../../../utils';
+import { transformTime, ru_toggleBanStatus, menuPermission } from '../../../utils';
 import { loadAllUsers } from '../../../redux/actions';
 import * as api from '../../../api';
 
@@ -41,6 +44,7 @@ const UserList = ({
   const [refreshTable, setRefreshTable] = useState(0);
 
   const [loading, setLoading] = useState(false);
+  const [keyword, setKeyword] = useState('');
   const [delId, setDeleteId] = useState(-1);
   const [modalDetails, setModalDetails] = useState(false);
   const [modalOptions, setModalOptions] = useState({
@@ -134,6 +138,12 @@ const UserList = ({
       Cell: (props) => <>{formatCoordinate(props.value)}</>,
     },
     {
+      Header: 'Created At',
+      accessor: 'create_time',
+      cellClass: 'text-muted  w-20',
+      Cell: (props) => <>{new Date(props.value * 1000).toLocaleString()}</>,
+    },
+    {
       Header: 'Active',
       accessor: 'active',
       cellClass: 'text-muted  w-5',
@@ -153,6 +163,7 @@ const UserList = ({
       Header: 'Actions',
       accessor: 'action',
       cellClass: 'text-muted  w-10',
+      canSort: false,
       Cell: (props) => (
         <>
           <div className="tbl-actions">
@@ -184,8 +195,9 @@ const UserList = ({
     },
   ];
 
-  const loadData = ({ limit, page }) => {
-    return api.r_loadUserRequest({ page, limit, type: 'ALL' })
+  const loadData = React.useCallback(({ limit, page, sortBy, sortDir, ...extra }) => {
+    console.log('[Keyword]', keyword, extra)
+    return api.r_loadUserRequest({ page, limit, type: 'ALL', sort: { col: sortBy, desc: sortDir }, keyword: extra.keyword })
       .then(res => {
         const { data, pager, status } = res;
         if (status) {
@@ -208,7 +220,7 @@ const UserList = ({
 
         }
       });
-  }
+  })
 
   const getUserAvatarUrl = ({ photo, sex, avatarIndex }) => {
     sex = sex.toString();
@@ -325,6 +337,11 @@ const UserList = ({
     });
   };
 
+  const onSearch = (st) => {
+    console.log('[search now]', keyword);
+    reloadTableContent();
+  }
+
   return (
     <>
       <Row>
@@ -347,12 +364,40 @@ const UserList = ({
             <IntlMessages id="actions.add" />
           </Button>{' '}
         </Colxx>
+      </Row>
 
+      <Row>
+        <Colxx xxs={12}>
+        <Formik initialValues={{}} onSubmit={onSearch}>
+          {({ errors, touched }) => (
+            <Form
+              className="av-tooltip tooltip-label-bottom"
+              style={{ maxWidth: 480, width: '100%' }}
+            >
+              <FormGroup className="form-group">
+                <Field
+                  className="form-control"
+                  type="text"
+                  name="keyword"
+                  placeholder='Search by user name or email'
+                  value={keyword}
+                  onChange={(event) => setKeyword(event.target.value)}
+                />
+              </FormGroup>
+            </Form>
+          )}
+          </Formik>
+        </Colxx>
+      </Row>
+
+      <Row>
         <Colxx xxs="12">
           <ReactTableWithPaginationCard 
             cols={cols} 
             loadData={loadData}
             refresh={refreshTable}
+            defaultSortBy="create_time"
+            extra={{keyword: keyword}}
             />
         </Colxx>
       </Row>
