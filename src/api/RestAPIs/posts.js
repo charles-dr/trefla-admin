@@ -9,10 +9,10 @@ export const r_createPostRequest = async (data) => {
   }
 }
 
-export const r_loadPostRequest = async ({ page, limit, type = 'ALL' }) => {
+export const r_loadPostRequest = async ({ page, limit, type = 'ALL', sort }) => {
   try {
     const { data: res } = await axios.get('/api/v1/post', {
-      params: { page, limit, type }
+      params: { page, limit, type, sort }
     });
     return res;
   } catch (e) {

@@ -108,6 +108,7 @@ const PostList = ({ match, history, posts, users, permission, role }) => {
       Header: 'Actions',
       accessor: 'id',
       cellClass: 'text-muted  w-20',
+      canSort: false,
       Cell: (props) => (
         <>
           <div className="tbl-actions">
@@ -129,8 +130,8 @@ const PostList = ({ match, history, posts, users, permission, role }) => {
     },
   ];
 
-  const loadData = ({ limit, page }) => {
-    return api.r_loadPostRequest({ page, limit, type: 'ALL' })
+  const loadData = ({ limit, page, sortBy, sortDir }) => {
+    return api.r_loadPostRequest({ page, limit, type: 'ALL', sort: { col: sortBy, desc: sortDir } })
       .then(res => {
         const { data, pager, status, message } = res;
         if (status) {
@@ -234,6 +235,7 @@ const PostList = ({ match, history, posts, users, permission, role }) => {
             cols={cols} 
             loadData={loadData}
             refresh={refreshTable}
+            defaultSortBy="post_time"
             />
         </Colxx>
       </Row>
