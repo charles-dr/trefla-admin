@@ -83,6 +83,7 @@ const CommentList = ({ match, users, posts, permission, role, history, loadAllCo
       Header: 'Actions',
       accessor: 'id',
       cellClass: 'text-muted  w-15',
+      canSort: false,
       Cell: (props) => (
         <>
           <div className="tbl-actions">
@@ -107,8 +108,8 @@ const CommentList = ({ match, users, posts, permission, role, history, loadAllCo
     },
   ];
 
-  const loadData = ({ limit, page }) => {
-    return api.r_loadCommentRequest({ page, limit, type: 'ALL' })
+  const loadData = ({ limit, page, sortBy, sortDir }) => {
+    return api.r_loadCommentRequest({ page, limit, type: 'ALL', sort: { col: sortBy, desc: sortDir } })
       .then(res => {
         const { data, pager, status, message } = res;
         if (status) {
@@ -231,6 +232,7 @@ const CommentList = ({ match, users, posts, permission, role, history, loadAllCo
             cols={cols}
             loadData={loadData}
             refresh={refreshTable}
+            defaultSortBy='time'
           />
         </Colxx>
       </Row>

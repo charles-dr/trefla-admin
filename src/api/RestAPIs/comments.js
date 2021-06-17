@@ -1,9 +1,9 @@
 import { nodeInstance as axios } from '../instance';
 
-export const r_loadCommentRequest = async ({ page, limit, type = 'ALL' }) => {
+export const r_loadCommentRequest = async ({ page, limit, type = 'ALL', sort = {} }) => {
   try {
     const { data: res } = await axios.get('/api/v1/comment', {
-      params: { page, limit, type }
+      params: { page, limit, type, sort },
     });
     return res;
   } catch (e) {
