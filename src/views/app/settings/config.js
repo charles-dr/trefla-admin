@@ -251,6 +251,26 @@ const ConfigPage = ({
                 </Colxx>
               </Row>
 
+              <Row>
+                <Colxx xxs="12" md="6">
+                  <FormGroup className="form-group">
+                    <Label>Default Around Radius</Label>
+                    <Field
+                      className="form-control"
+                      type="text"
+                      name="defaultAroundRadius"
+                      value={config.defaultAroundRadius || 1000}
+                      onChange={handleOnChange}
+                    />
+                    {errors.defaultAroundRadius && touched.defaultAroundRadius && (
+                      <div className="invalid-feedback d-block">
+                        {errors.defaultAroundRadius}
+                      </div>
+                    )}
+                  </FormGroup>
+                </Colxx>
+              </Row>
+
               <div className="d-flex justify-content-end align-items-center">
                 <Button
                   type="submit"

@@ -19,7 +19,6 @@ import {
   AvInput,
   AvFeedback,
 } from 'availity-reactstrap-validation';
-import Select from 'react-select';
 import { Formik, Form, Field } from 'formik';
 
 import IntlMessages from '../../../helpers/IntlMessages';
@@ -28,7 +27,7 @@ import { Colxx, Separator } from '../../../components/common/CustomBootstrap';
 import Breadcrumb from '../../../containers/navs/Breadcrumb';
 import { ReactTableWithPaginationCard } from '../../../containers/ui/ReactTableCards';
 
-import { transformTime, ru_toggleBanStatus, menuPermission } from '../../../utils';
+import { ru_toggleBanStatus, menuPermission } from '../../../utils';
 import { loadAllUsers } from '../../../redux/actions';
 import * as api from '../../../api';
 
@@ -220,7 +219,8 @@ const UserList = ({
 
         }
       });
-  })
+    // eslint-disable-next-line
+  }, [])
 
   const getUserAvatarUrl = ({ photo, sex, avatarIndex }) => {
     sex = sex.toString();

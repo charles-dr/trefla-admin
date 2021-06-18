@@ -137,8 +137,8 @@ function Table({ columns, data, divided = false, defaultPageSize = 10, pageCount
 export const ReactTableWithPaginationCard = ({ cols, loadData, refresh, defaultSortBy, extra }, ref) => {
   const defaultSortIndex = cols.map((col) => col.accessor).indexOf(defaultSortBy);
   const [data, setData] = React.useState([]);
-  // const [lastId, setLastId] = React.useState(null);
-  const [extraInfo] = React.useState(extra);
+  // // const [lastId, setLastId] = React.useState(null);
+  // const [extraInfo] = React.useState(extra);
   const [pageCount, setPageCount] = React.useState(0);
   const [pager, setPager] = React.useState({ limit: 10, page: 0, sortBy: defaultSortIndex, sortDir: true });
 
