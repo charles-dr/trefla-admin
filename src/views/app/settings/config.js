@@ -23,6 +23,8 @@ const initConfig = {
   android_link: '',
   apple_version: '',
   apple_link: '',
+  defaultAroundRadius: 0,
+  defaultUserRadiusAround: 0,
 };
 
 const ConfigPage = ({
@@ -92,11 +94,11 @@ const ConfigPage = ({
       </Row>
 
       <Row>
-        <Colxx xxs="12">
+        {/* <Colxx xxs="12">
           <h3 className="mb-4">
             <IntlMessages id="pages.config" />
           </h3>
-        </Colxx>
+        </Colxx> */}
 
         <Formik initialValues={initialValues} onSubmit={onUpdateConfig}>
           {({ errors, touched }) => (
@@ -104,6 +106,7 @@ const ConfigPage = ({
               className="av-tooltip tooltip-label-bottom mx-auto"
               style={{ maxWidth: 1024, width: '100%' }}
             >
+              <h3 className="mb-4">Versions</h3>
               <Row>
                 <Colxx xxs="12" md="6">
                   <FormGroup className="form-group">
@@ -125,58 +128,8 @@ const ConfigPage = ({
                     )}
                   </FormGroup>
                 </Colxx>
-                <Colxx xxs="12" md="6">
-                  <FormGroup className="form-group">
-                    <Label>
-                      Admin Email(Notification)
-                    </Label>
-                    <Field
-                      className="form-control"
-                      type="email"
-                      name="admin_email"
-                      value={config.admin_email}
-                      validate={validateLangVersion}
-                      onChange={handleOnChange}
-                    />
-                    {errors.admin_email && touched.admin_email && (
-                      <div className="invalid-feedback d-block">
-                        {errors.admin_email}
-                      </div>
-                    )}
-                  </FormGroup>
-                </Colxx>
               </Row>
-
-              <Row>
-                <Colxx xxs="12" md="6">
-                  <FormGroup className="form-group">
-                    <Label>
-                      Default Zone
-                    </Label>
-                    <Field
-                      className="form-control"
-                      type="text"
-                      name="default_zone"
-                      value={config.default_zone}
-                      onChange={handleOnChange}
-                    />
-                  </FormGroup>
-                </Colxx>
-
-                <Colxx xxs="12" md="6">
-                  <FormGroup className="form-group">
-                    <Label>
-                      Apply Default Zone
-                    </Label>
-                    <Switch
-                      className="custom-switch custom-switch-secondary"
-                      checked={config.apply_default_zone === 1}
-                      onChange={(st) => setConfig({ ...config, apply_default_zone: st === true ? 1 : 0 })}
-                    />
-                  </FormGroup>
-                </Colxx>
-              </Row>
-
+              
               <Row>
                 <Colxx xxs="12" md="6">
                   <FormGroup className="form-group">
@@ -251,6 +204,62 @@ const ConfigPage = ({
                 </Colxx>
               </Row>
 
+              <hr/>
+
+              <h3 className="mb-4">Default Settings</h3>
+              <Row>
+                <Colxx xxs="12" md="6">
+                  <FormGroup className="form-group">
+                    <Label>
+                      Admin Email(Notification)
+                    </Label>
+                    <Field
+                      className="form-control"
+                      type="email"
+                      name="admin_email"
+                      value={config.admin_email}
+                      validate={validateLangVersion}
+                      onChange={handleOnChange}
+                    />
+                    {errors.admin_email && touched.admin_email && (
+                      <div className="invalid-feedback d-block">
+                        {errors.admin_email}
+                      </div>
+                    )}
+                  </FormGroup>
+                </Colxx>
+              </Row>
+
+              <Row>
+                <Colxx xxs="12" md="6">
+                  <FormGroup className="form-group">
+                    <Label>
+                      Default Zone
+                    </Label>
+                    <Field
+                      className="form-control"
+                      type="text"
+                      name="default_zone"
+                      value={config.default_zone}
+                      onChange={handleOnChange}
+                    />
+                  </FormGroup>
+                </Colxx>
+
+                <Colxx xxs="12" md="6">
+                  <FormGroup className="form-group">
+                    <Label>
+                      Apply Default Zone
+                    </Label>
+                    <Switch
+                      className="custom-switch custom-switch-secondary"
+                      checked={config.apply_default_zone === 1}
+                      onChange={(st) => setConfig({ ...config, apply_default_zone: st === true ? 1 : 0 })}
+                    />
+                  </FormGroup>
+                </Colxx>
+              </Row>
+              
               <Row>
                 <Colxx xxs="12" md="6">
                   <FormGroup className="form-group">
@@ -265,6 +274,23 @@ const ConfigPage = ({
                     {errors.defaultAroundRadius && touched.defaultAroundRadius && (
                       <div className="invalid-feedback d-block">
                         {errors.defaultAroundRadius}
+                      </div>
+                    )}
+                  </FormGroup>
+                </Colxx>
+                <Colxx xxs="12" md="6">
+                  <FormGroup className="form-group">
+                    <Label>Default User Around Radius</Label>
+                    <Field
+                      className="form-control"
+                      type="text"
+                      name="defaultUserRadiusAround"
+                      value={config.defaultUserRadiusAround || 1000}
+                      onChange={handleOnChange}
+                    />
+                    {errors.defaultUserRadiusAround && touched.defaultUserRadiusAround && (
+                      <div className="invalid-feedback d-block">
+                        {errors.defaultUserRadiusAround}
                       </div>
                     )}
                   </FormGroup>
