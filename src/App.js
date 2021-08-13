@@ -1,8 +1,8 @@
 import React, { Suspense } from 'react';
 import { connect } from 'react-redux';
 import {
-  // BrowserRouter as Router,
-  HashRouter as Router,
+  BrowserRouter as Router,
+  // HashRouter as Router,
   Route,
   Switch,
   Redirect,

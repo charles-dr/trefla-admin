@@ -31,6 +31,7 @@ function* loginRequest(action) {
     saveAuthToken(res.token);
   } else {
     deleteAuthToken();
+    NotificationManager.error(res.message, 'Authentication');
   }
 
   yield put({ type: AUTH_LOGIN_SUCCESS, payload: res });
@@ -69,7 +70,7 @@ function* checkLogin(action) {
       payload: { status: false, message: e.message },
     });
     deleteAuthToken();
-    window.location.href = '#auth';
+    window.location.href = 'auth';
   }
 }
 

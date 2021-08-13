@@ -23,6 +23,7 @@ const initConfig = {
   android_link: '',
   apple_version: '',
   apple_link: '',
+  enable_top_music: 0,
   defaultAroundRadius: 0,
   defaultUserRadiusAround: 0,
 };
@@ -294,6 +295,21 @@ const ConfigPage = ({
                       </div>
                     )}
                   </FormGroup>
+                </Colxx>
+              </Row>
+
+              <Row>
+                <Colxx xxs="12" md="6">
+                  <FormGroup className="form-group">
+                      <Label>
+                        Enable Top Music
+                      </Label>
+                      <Switch
+                        className="custom-switch custom-switch-secondary"
+                        checked={config.enable_top_music === 1}
+                        onChange={(st) => setConfig({ ...config, enable_top_music: st === true ? 1 : 0 })}
+                      />
+                    </FormGroup>
                 </Colxx>
               </Row>
 
