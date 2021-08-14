@@ -332,7 +332,7 @@ const NationalIDList = ({
     <>
       <Row>
         <Colxx xxs="12">
-          <Breadcrumb heading="menu.national-ids" match={match} />
+          <Breadcrumb heading="menu.driver-ids" match={match} />
           <Separator className="mb-5" />
         </Colxx>
       </Row>
@@ -340,7 +340,7 @@ const NationalIDList = ({
       <Row>
         <Colxx xxs="12">
           <h3 className="mb-4">
-            <IntlMessages id="pages.national-ids" />
+            <IntlMessages id="pages.driver-ids" />
           </h3>
         </Colxx>
 

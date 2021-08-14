@@ -4,9 +4,9 @@ import { Redirect, Route, Switch } from 'react-router-dom';
 const UserAdd = React.lazy(() => import('./add'));
 const UserEdit = React.lazy(() => import('./edit'));
 const UserList = React.lazy(() => import('./list'));
-const NationalIDList = React.lazy(() => import('./national-ids'));
+const DriverIDList = React.lazy(() => import('./driver-ids'));
 const IDChangeList = React.lazy(() => import('./id-changes'));
-const IDTransfer = React.lazy(() => import('./id-transfer'));
+const DriverIDTransfer = React.lazy(() => import('./driver-id-transfer'));
 
 const UserModule = ({ match }) => (
   <Suspense fallback={<div className="loading" />}>
@@ -26,8 +26,8 @@ const UserModule = ({ match }) => (
       />
 
       <Route
-        path={`${match.url}/national-ids`}
-        render={(props) => <NationalIDList {...props} />}
+        path={`${match.url}/driver-ids`}
+        render={(props) => <DriverIDList {...props} />}
       />
       
       <Route
@@ -36,8 +36,8 @@ const UserModule = ({ match }) => (
       />
 
       <Route
-        path={`${match.url}/id-transfer`}
-        render={(props) => <IDTransfer {...props} /> }
+        path={`${match.url}/driver-id-transfer`}
+        render={(props) => <DriverIDTransfer {...props} /> }
       />
       <Redirect to="/error" />
     </Switch>

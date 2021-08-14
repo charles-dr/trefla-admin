@@ -353,7 +353,7 @@ const IDTransferList = ({
       />
       <Row>
         <Colxx xxs="12">
-          <Breadcrumb heading="menu.id-transfer" match={match} />
+          <Breadcrumb heading="menu.driver-id-transfer" match={match} />
           <Separator className="mb-5" />
         </Colxx>
       </Row>
@@ -361,7 +361,7 @@ const IDTransferList = ({
       <Row>
         <Colxx xxs="12">
           <h3 className="mb-4">
-            <IntlMessages id="pages.id-transfer" />
+            <IntlMessages id="pages.driver-id-transfer" />
           </h3>
         </Colxx>
 
