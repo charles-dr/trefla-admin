@@ -7,6 +7,7 @@ const UserList = React.lazy(() => import('./list'));
 const DriverIDList = React.lazy(() => import('./driver-ids'));
 const IDChangeList = React.lazy(() => import('./id-changes'));
 const DriverIDTransfer = React.lazy(() => import('./driver-id-transfer'));
+const NationalIDList = React.lazy(() => import('./national-ids'));
 
 const UserModule = ({ match }) => (
   <Suspense fallback={<div className="loading" />}>
@@ -39,6 +40,12 @@ const UserModule = ({ match }) => (
         path={`${match.url}/driver-id-transfer`}
         render={(props) => <DriverIDTransfer {...props} /> }
       />
+
+      <Route
+        path={`${match.url}/national-ids`}
+        render={(props) => <NationalIDList {...props} />}
+      />
+
       <Redirect to="/error" />
     </Switch>
   </Suspense>

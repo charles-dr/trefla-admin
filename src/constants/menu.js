@@ -31,15 +31,10 @@ const data = [
         subs: [
           {
             icon: 'iconsminds-id-card',
-            label: 'menu.driver-ids',
+            label: 'menu.driver-id-list',
             to: '/app/user/driver-ids',
             permission: 'user.nationalId.show'
           },
-          // {
-          //   icon: 'iconsminds-quill-3',
-          //   label: 'menu.id-changes',
-          //   to: '/app/user/id-changes',
-          // },
           {
             icon: 'iconsminds-left---right',
             label: 'menu.id-transfer',
@@ -47,7 +42,21 @@ const data = [
             permission: 'user.idTransfer.show'
           }
         ],
-      },{
+      },
+      {
+        id: 'national-ids',
+        label: 'menu.national-id',
+        to: '/app/national-ids',
+        subs: [
+          {
+            icon: 'iconsminds-id-card',
+            label: 'menu.national-id-list',
+            to: '/app/user/national-ids',
+            permission: 'user.nationalId.show'
+          },
+        ],
+      },
+      {
         id: 'notification',
         label: 'menu.notification',
         to: '/app/notification',
