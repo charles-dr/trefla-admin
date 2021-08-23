@@ -11,3 +11,21 @@ export const r_loadIdentityRequest = async ({ page, limit, sort }) => {
     return e.response.data;
   }
 }
+
+export const r_verifyIdentityRequest = async ({ id }) => {
+  try {
+    const { data: res } = await axios.post(`/api/v1/admin/identities/${id}/verify`);
+    return res;
+  } catch (e) {
+    return e.response.data;
+  }
+}
+
+export const r_unverifyIdentityRequest = async ({ id }) => {
+  try {
+    const { data: res } = await axios.post(`/api/v1/admin/identities/${id}/unverify`);
+    return res;
+  } catch (e) {
+    return e.response.data;
+  }
+}

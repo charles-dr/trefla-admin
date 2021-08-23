@@ -28,15 +28,6 @@ import { Colxx, Separator } from '../../../components/common/CustomBootstrap';
 import Breadcrumb from '../../../containers/navs/Breadcrumb';
 import { ReactTableWithPaginationCard } from '../../../containers/ui/ReactTableCards';
 
-// import {
-//   verifyUserByIdRequest
-// } from '../../../api/functions.api';
-// import {
-//   deleteUserById,
-//   // toggleBanStatus,
-//   updateUserProfile,
-// } from '../../../utils';
-// import { loadAllUsers } from '../../../redux/actions';
 import * as api from '../../../api';
 import { transformTime, menuPermission } from '../../../utils';
 
@@ -165,7 +156,7 @@ const NationalIDList = ({
                 className="iconsminds-security-check success"
                 title="Verify Now"
                 style={{ fontSize: 18 }}
-                onClick={() => verifyUserById(props.value.user_id)}
+                onClick={() => verifyIdentity(props.value.id)}
               />
             )}
             {(props.value.verified  && menuPermission({role, permission}, 'user.nationalId.verify')) && (
@@ -173,7 +164,7 @@ const NationalIDList = ({
                 className="iconsminds-security-bug danger"
                 title="Unverify Now"
                 style={{ fontSize: 18 }}
-                onClick={() => unverifyUserById(props.value.user_id)}
+                onClick={() => unverifyIdentity(props.value.id)}
               />
             )}
           </div>
@@ -200,8 +191,8 @@ const NationalIDList = ({
             list: data.map(user => ({
               ...user,
               action: {
-                user_id: user.id,
-                verified: user.card_verified === 1,
+                id: user.id,
+                verified: user.verified === 1,
               },
               verified: user.verified,
               user: {
@@ -223,20 +214,20 @@ const NationalIDList = ({
     history.push('/app/user/add');
   };
 
-  const verifyUserById = async (user_id) => {
-    setVerifyInfo({...verifyInfo, user_id: user_id, mode: 1}); // mode: target status
+  const verifyIdentity = async (id) => {
+    setVerifyInfo({...verifyInfo, id: id, mode: 1}); // mode: target status
     setVerifyModal(true);
   }
 
   const confirmVerification = async () => {
-    const user_id = verifyInfo.user_id;
+    const id = verifyInfo.id;
     try {
       setLoading(true);
-      const res = await api.r_verifyUserRequest({ id: user_id });
+      const res = await api.r_verifyIdentityRequest({ id: id });
       setLoading(false);
       setVerifyModal(false);
       if (res.status === true) {
-        NotificationManager.success('User has been verified!', 'Verification');
+        NotificationManager.success('User identity has been verified!', 'Verification');
         reloadTableContent();
       } else {
         NotificationManager.error(res.message, 'Verification');
@@ -246,21 +237,21 @@ const NationalIDList = ({
     }
   };
 
-  const unverifyUserById = (user_id) => {
-    setVerifyInfo({...verifyInfo, user_id: user_id, mode: 0});
+  const unverifyIdentity = (id) => {
+    setVerifyInfo({...verifyInfo, id: id, mode: 0});
     setVerifyModal(true);
   }
 
   const confirmUnverification = async () => {
-    const user_id = verifyInfo.user_id;
+    const id = verifyInfo.id;
     try {
       setLoading(true);
-      const res = await api.r_unverifyUserRequest({ id: user_id }); //updateUserProfile(profile);
+      const res = await api.r_unverifyIdentityRequest({ id }); //updateUserProfile(profile);
       setLoading(false);
       setVerifyModal(false);
 
       if (res.status === true) {
-        NotificationManager.success('User has been unverified', 'Verification');
+        NotificationManager.success('User identity has been unverified', 'Verification');
         reloadTableContent();
       } else {
         NotificationManager.error(res.message, 'Verification');
@@ -351,7 +342,7 @@ const NationalIDList = ({
         backdrop="static"
       >
         <ModalHeader>
-          {verifyInfo.mode === 1 ? 'Verify User' : 'Unverify User'}
+          {verifyInfo.mode === 1 ? 'Verify Identity' : 'Unverify Identity'}
         </ModalHeader>
         <ModalBody>
           <AvForm
@@ -362,7 +353,10 @@ const NationalIDList = ({
           >
 
           <label>
-            { verifyInfo.mode === 1 ? 'Are you sure to verify this user? Other accounts with same ID will be unverified!' : 'Are you sure to unverify this user?' }
+            { verifyInfo.mode === 1 ?
+                'Are you sure to verify this user? Other accounts with same ID will be unverified!' :
+                'Are you sure to unverify this user?' 
+            }
           </label>
 
             <Separator className="mb-5 mt-3" />
