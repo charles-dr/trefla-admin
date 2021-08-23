@@ -38,7 +38,7 @@ import { ReactTableWithPaginationCard } from '../../../containers/ui/ReactTableC
 // } from '../../../utils';
 // import { loadAllUsers } from '../../../redux/actions';
 import * as api from '../../../api';
-import { menuPermission } from '../../../utils';
+import { transformTime, menuPermission } from '../../../utils';
 
 const NationalIDList = ({
   match,
@@ -73,42 +73,41 @@ const NationalIDList = ({
       ),
     },
     {
-      Header: 'Image',
-      accessor: 'image',
+      Header: 'Face Image',
+      accessor: 'photo_person',
       cellClass: 'list-item-heading w-10',
       Cell: (props) => (
         <>
+          {!props.value && (
+            <Badge color="dark" pill className="mb-1">
+              No Image
+            </Badge>
+          )}
           <div className="text-center">
             <img
-              src={getUserAvatarUrl(props.value)}
+              src={props.value}
               style={{ width: 50, height: 50, borderRadius: '50%' }}
-              alt="User Profile"
+              alt="Face"
             />
           </div>
         </>
       ),
     },
     {
-      Header: 'Card Number',
-      accessor: 'card_number',
-      cellClass: 'text-muted  w-5',
-      Cell: (props) => <>{props.value}</>,
-    },
-    {
-      Header: 'Card Image',
-      accessor: 'card_img',
+      Header: 'ID Image',
+      accessor: 'photo_id',
       cellClass: 'text-muted  w-5',
       Cell: (props) => (
         <>
-          {!props.value.url && (
+          {!props.value && (
             <Badge color="dark" pill className="mb-1">
               No Image
             </Badge>
           )}
-          {props.value.url && (
+          {props.value && (
             <img
-              src={props.value.url}
-              alt="Card"
+              src={props.value}
+              alt="National ID"
               onClick={() => showCardImage(props.value.user_id)}
               style={{ width: 100, height: 'auto', cursor: 'pointer' }}
             />
@@ -116,22 +115,22 @@ const NationalIDList = ({
         </>
       ),
     },
-    {
-      Header: 'Active',
-      accessor: 'active',
-      cellClass: 'text-muted  w-5',
-      Cell: (props) => (
-        <>
-          <Badge
-            color={props.value === 0 ? 'success' : 'danger'}
-            pill
-            className="mb-1"
-          >
-            {props.value === 0 ? 'Active' : 'Disabled'}
-          </Badge>
-        </>
-      ),
-    },
+    // {
+    //   Header: 'Active',
+    //   accessor: 'active',
+    //   cellClass: 'text-muted  w-5',
+    //   Cell: (props) => (
+    //     <>
+    //       <Badge
+    //         color={props.value === 0 ? 'success' : 'danger'}
+    //         pill
+    //         className="mb-1"
+    //       >
+    //         {props.value === 0 ? 'Active' : 'Disabled'}
+    //       </Badge>
+    //     </>
+    //   ),
+    // },
     {
       Header: 'Verified',
       accessor: 'verified',
@@ -147,6 +146,12 @@ const NationalIDList = ({
           </Badge>
         </>
       ),
+    },
+    {
+      Header: 'Create Time',
+      accessor: 'create_time',
+      cellClass: 'text-muted w-10',
+      Cell: (props) => <>{new Date(props.value * 1000).toLocaleString()}</>,
     },
     {
       Header: 'Actions',
@@ -177,16 +182,15 @@ const NationalIDList = ({
     },
   ];
 
-  const loadData = ({ limit, page }) => {
-    return api.r_loadCardRequest({ page, limit })
+  const loadData = React.useCallback(({ limit, page, sortBy, sortDir, ...extra }) => {
+    console.log('[Sort]', sortBy, sortDir, extra);
+    return api.r_loadIdentityRequest({ page, limit, sort: { col: sortBy, desc: sortDir }, ...extra })
       .then(res => {
         const { data, pager, status } = res;
         if (status) {
-
-          // const usersWithImg = data.filter(user => user.card_img_url);
-          const imgObjects = data.filter(user => user.card_img_url).map(user => ({
-            src: user.card_img_url,
-            srcSet: [user.card_img_url],
+          const imgObjects = data.filter(user => user.photo_id).map(user => ({
+            src: user.photo_id,
+            srcSet: [user.photo_id],
             alt: user.id,
             caption: user.user_name,
           }));
@@ -195,21 +199,11 @@ const NationalIDList = ({
           return {
             list: data.map(user => ({
               ...user,
-              image: {
-                photo: user.photo,
-                sex: user.sex,
-                avatarIndex: user.avatarIndex,
-              },
-              card_img: {
-                url: user.card_img_url,
-                user_id: user.id,
-              },
               action: {
                 user_id: user.id,
-                active: user.active,
                 verified: user.card_verified === 1,
               },
-              verified: user.card_verified,
+              verified: user.verified,
               user: {
                 id: user.id,
                 name: user.user_name,
@@ -217,27 +211,13 @@ const NationalIDList = ({
             })),
             pager,
           };
-        } else {
-
         }
       });
-  }
+  }, []);
 
   const reloadTableContent = () => {
     setRefreshTable(refreshTable + 1);
   }
-
-  const getUserAvatarUrl = ({ photo, sex, avatarIndex }) => {
-    if (photo) {
-      return photo;
-    }
-    if (avatarIndex !== undefined && avatarIndex !== '') {
-      return `/assets/avatar/${
-        sex === '1' ? 'girl' : 'boy'
-      }/${avatarIndex}.png`;
-    }
-    return `/assets/avatar/avatar_${sex === '1' ? 'girl2' : 'boy1'}.png`;
-  };
 
   const openAddModal = () => {
     history.push('/app/user/add');
@@ -332,7 +312,7 @@ const NationalIDList = ({
     <>
       <Row>
         <Colxx xxs="12">
-          <Breadcrumb heading="menu.driver-ids" match={match} />
+          <Breadcrumb heading="menu.national-ids" match={match} />
           <Separator className="mb-5" />
         </Colxx>
       </Row>
@@ -340,22 +320,16 @@ const NationalIDList = ({
       <Row>
         <Colxx xxs="12">
           <h3 className="mb-4">
-            <IntlMessages id="pages.driver-ids" />
+            <IntlMessages id="pages.national-ids" />
           </h3>
-        </Colxx>
-
-        <Colxx className="d-flex justify-content-end" xxs={12}>
-          <Button color="primary" className="mb-2" onClick={openAddModal}>
-            <i className="simple-icon-plus mr-1" />
-            <IntlMessages id="actions.add" />
-          </Button>{' '}
         </Colxx>
 
         <Colxx xxs="12">
           <ReactTableWithPaginationCard 
             cols={cols}
             loadData={loadData}
-            refresh={refreshTable} 
+            refresh={refreshTable}
+            defaultSortBy='create_time'
           />
         </Colxx>
       </Row>
