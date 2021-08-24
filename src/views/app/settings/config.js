@@ -26,6 +26,8 @@ const initConfig = {
   enable_top_music: 0,
   defaultAroundRadius: 0,
   defaultUserRadiusAround: 0,
+  post_point: 2,
+  comment_point: 1,
 };
 
 const ConfigPage = ({
@@ -207,7 +209,49 @@ const ConfigPage = ({
 
               <hr/>
 
-              <h3 className="mb-4">Default Settings</h3>
+              <h3 className="my-4">Point Settings</h3>
+              <Row>
+                <Colxx xxs="12" md="6">
+                  <FormGroup className="form-group">
+                    <Label>
+                      Point For a Post
+                    </Label>
+                    <Field
+                      className="form-control"
+                      type="number"
+                      name="post_point"
+                      value={config.post_point}
+                      onChange={handleOnChange}
+                    />
+                    {errors.post_point && touched.post_point && (
+                      <div className="invalid-feedback d-block">
+                        {errors.post_point}
+                      </div>
+                    )}
+                  </FormGroup>
+                </Colxx>
+                <Colxx xxs="12" md="6">
+                  <FormGroup className="form-group">
+                    <Label>
+                      Point For a Comment
+                    </Label>
+                    <Field
+                      className="form-control"
+                      type="number"
+                      name="comment_point"
+                      value={config.comment_point}
+                      onChange={handleOnChange}
+                    />
+                    {errors.comment_point && touched.comment_point && (
+                      <div className="invalid-feedback d-block">
+                        {errors.comment_point}
+                      </div>
+                    )}
+                  </FormGroup>
+                </Colxx>
+              </Row>
+
+              <h3 className="my-4">Default Settings</h3>
               <Row>
                 <Colxx xxs="12" md="6">
                   <FormGroup className="form-group">

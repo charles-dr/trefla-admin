@@ -29,7 +29,7 @@ import Breadcrumb from '../../../containers/navs/Breadcrumb';
 import { ReactTableWithPaginationCard } from '../../../containers/ui/ReactTableCards';
 
 import * as api from '../../../api';
-import { transformTime, menuPermission } from '../../../utils';
+import { menuPermission } from '../../../utils';
 
 const NationalIDList = ({
   match,
@@ -209,10 +209,6 @@ const NationalIDList = ({
   const reloadTableContent = () => {
     setRefreshTable(refreshTable + 1);
   }
-
-  const openAddModal = () => {
-    history.push('/app/user/add');
-  };
 
   const verifyIdentity = async (id) => {
     setVerifyInfo({...verifyInfo, id: id, mode: 1}); // mode: target status
