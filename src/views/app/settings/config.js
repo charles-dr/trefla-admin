@@ -27,7 +27,9 @@ const initConfig = {
   defaultAroundRadius: 0,
   defaultUserRadiusAround: 0,
   post_point: 2,
+  daily_post_limit: 1,
   comment_point: 1,
+  daily_comment_limit: 1,
 };
 
 const ConfigPage = ({
@@ -233,6 +235,25 @@ const ConfigPage = ({
                 <Colxx xxs="12" md="6">
                   <FormGroup className="form-group">
                     <Label>
+                      Daily Post Limit
+                    </Label>
+                    <Field
+                      className="form-control"
+                      type="number"
+                      name="daily_post_limit"
+                      value={config.daily_post_limit}
+                      onChange={handleOnChange}
+                    />
+                    {errors.daily_post_limit && touched.daily_post_limit && (
+                      <div className="invalid-feedback d-block">
+                        {errors.daily_post_limit}
+                      </div>
+                    )}
+                  </FormGroup>
+                </Colxx>
+                <Colxx xxs="12" md="6">
+                  <FormGroup className="form-group">
+                    <Label>
                       Point For a Comment
                     </Label>
                     <Field
@@ -245,6 +266,25 @@ const ConfigPage = ({
                     {errors.comment_point && touched.comment_point && (
                       <div className="invalid-feedback d-block">
                         {errors.comment_point}
+                      </div>
+                    )}
+                  </FormGroup>
+                </Colxx>
+                <Colxx xxs="12" md="6">
+                  <FormGroup className="form-group">
+                    <Label>
+                      Daily Comment Limit
+                    </Label>
+                    <Field
+                      className="form-control"
+                      type="number"
+                      name="daily_comment_limit"
+                      value={config.daily_comment_limit}
+                      onChange={handleOnChange}
+                    />
+                    {errors.daily_comment_limit && touched.daily_comment_limit && (
+                      <div className="invalid-feedback d-block">
+                        {errors.daily_comment_limit}
                       </div>
                     )}
                   </FormGroup>
