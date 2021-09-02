@@ -33,6 +33,7 @@ const UserModule = React.lazy(() => import('./user'));
 const DashboardPage = React.lazy(() => import('./dashboard'));
 const BugModule = React.lazy(() => import('./bug'));
 const AdminModule = React.lazy(() => import('./admins'));
+const IconPage = React.lazy(() => import('./icons'));
 
 const App = ({
   match,
@@ -123,6 +124,10 @@ const App = ({
             <Route
               path={`${match.url}/admin`}
               render={(props) => <AdminModule {...props} />}
+            />
+            <Route 
+              path={`${match.url}/icons`}
+              render={(props) => <IconPage {...props} />}
             />
             <Redirect to="/error" />
           </Switch>

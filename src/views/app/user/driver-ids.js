@@ -40,6 +40,22 @@ import { ReactTableWithPaginationCard } from '../../../containers/ui/ReactTableC
 import * as api from '../../../api';
 import { menuPermission } from '../../../utils';
 
+const modalHeader = [
+   'Unverify User',
+   'Verify User',
+   'Reject Verification Request',
+];
+const modalDescription = [
+  'Are you sure to unverify this user?',
+  'Are you sure to verify this user? Other accounts with same ID will be unverified!',
+  'Are you sure to reject this user?',
+];
+const modalButtonText = [
+  'Unverify',
+  'Verify',
+  'Reject',
+];
+
 const NationalIDList = ({
   match,
   history,
@@ -136,17 +152,28 @@ const NationalIDList = ({
       Header: 'Verified',
       accessor: 'verified',
       cellClass: 'text-muted  w-5',
-      Cell: (props) => (
+      Cell: (props) => {
+        const colors = [
+          'outline-primary',
+          'outline-success',
+          'outline-danger',
+        ];
+        const statuses = [
+          'Pending',
+          'Verified',
+          'Rejected',
+        ];
+        return (
         <>
           <Badge
-            color={props.value === 1 ? 'outline-success' : 'outline-danger'}
+            color={colors[props.value]}
             pill
             className="mb-1"
           >
-            {props.value === 1 ? 'Verified' : 'Unverified'}
+            {statuses[props.value]}
           </Badge>
         </>
-      ),
+      )},
     },
     {
       Header: 'Actions',
@@ -155,15 +182,26 @@ const NationalIDList = ({
       Cell: (props) => (
         <>
           <div className="tbl-actions">
-            {(!props.value.verified && menuPermission({role, permission}, 'user.nationalId.verify')) && (
+            {(props.value.verified !== 1 && menuPermission({role, permission}, 'user.nationalId.verify')) && (
+              <>
+              {
+                props.value.verified === 0 && 
+                (<i
+                  className="iconsminds-security-block warning"
+                  title="Reject Now"
+                  style={{ fontSize: 18 }}
+                  onClick={() => rejectUserById(props.value.user_id)}
+                />)
+              }
               <i
                 className="iconsminds-security-check success"
                 title="Verify Now"
                 style={{ fontSize: 18 }}
                 onClick={() => verifyUserById(props.value.user_id)}
               />
+              </>
             )}
-            {(props.value.verified  && menuPermission({role, permission}, 'user.nationalId.verify')) && (
+            {(props.value.verified === 1  && menuPermission({role, permission}, 'user.nationalId.verify')) && (
               <i
                 className="iconsminds-security-bug danger"
                 title="Unverify Now"
@@ -207,7 +245,7 @@ const NationalIDList = ({
               action: {
                 user_id: user.id,
                 active: user.active,
-                verified: user.card_verified === 1,
+                verified: user.card_verified,
               },
               verified: user.card_verified,
               user: {
@@ -290,9 +328,38 @@ const NationalIDList = ({
     }
   };
 
+  const rejectUserById = (user_id) => {
+    setVerifyInfo({ ...verifyInfo, user_id: user_id, mode: 2 });
+    setVerifyModal(true);
+  }
+
+  const confirmRejection = async () => {
+    const user_id = verifyInfo.user_id;
+    try {
+      setLoading(true);
+      const res = await api.r_rejectVerificationRequest({ id: user_id }); //updateUserProfile(profile);
+      setLoading(false);
+      setVerifyModal(false);
+
+      if (res.status === true) {
+        NotificationManager.success('Rejection success!', 'Verification');
+        reloadTableContent();
+      } else {
+        NotificationManager.error(res.message, 'Verification');
+      }
+    } catch (err) {
+      NotificationManager.error('Error while rejection!', 'Verification');
+    }
+  }
+
   const onConfirmVerification = async (event, errors, values) => {
     // console.log(event, errors, values);
-    return verifyInfo.mode === 1 ? confirmVerification() : confirmUnverification();
+    const actions = [
+      confirmUnverification,
+      confirmVerification,
+      confirmRejection,
+    ];
+    return actions[verifyInfo.mode]();
   };
 
   // Image Viewer
@@ -377,7 +444,7 @@ const NationalIDList = ({
         backdrop="static"
       >
         <ModalHeader>
-          {verifyInfo.mode === 1 ? 'Verify User' : 'Unverify User'}
+          {modalHeader[verifyInfo.mode]}
         </ModalHeader>
         <ModalBody>
           <AvForm
@@ -388,7 +455,7 @@ const NationalIDList = ({
           >
 
           <label>
-            { verifyInfo.mode === 1 ? 'Are you sure to verify this user? Other accounts with same ID will be unverified!' : 'Are you sure to unverify this user?' }
+            { modalDescription[verifyInfo.mode] }
           </label>
 
             <Separator className="mb-5 mt-3" />
@@ -407,7 +474,7 @@ const NationalIDList = ({
                   <span className="bounce3" />
                 </span>
                 <span className="label">
-                  {verifyInfo.mode === 1 ? 'Verify' : 'Unverify'}
+                  { modalButtonText[verifyInfo.mode]}
                 </span>
               </Button>{' '}
               <Button color="secondary" onClick={() => setVerifyModal(false)}>

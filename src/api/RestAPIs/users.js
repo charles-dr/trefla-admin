@@ -137,3 +137,12 @@ export const r_unverifyUserRequest = async ({ id }) => {
     return e.response.data;
   }
 }
+
+export const r_rejectVerificationRequest = async ({ id }) => {
+  try {
+    const { data: res } = await axios.post(`/api/v1/admin/driver-ids/reject/${id}`);
+    return res;
+  } catch (e) {
+    return e.response.data;
+  }
+}
