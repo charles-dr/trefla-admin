@@ -30,6 +30,7 @@ const initConfig = {
   daily_post_limit: 1,
   comment_point: 1,
   daily_comment_limit: 1,
+  chat_point: 0,
 };
 
 const ConfigPage = ({
@@ -285,6 +286,25 @@ const ConfigPage = ({
                     {errors.daily_comment_limit && touched.daily_comment_limit && (
                       <div className="invalid-feedback d-block">
                         {errors.daily_comment_limit}
+                      </div>
+                    )}
+                  </FormGroup>
+                </Colxx>
+                <Colxx xxs="12" md="6">
+                  <FormGroup className="form-group">
+                    <Label>
+                      Point For a Chat
+                    </Label>
+                    <Field
+                      className="form-control"
+                      type="number"
+                      name="chat_point"
+                      value={config.chat_point}
+                      onChange={handleOnChange}
+                    />
+                    {errors.chat_point && touched.chat_point && (
+                      <div className="invalid-feedback d-block">
+                        {errors.chat_point}
                       </div>
                     )}
                   </FormGroup>
