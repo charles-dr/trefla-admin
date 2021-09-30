@@ -31,6 +31,7 @@ const initConfig = {
   comment_point: 1,
   daily_comment_limit: 1,
   chat_point: 0,
+  match_skip_days: 7,
 };
 
 const ConfigPage = ({
@@ -305,6 +306,30 @@ const ConfigPage = ({
                     {errors.chat_point && touched.chat_point && (
                       <div className="invalid-feedback d-block">
                         {errors.chat_point}
+                      </div>
+                    )}
+                  </FormGroup>
+                </Colxx>
+              </Row>
+
+              <h3 className="my-4">Match Settings</h3>
+              <Row>
+                <Colxx xxs="12" md="6">
+                  <FormGroup className="form-group">
+                    <Label>
+                      Match Skip Days
+                    </Label>
+                    <Field
+                      className="form-control"
+                      type="number"
+                      name="match_skip_days"
+                      value={config.match_skip_days}
+                      validate={validateLangVersion}
+                      onChange={handleOnChange}
+                    />
+                    {errors.match_skip_days && touched.match_skip_days && (
+                      <div className="invalid-feedback d-block">
+                        {errors.match_skip_days}
                       </div>
                     )}
                   </FormGroup>
